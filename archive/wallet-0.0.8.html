@@ -8,64 +8,60 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a1a;color:#f5f5f5;min-height:100vh;padding:20px}
-        .container{max-width:1200px;margin:0 auto}
-        .header{text-align:center;margin-bottom:40px;padding:30px 0;border-bottom:2px solid #3a3a3a}
-        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:12px}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a1a;color:#f5f5f5;min-height:100vh;padding:20px;display:flex;justify-content:center;align-items:center}
+        .container{width:100%;max-width:520px;background:#2a2a2a;border-radius:20px;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,.6);position:relative;border:1px solid #3a3a3a}
+        .header{text-align:center;margin-bottom:25px}
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:12px;border-bottom:1px solid #3a3a3a}
         .header-top-left{display:flex;align-items:center;gap:12px}
-        .logo{font-size:42px;font-weight:700;color:#32CD32;margin-bottom:8px}
-        .subtitle{color:#bbb;font-size:16px}
-        .card{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
-        .section{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
-        .section-title{font-size:20px;font-weight:600;color:#f28500;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #444}
-        .balance-amount{font-size:42px;font-weight:700;color:#32CD32;margin:12px 0}
+        .logo{font-size:34px;font-weight:700;color:#32CD32;margin-bottom:6px}
+        .subtitle{color:#bbb;font-size:14px}
+        .card{background:#333;border:1px solid #444;border-radius:12px;padding:20px;margin-bottom:18px}
+        .balance-card{background:#1a1a1a;border:1px solid #32CD32;text-align:center;color:#32CD32}
+        .balance-amount{font-size:38px;font-weight:700;margin:6px 0}
         .npub-display{font-size:11px;color:#888;font-family:monospace;word-break:break-all;margin-top:8px}
         .button{width:100%;padding:13px;border-radius:8px;font-size:14px;font-weight:600;border:1px solid transparent;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-bottom:12px}
         .button-primary{background:#32CD32;color:#1a1a1a;border-color:#32CD32}
-        .button-primary:hover{background:#28b428;border-color:#28b428;transform:translateY(-2px)}
+        .button-primary:hover{background:#28b428;border-color:#28b428;transform:translateY(-1px)}
         .button-secondary{background:#2a2a2a;color:#f28500;border:1px solid #f28500}
         .button-secondary:hover{background:#f28500;color:#1a1a1a}
-        .refresh-btn{background:#32CD32;color:#1a1a1a;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;margin-bottom:20px}
-        .refresh-btn:hover{background:#28b428;transform:translateY(-2px)}
-        .button-refresh{margin-top:10px;padding:8px 16px;background:#32CD32;color:#1a1a1a;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;width:auto;display:inline-block;text-transform:uppercase;letter-spacing:.5px;transition:all .2s}
-        .button-refresh:hover{background:#28b428;transform:translateY(-2px)}
-        .tab-buttons{display:flex;gap:10px;margin-bottom:30px}
-        .tab-btn{flex:1;padding:12px;border-radius:8px;border:1px solid #444;background:#2a2a2a;color:#f5f5f5;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+        .button-refresh{margin-top:10px;padding:8px 16px;background:#2a2a2a;border:1px solid #32CD32;border-radius:6px;color:#32CD32;cursor:pointer;font-size:12px;width:auto;display:inline-block}
+        .button-refresh:hover{background:#32CD32;color:#1a1a1a}
+        .tab-buttons{display:flex;gap:10px;margin-bottom:18px}
+        .tab-btn{flex:1;padding:10px;border-radius:8px;border:1px solid #444;background:#2a2a2a;color:#f5f5f5;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
         .tab-btn.active{background:#f28500;color:#1a1a1a;border-color:#f28500}
-        .tab-btn:hover:not(.active){border-color:#32CD32}
         .tab-content{display:none}
         .tab-content.active{display:block}
-        .form-group{margin-bottom:20px}
-        .form-label{font-size:12px;font-weight:600;color:#e0e0e0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-        .form-input{width:100%;padding:12px;border-radius:8px;border:1px solid #444;background:#1a1a1a;color:#f5f5f5;font-family:monospace;font-size:14px}
+        .form-group{margin-bottom:14px}
+        .form-label{font-size:12px;font-weight:600;color:#e0e0e0;text-transform:uppercase;margin-bottom:6px}
+        .form-input{width:100%;padding:12px;border-radius:8px;border:1px solid #444;background:#1a1a1a;color:#f5f5f5;font-family:monospace}
         .form-input:focus{outline:none;border-color:#32CD32;box-shadow:0 0 0 2px rgba(50,205,50,.3)}
-        .status{padding:12px;border-radius:8px;border:1px solid #444;background:#2a2a2a;font-size:14px;margin-bottom:20px}
+        .status{padding:12px;border-radius:8px;border:1px solid #444;background:#2a2a2a;font-size:13px;margin-bottom:15px}
         .status.success{color:#32CD32;border-color:#32CD32}
         .status.error{color:#ff6b6b;border-color:#ff6b6b}
         .status.info{color:#66c2ff;border-color:#66c2ff}
-        .tx-item{background:#333;border:1px solid #444;border-radius:8px;padding:16px;margin-bottom:12px;transition:all .2s;font-size:14px}
-        .tx-item:hover{border-color:#32CD32;transform:translateX(4px)}
-        .tx-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-        .tx-type{font-weight:600;padding:6px 12px;border-radius:6px;font-size:12px;text-transform:uppercase}
+        .tx-item{padding:12px;border-bottom:1px solid #3a3a3a;font-size:13px}
+        .tx-item:last-child{border-bottom:none}
+        .tx-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+        .tx-type{font-weight:600;padding:4px 8px;border-radius:4px;font-size:11px}
         .tx-type.received{background:#d4edda;color:#155724}
         .tx-type.sent{background:#f8d7da;color:#721c24}
         .tx-type.mined{background:#d1ecf1;color:#0c5460}
-        .tx-amount{font-weight:700;color:#32CD32;font-size:16px}
-        .tx-hash{color:#999;font-family:monospace;font-size:12px;line-height:1.6}
-        .mining-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-        .stat-box{background:#333;border:1px solid #444;border-radius:8px;padding:16px;text-align:center}
-        .stat-label{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
-        .stat-value{font-size:24px;font-weight:700;color:#f28500}
-        .progress-bar{width:100%;height:10px;border-radius:5px;background:#1a1a1a;border:1px solid #444;overflow:hidden;margin-bottom:16px}
+        .tx-amount{font-weight:600;color:#32CD32}
+        .tx-hash{color:#999;font-family:monospace;font-size:11px}
+        .mining-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+        .stat-box{background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:12px;text-align:center}
+        .stat-label{font-size:11px;color:#888;text-transform:uppercase}
+        .stat-value{font-size:18px;font-weight:700;color:#f28500}
+        .progress-bar{width:100%;height:8px;border-radius:4px;background:#2a2a2a;border:1px solid #444;overflow:hidden;margin-bottom:12px}
         .progress-fill{height:100%;background:#f28500;transition:width .1s}
-        .qr-container{background:#1a1a1a;border-radius:8px;border:1px solid #444;padding:24px;text-align:center}
+        .qr-container{background:#1a1a1a;border-radius:8px;border:1px solid #444;padding:18px;text-align:center}
         #qrcode{margin:0 auto}
-        .version-footer{text-align:center;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-top:30px;padding-top:20px;border-top:1px solid #3a3a3a}
-        .about-link{text-align:center;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-top:6px}
-        .about-link button{background:none;border:none;color:inherit;cursor:pointer;opacity:.7;transition:opacity .2s}
-        .about-link button:hover{opacity:1}
-        .join-nostr-btn{background:#f28500;color:#1a1a1a;border:1px solid #f28500;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;text-decoration:none;display:inline-block;transition:all .2s}
-        .join-nostr-btn:hover{background:#ff9500;border-color:#ff9500;transform:translateY(-2px)}
+        .version-footer{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px}
+        .about-link{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:1px}
+        .about-link button{background:none;border:none;color:#aaa;cursor:pointer;opacity:.9;transition:opacity .2s}
+        .about-link button:hover{opacity:1;color:#ccc}
+        .join-nostr-btn{background:#f28500;color:#1a1a1a;border:1px solid #f28500;padding:8px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;text-decoration:none;display:inline-block;transition:all .2s}
+        .join-nostr-btn:hover{background:#ff9500;border-color:#ff9500;transform:translateY(-1px)}
         .modal .join-nostr-btn{color:#1a1a1a!important}
         .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;padding:20px;z-index:50}
         .modal-overlay.active{display:flex}
@@ -79,44 +75,48 @@
     </style>
 </head>
 <body>
-        <div class="container">
+    <div class="container">
         <div class="header">
-            <div class="logo">⚡ Nostrcoin Wallet</div>
+            <div class="header-top">
+                <div class="header-top-left">
+                    <div class="version-footer">Nostrcoin Wallet v0.0.8</div>
+                    <div class="about-link">
+                        <button type="button" onclick="toggleAboutModal(true)">About</button>
+                    </div>
+                </div>
+                <a href="https://nstart.me" target="_blank" class="join-nostr-btn">Join Nostr</a>
+            </div>
+            <div class="logo">⚡ Nostrcoin</div>
             <div class="subtitle">NSTC Wallet • Nostr-native PoW</div>
         </div>
 
-        <button class="refresh-btn" onclick="refreshWallet()" id="refreshBtn" style="display:none;">🔄 Refresh Balance</button>
-
         <div id="status"></div>
 
-        <div id="indexerStatus" style="font-size:11px;color:#888;margin-bottom:20px;text-align:center;display:none;">
-            Checking indexers...
-        </div>
-
         <div id="notConnected">
-            <div class="section">
-                <div class="section-title">Connect Wallet</div>
-                <p style="text-align:center;color:#aaa;margin-bottom:20px;">Connect your Nostr wallet to get started</p>
+            <div class="card">
+                <p style="text-align:center;color:#aaa;margin-bottom:15px;">Connect your Nostr wallet to get started</p>
                 <button class="button button-primary" onclick="connectWallet()">Connect Extension</button>
-                <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Login with nsec (Demo)</button>
-                <div id="nsecLoginForm" style="display:none;margin-top:20px;">
+                <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:10px;">Login with nsec (Demo)</button>
+                <div id="nsecLoginForm" style="display:none;margin-top:15px;">
                     <div class="form-group">
                         <label class="form-label">Your nsec (private key)</label>
-                        <input type="password" class="form-input" id="nsecInput" placeholder="nsec1...">
-                        <p style="font-size:12px;color:#ff6b6b;margin-top:8px;">Demo only – never share your nsec</p>
+                        <input type="password" class="form-input" id="nsecInput" placeholder="nsec1..." style="font-size:12px;">
+                        <p style="font-size:11px;color:#ff6b6b;margin-top:6px;">Demo only – never share your nsec</p>
                     </div>
                     <button class="button button-primary" onclick="loginWithNsec()">Login (Demo)</button>
-                    <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Cancel</button>
+                    <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:8px;">Cancel</button>
                 </div>
             </div>
         </div>
 
         <div id="connected" style="display:none;">
-            <div class="balance-card" style="background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:32px;margin-bottom:30px;text-align:center;">
-                <div style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Balance</div>
+            <div class="card balance-card">
+                <div style="font-size:12px;opacity:.9;text-transform:uppercase;letter-spacing:.8px;">Balance</div>
                 <div class="balance-amount" id="balanceAmount">0.00000000</div>
-                <div style="font-size:13px;color:#aaa;margin-bottom:12px;" id="balanceSubtext">Connected</div>
+                <div style="font-size:12px;opacity:.8;color:#aaa;" id="balanceSubtext">Connected</div>
                 <div class="npub-display" id="npubDisplay">npub...</div>
+                <div id="indexerStatus" style="font-size:10px;color:#888;margin-top:6px;">Checking indexers...</div>
+                <button class="button-refresh" onclick="refreshWallet()">🔄 Refresh Balance</button>
             </div>
 
             <div class="tab-buttons">
@@ -127,8 +127,7 @@
             </div>
 
             <div id="send" class="tab-content active">
-                <div class="section">
-                    <div class="section-title">💸 Send NSTC</div>
+                <div class="card">
                     <div class="form-group">
                         <label class="form-label">Recipient npub</label>
                         <input type="text" class="form-input" id="recipientNpub" placeholder="npub1...">
@@ -142,9 +141,8 @@
             </div>
 
             <div id="mine" class="tab-content">
-                <div class="section">
-                    <div class="section-title">⛏️ Mining</div>
-                    <p style="text-align:center;font-size:13px;color:#aaa;margin-bottom:20px;">Difficulty 4 • Reward 50 NSTC</p>
+                <div class="card">
+                    <p style="text-align:center;font-size:12px;color:#aaa;margin-bottom:12px;">Difficulty 4 • Reward 50 NSTC</p>
                     <div class="mining-stats">
                         <div class="stat-box">
                             <div class="stat-label">Hash Rate</div>
@@ -161,33 +159,23 @@
             </div>
 
             <div id="history" class="tab-content">
-                <div class="section">
-                    <div class="section-title">📜 Transaction History</div>
+                <div class="card">
                     <div id="historyList">
-                        <div style="text-align:center;color:#888;padding:30px;">No transactions yet</div>
+                        <div style="text-align:center;color:#888;padding:20px;">No transactions yet</div>
                     </div>
                 </div>
             </div>
 
             <div id="qr" class="tab-content">
-                <div class="section">
-                    <div class="section-title">📱 Receive NSTC</div>
+                <div class="card">
                     <div class="qr-container">
                         <div id="qrcode"></div>
-                        <p style="margin-top:16px;font-size:13px;color:#aaa;">Share to receive NSTC</p>
+                        <p style="margin-top:12px;font-size:12px;color:#aaa;">Share to receive NSTC</p>
                     </div>
                 </div>
             </div>
 
-            <button class="button button-secondary" onclick="disconnectWallet()" style="margin-top:30px;">Disconnect Wallet</button>
-        </div>
-
-        <div class="version-footer">
-            Nostrcoin Wallet v0.0.8
-        </div>
-
-        <div class="about-link">
-            <button type="button" onclick="toggleAboutModal(true)">About</button>
+            <button class="button button-secondary" onclick="disconnectWallet()" style="margin-top:20px;">Disconnect Wallet</button>
         </div>
     </div>
 
@@ -289,8 +277,6 @@
 
                 document.getElementById('notConnected').style.display = 'none';
                 document.getElementById('connected').style.display = 'block';
-                document.getElementById('refreshBtn').style.display = 'block';
-                document.getElementById('indexerStatus').style.display = 'block';
 
                 await fetchBalance();
                 await fetchHistory();
@@ -499,7 +485,7 @@
         function updateHistoryDisplay() {
             const list = document.getElementById('historyList');
             if (!state.transactions.length) {
-                list.innerHTML = '<div style="text-align:center;color:#888;padding:30px;">No transactions yet</div>';
+                list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">No transactions yet</div>';
                 return;
             }
             const sortedTx = [...state.transactions].reverse();
@@ -533,7 +519,7 @@
                             <span class="tx-type ${tx.type}">${tx.type.toUpperCase()}</span>
                             <span class="tx-amount">${sign}${tx.amount.toFixed(8)} NSTC</span>
                         </div>
-                        <div class="tx-hash" style="margin-bottom:4px;">${date}</div>
+                        <div class="tx-hash">${date}</div>
                         ${tx.recipient ? `<div class="tx-hash">To: ${recipientStr}</div>` : ''}
                         ${tx.sender ? `<div class="tx-hash">From: ${senderStr}</div>` : ''}
                     </div>
@@ -644,8 +630,6 @@
 
         function updateIndexerStatusDisplay() {
             const statusDiv = document.getElementById('indexerStatus');
-            if (!statusDiv) return;
-            
             const statuses = Object.entries(state.indexerStatus).map(([url, status]) => {
                 const icon = status === 'online' ? '✓' : '✗';
                 const color = status === 'online' ? '#32CD32' : '#ff6b6b';
@@ -654,7 +638,7 @@
             });
             
             if (statuses.length > 0) {
-                statusDiv.innerHTML = `Indexers: ${statuses.join(' • ')}`;
+                statusDiv.innerHTML = statuses.join(' • ');
             } else {
                 statusDiv.innerHTML = 'No indexers configured';
             }
@@ -678,8 +662,6 @@
 
             document.getElementById('connected').style.display = 'none';
             document.getElementById('notConnected').style.display = 'block';
-            document.getElementById('refreshBtn').style.display = 'none';
-            document.getElementById('indexerStatus').style.display = 'none';
 
             showStatus('Wallet disconnected', 'info');
         }
