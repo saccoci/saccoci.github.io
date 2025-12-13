@@ -279,8 +279,7 @@
             transactions: [],
             mining: false,
             hashesPerSecond: 0,
-            indexerStatus: {}, // Track which indexers are responding
-            refreshInterval: null // Store the auto-refresh interval
+            indexerStatus: {} // Track which indexers are responding
         };
 
         function toggleJoinNostrModal(show) {
@@ -339,18 +338,6 @@
                 await fetchBalance();
                 await fetchHistory();
                 updateUI();
-
-                // Start periodic auto-refresh every 30 seconds
-                if (state.refreshInterval) {
-                    clearInterval(state.refreshInterval);
-                }
-                state.refreshInterval = setInterval(async () => {
-                    if (state.pubkeyHex) {
-                        await fetchBalance();
-                        await fetchHistory();
-                        updateUI();
-                    }
-                }, 30000);
 
                 try {
                     if (typeof QRCode !== 'undefined') {
@@ -430,20 +417,18 @@
                 document.getElementById('sendAmount').value = '';
                 showStatus(`💸 Transfer broadcast! ${amount} NSTC sent`, 'success');
 
-                // AUTO-REFRESH after transaction (multiple attempts to catch indexer updates)
+                // AUTO-REFRESH balance after 3 seconds
                 setTimeout(async () => {
                     await fetchBalance();
-                    await fetchHistory();
                     updateUI();
-                    showStatus('✓ Refreshing...', 'info');
+                    showStatus('✔ Balance updated', 'info');
                 }, 3000);
 
-                // Second refresh after 8 seconds (gives indexers more time)
+                // AUTO-REFRESH history after 5 seconds (gives indexers more time)
                 setTimeout(async () => {
-                    await fetchBalance();
                     await fetchHistory();
-                    updateUI();
-                }, 8000);
+                    updateHistoryDisplay();
+                }, 5000);
             } catch (error) {
                 showStatus('Transaction failed: ' + error.message, 'error');
             }
@@ -737,12 +722,6 @@
             state.balance = 0;
             state.transactions = [];
             state.mining = false;
-
-            // Stop periodic auto-refresh
-            if (state.refreshInterval) {
-                clearInterval(state.refreshInterval);
-                state.refreshInterval = null;
-            }
 
             document.getElementById('connected').style.display = 'none';
             document.getElementById('notConnected').style.display = 'block';
