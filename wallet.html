@@ -11,7 +11,7 @@
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a1a;color:#f5f5f5;min-height:100vh;padding:20px}
         .container{max-width:1200px;margin:0 auto}
         .header{text-align:center;margin-bottom:40px;padding:30px 0;border-bottom:2px solid #3a3a3a}
-        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:12px}
+        .header-top{display:flex;justify-content:flex-end;align-items:center;margin-bottom:20px;padding-bottom:20px;text-align:right}
         .header-top-left{display:flex;align-items:center;gap:12px}
         .logo{font-size:42px;font-weight:700;color:#32CD32;margin-bottom:8px}
         .subtitle{color:#bbb;font-size:16px}
@@ -66,6 +66,7 @@
         .about-link button:hover{opacity:1}
         .join-nostr-btn{background:#f28500;color:#1a1a1a;border:1px solid #f28500;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;text-decoration:none;display:inline-block;transition:all .2s}
         .join-nostr-btn:hover{background:#ff9500;border-color:#ff9500;transform:translateY(-2px)}
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:20px;border-bottom:2px solid #3a3a3a}
         .modal .join-nostr-btn{color:#1a1a1a!important}
         .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;padding:20px;z-index:50}
         .modal-overlay.active{display:flex}
@@ -81,6 +82,10 @@
 <body>
         <div class="container">
         <div class="header">
+            <div class="header-top">
+                <div style="flex:1;"></div>
+                <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
+            </div>
             <div class="logo">⚡ Nostrcoin Wallet</div>
             <div class="subtitle">NSTC Wallet • Nostr-native PoW</div>
         </div>
@@ -96,7 +101,8 @@
         <div id="notConnected">
             <div class="section">
                 <div class="section-title">Connect Wallet</div>
-                <p style="text-align:center;color:#aaa;margin-bottom:20px;">Connect your Nostr wallet to get started</p>
+                <p style="text-align:center;color:#aaa;margin-bottom:12px;">Connect your Nostr wallet to get started</p>
+                <p style="text-align:center;color:#888;font-size:13px;margin-bottom:20px;">Don't have a Nostr account? <button onclick="toggleJoinNostrModal(true)" style="background:none;border:none;color:#f28500;cursor:pointer;text-decoration:underline;font-size:13px;">Learn more about Nostr</button></p>
                 <button class="button button-primary" onclick="connectWallet()">Connect Extension</button>
                 <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Login with nsec (Demo)</button>
                 <div id="nsecLoginForm" style="display:none;margin-top:20px;">
@@ -191,19 +197,41 @@
         </div>
     </div>
 
+    <div id="joinNostrModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal">
+            <button class="modal-close" onclick="toggleJoinNostrModal(false)" aria-label="Close">×</button>
+            <h3>What is Nostr?</h3>
+            <p style="margin-top:12px;">
+                <strong>Nostr</strong> (Notes and Other Stuff Transmitted by Relays) is a decentralized social protocol that enables global, decentralized, and censorship-resistant social networking.
+            </p>
+            <p style="margin-top:12px;">
+                <strong>Why do I need Nostr for Nostrcoin?</strong> Nostrcoin is built on top of Nostr's event system. Since Nostrcoin uses Nostr events for its blockchain (mining events and transfer events), you need a Nostr account to use the wallet and interact with the network.
+            </p>
+            <p style="margin-top:12px;">
+                To get started with Nostrcoin, you'll need to:
+            </p>
+            <ul style="margin-top:8px;margin-left:20px;line-height:1.8;">
+                <li>Create a Nostr account</li>
+                <li>Install a Nostr signing extension to your web browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others)</li>
+            </ul>
+            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Join Nostr</a>
+            <button class="button button-secondary" style="margin-top:16px;" onclick="toggleJoinNostrModal(false)">Close</button>
+        </div>
+    </div>
+
     <div id="aboutModal" class="modal-overlay" aria-hidden="true">
         <div class="modal">
             <button class="modal-close" onclick="toggleAboutModal(false)" aria-label="Close">×</button>
-            <h3>About Nostrcoin Wallet</h3>
+            <h3>About Nostrcoin</h3>
             <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.0.8</p>
             <p style="margin-top:12px;">
-                Nostrcoin is an experimental, Nostr-native proof-of-work cryptocurrency. This wallet allows you to send, receive, and mine NSTC.
+                Nostrcoin is an experimental, Nostr-native proof-of-work cryptocurrency. It is for education and fun only. This wallet allows you to send, receive, and mine NSTC.
             </p>
             <p style="margin-top:12px;">
                 <strong>About Nostr:</strong> Nostrcoin is built on <strong>Nostr</strong> (Notes and Other Stuff Transmitted by Relays), a decentralized social protocol. Nostr is an open protocol that enables global, decentralized, and censorship-resistant social networking. Since Nostrcoin uses Nostr events for its blockchain, you need a Nostr account to use the wallet and interact with the network.
             </p>
             <p style="margin-top:12px;">
-                To get started, you'll need to create a Nostr account. You can use a Nostr client extension (like nos2x, Alby, or others) or create an account through various Nostr services.
+                To get started, you'll need two things: (1) a Nostr account. (2) A Nostr signing extension for your browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others).
             </p>
             <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:12px;text-align:center;display:block;">Join Nostr</a>
             <p style="margin-top:12px;font-size:12px;color:#ff6b6b;">
@@ -254,6 +282,17 @@
             indexerStatus: {} // Track which indexers are responding
         };
 
+        function toggleJoinNostrModal(show) {
+            const modal = document.getElementById('joinNostrModal');
+            if (show) {
+                modal.classList.add('active');
+                modal.setAttribute('aria-hidden', 'false');
+            } else {
+                modal.classList.remove('active');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        }
+
         function toggleAboutModal(show) {
             const modal = document.getElementById('aboutModal');
             if (show) {
@@ -266,10 +305,14 @@
         }
 
         window.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') toggleAboutModal(false);
+            if (event.key === 'Escape') {
+                toggleJoinNostrModal(false);
+                toggleAboutModal(false);
+            }
         });
 
         window.addEventListener('click', (event) => {
+            if (event.target === document.getElementById('joinNostrModal')) toggleJoinNostrModal(false);
             if (event.target === document.getElementById('aboutModal')) toggleAboutModal(false);
         });
 
