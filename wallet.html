@@ -379,6 +379,19 @@
             });
         }
 
+        function generateQRCode() {
+            generateQRCode();
+        }
+
+        function copyNpubToClipboard() {
+            if (!state.npub) return;
+            navigator.clipboard.writeText(state.npub).then(() => {
+                showStatus('✔ npub copied to clipboard!', 'success');
+            }).catch(err => {
+                showStatus('Failed to copy npub', 'error');
+            });
+        }
+
         function switchTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
