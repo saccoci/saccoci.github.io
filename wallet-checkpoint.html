@@ -415,16 +415,20 @@
 
                 document.getElementById('recipientNpub').value = '';
                 document.getElementById('sendAmount').value = '';
-
                 showStatus(`💸 Transfer broadcast! ${amount} NSTC sent`, 'success');
 
-                // AUTO-REFRESH after 3 seconds
+                // AUTO-REFRESH balance after 3 seconds
                 setTimeout(async () => {
                     await fetchBalance();
-                    await fetchHistory();
                     updateUI();
-                    showStatus('✓ Balance updated', 'info');
+                    showStatus('✔ Balance updated', 'info');
                 }, 3000);
+
+                // AUTO-REFRESH history after 5 seconds (gives indexers more time)
+                setTimeout(async () => {
+                    await fetchHistory();
+                    updateHistoryDisplay();
+                }, 5000);
             } catch (error) {
                 showStatus('Transaction failed: ' + error.message, 'error');
             }
