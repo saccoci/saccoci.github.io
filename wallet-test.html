@@ -225,38 +225,55 @@
         async function showNsecAppModal() {
             document.getElementById('nsecAppModal').classList.add('active');
             
-            // Generate connection string for nsec.app
-            const connectUrl = generateNsecAppUrl();
-            document.getElementById('connectUrl').textContent = connectUrl;
-            document.getElementById('nsecAppLink').href = connectUrl;
-            
-            // Generate QR code
-            try {
-                document.getElementById('nsecAppQR').innerHTML = '';
-                if (typeof QRCode !== 'undefined') {
-                    new QRCode(document.getElementById('nsecAppQR'), {
-                        text: connectUrl,
-                        width: 256,
-                        height: 256,
-                        colorDark: "#f5f5f5",
-                        colorLight: "#1a1a1a"
-                    });
+            // Small delay to ensure modal is visible before generating QR
+            setTimeout(() => {
+                // Generate connection string for nsec.app
+                const connectUrl = generateNsecAppUrl();
+                document.getElementById('connectUrl').textContent = connectUrl;
+                document.getElementById('nsecAppLink').href = connectUrl;
+                
+                // Generate QR code
+                try {
+                    const qrContainer = document.getElementById('nsecAppQR');
+                    qrContainer.innerHTML = ''; // Clear any existing QR
+                    
+                    if (typeof QRCode !== 'undefined') {
+                        new QRCode(qrContainer, {
+                            text: connectUrl,
+                            width: 256,
+                            height: 256,
+                            colorDark: "#f5f5f5",
+                            colorLight: "#1a1a1a"
+                        });
+                        showStatus('Scan QR code with nsec.app', 'info');
+                    } else {
+                        qrContainer.innerHTML = '<p style="color:#ff6b6b;">QRCode library not loaded</p>';
+                        showStatus('QR code failed to load', 'error');
+                    }
+                } catch (e) {
+                    console.error('QR generation failed:', e);
+                    document.getElementById('nsecAppQR').innerHTML = '<p style="color:#ff6b6b;">QR generation failed</p>';
                 }
-            } catch (e) {
-                console.error('QR generation failed:', e);
-            }
-            
-            showStatus('Scan QR code with nsec.app or click the button', 'info');
+            }, 100);
         }
 
         function generateNsecAppUrl() {
-            // nsec.app uses bunker:// URLs for NIP-46 connections
-            const appName = encodeURIComponent('Nostrcoin Wallet');
-            const relay = encodeURIComponent(CONFIG.relays[0]);
-            const origin = encodeURIComponent(window.location.origin);
+            // Generate a temporary pubkey for this connection session
+            const tempKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+                .map(b => b.toString(16).padStart(2, '0')).join('');
             
-            // bunker URL format for nsec.app
-            return `nostrconnect://${origin}?relay=${relay}&name=${appName}`;
+            // nsec.app expects: bunker://<pubkey>?relay=<relay>&secret=<secret>
+            // For nostrconnect, the format is: nostrconnect://<pubkey>?relay=<relay>&metadata=<metadata>
+            const metadata = {
+                name: 'Nostrcoin Wallet',
+                url: window.location.origin
+            };
+            
+            const relay = CONFIG.relays[0]; // Use first relay
+            const metadataEncoded = encodeURIComponent(JSON.stringify(metadata));
+            
+            // Return bunker URL for nsec.app
+            return `bunker://${tempKey}?relay=${encodeURIComponent(relay)}&secret=${tempKey.substring(0, 16)}`;
         }
 
         function closeNsecAppModal() {
