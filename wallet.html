@@ -283,6 +283,96 @@
             indexerStatus: {} // Track which indexers are responding
         };
 
+        // Define NIP-46 functions globally BEFORE they're called
+        window.connectNostrConnect = async function() {
+            showStatus('Generating connection string...', 'info');
+            
+            try {
+                const connectionString = await generateNostrConnectURI();
+                showNostrConnectModal(connectionString);
+            } catch (error) {
+                showStatus('Failed to generate connection string: ' + error.message, 'error');
+            }
+        };
+
+        window.closeNostrConnectModal = function() {
+            const modal = document.getElementById('nostrConnectModal');
+            if (modal) modal.remove();
+        };
+
+        window.copyToClipboard = function(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showStatus('✓ Connection string copied to clipboard', 'success');
+            }).catch(() => {
+                showStatus('Failed to copy to clipboard', 'error');
+            });
+        };
+
+        async function generateNostrConnectURI() {
+            const privateKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+                .map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            const metadata = encodeURIComponent(JSON.stringify({
+                name: "Nostrcoin Wallet",
+                url: window.location.origin,
+                description: "Connect to Nostrcoin Wallet"
+            }));
+            
+            const relay = encodeURIComponent('wss://relay.damus.io');
+            const uri = `nostrconnect://${privateKey}?relay=${relay}&metadata=${metadata}`;
+            
+            return uri;
+        }
+
+        function showNostrConnectModal(connectionString) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay active';
+            modal.id = 'nostrConnectModal';
+            modal.innerHTML = `
+                <div class="modal" style="max-width: 500px;">
+                    <button class="modal-close" onclick="closeNostrConnectModal()">×</button>
+                    <h3>Connect with Nostr Connect</h3>
+                    <p style="margin-top:12px;color:#c0c0c0;font-size:14px;">
+                        Scan this QR code with your mobile Nostr signer app (nsec.app, Amber, etc.) or copy the connection string below:
+                    </p>
+                    <div style="background:#1a1a1a;border-radius:8px;padding:24px;margin:20px 0;text-align:center;">
+                        <div id="nostrConnectQR"></div>
+                    </div>
+                    <div style="margin-top:16px;">
+                        <label style="font-size:12px;color:#888;display:block;margin-bottom:8px;">Connection String:</label>
+                        <textarea 
+                            readonly 
+                            style="width:100%;padding:12px;border-radius:8px;border:1px solid #444;background:#1a1a1a;color:#f5f5f5;font-family:monospace;font-size:11px;resize:none;height:80px;"
+                            onclick="this.select()"
+                        >${connectionString}</textarea>
+                        <button class="button button-secondary" style="margin-top:12px;" onclick="copyToClipboard('${connectionString}')">
+                            Copy Connection String
+                        </button>
+                    </div>
+                    <button class="button button-primary" style="margin-top:20px;" onclick="closeNostrConnectModal()">
+                        Cancel
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            try {
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(document.getElementById('nostrConnectQR'), {
+                        text: connectionString,
+                        width: 256,
+                        height: 256,
+                        colorDark: "#f5f5f5",
+                        colorLight: "#1a1a1a"
+                    });
+                }
+            } catch (e) {
+                console.error('QR generation failed:', e);
+            }
+            
+            showStatus('⏳ Waiting for mobile app to connect...', 'info');
+        }
+
         function toggleJoinNostrModal(show) {
             const modal = document.getElementById('joinNostrModal');
             if (show) {
