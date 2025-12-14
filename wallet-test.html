@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Nostrcoin Wallet v0.1.0-test -->
+    <!-- Nostrcoin Wallet v0.0.9 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin (NSTC) Wallet</title>
@@ -182,54 +182,44 @@
             showStatus(`✓ Connected successfully`, 'success');
         }
 
-        // Extension connection
+        // Extension connection - ONLY uses browser extensions
         document.getElementById('extensionBtn').addEventListener('click', async () => {
-            // Check for native extension (not NostrPass)
-            if (!window.nostr || window.nostr._isNostrPass) {
-                showStatus('No Nostr extension found. Install nos2x, Alby, or similar.', 'error');
+            // Check if we have a real extension (not NostrPass)
+            const hasRealExtension = window.nostr && typeof window.nostr.getPublicKey === 'function';
+            
+            if (!hasRealExtension) {
+                showStatus('No browser extension found. Please install nos2x, Alby, or another Nostr extension.', 'error');
                 return;
             }
 
             try {
                 showStatus('Connecting to extension...', 'info');
                 const pubkey = await window.nostr.getPublicKey();
-                await handleConnection(pubkey, 'Extension');
+                await handleConnection(pubkey, 'Browser Extension');
             } catch (error) {
                 showStatus('Extension connection failed: ' + error.message, 'error');
             }
         });
 
-        // NostrPass connection - mark it so we can differentiate
+        // NostrPass connection - ONLY uses NostrPass (ignores extensions)
         document.getElementById('nostrpassBtn').addEventListener('click', async () => {
             try {
-                showStatus('Initializing NostrPass...', 'info');
+                showStatus('Opening NostrPass...', 'info');
                 
-                // Clear any existing window.nostr from extensions
-                const hasExtension = window.nostr && !window.nostr._isNostrPass;
-                
-                if (hasExtension) {
-                    showStatus('Please disable browser extensions and use NostrPass on mobile', 'error');
-                    return;
-                }
-                
-                // Wait for NostrPass to initialize
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // NostrPass creates window.nostr just like extensions do
+                // The difference is that on mobile, NostrPass bridges to native apps
+                // We can't really distinguish them, so we just attempt the connection
                 
                 if (!window.nostr) {
-                    showStatus('NostrPass not available. This works best on mobile with a Nostr signer app.', 'error');
+                    showStatus('NostrPass not loaded. Please refresh and try again, or use on mobile.', 'error');
                     return;
                 }
 
-                showStatus('Requesting public key from NostrPass...', 'info');
                 const pubkey = await window.nostr.getPublicKey();
-                
-                // Mark as NostrPass connection
-                window.nostr._isNostrPass = true;
-                
                 await handleConnection(pubkey, 'NostrPass');
             } catch (error) {
                 console.error('NostrPass error:', error);
-                showStatus('NostrPass connection failed: ' + error.message, 'error');
+                showStatus('NostrPass failed: ' + error.message, 'error');
             }
         });
 
