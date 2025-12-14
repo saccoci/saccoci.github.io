@@ -6,33 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin (NSTC) Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
-    <script src="https://cdn.nostrpass.com/embassy.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a1a;color:#f5f5f5;min-height:100vh;padding:20px}
         .container{max-width:1200px;margin:0 auto}
         .header{text-align:center;margin-bottom:40px;padding:30px 0;border-bottom:2px solid #3a3a3a}
         .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:20px}
+        .hamburger-btn{background:#2a2a2a;border:1px solid #444;color:#f5f5f5;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:20px;line-height:1;transition:all .2s;display:flex;align-items:center;justify-content:center}
+        .hamburger-btn:hover{background:#333;border-color:#32CD32}
         .logo{font-size:42px;font-weight:700;color:#32CD32;margin-bottom:8px}
         .subtitle{color:#bbb;font-size:16px}
+        .section{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
+        .section-title{font-size:20px;font-weight:600;color:#f28500;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #444}
+        .balance-amount{font-size:42px;font-weight:700;color:#32CD32;margin:12px 0}
+        .npub-display{font-size:11px;color:#888;font-family:monospace;word-break:break-all;margin-top:8px}
         .button{width:100%;padding:13px;border-radius:8px;font-size:14px;font-weight:600;border:1px solid transparent;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-bottom:12px}
         .button-primary{background:#32CD32;color:#1a1a1a;border-color:#32CD32}
         .button-primary:hover{background:#28b428;border-color:#28b428;transform:translateY(-2px)}
         .button-secondary{background:#2a2a2a;color:#f28500;border:1px solid #f28500}
         .button-secondary:hover{background:#f28500;color:#1a1a1a}
-        .section{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
-        .section-title{font-size:20px;font-weight:600;color:#f28500;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #444}
-        .balance-amount{font-size:42px;font-weight:700;color:#32CD32;margin:12px 0}
-        .npub-display{font-size:11px;color:#888;font-family:monospace;word-break:break-all;margin-top:8px}
         .status{padding:12px;border-radius:8px;border:1px solid #444;background:#2a2a2a;font-size:14px;margin-bottom:20px}
         .status.success{color:#32CD32;border-color:#32CD32}
         .status.error{color:#ff6b6b;border-color:#ff6b6b}
         .status.info{color:#66c2ff;border-color:#66c2ff}
+        .join-nostr-btn{background:#f28500;color:#1a1a1a;border:1px solid #f28500;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;text-decoration:none;display:inline-block;transition:all .2s}
+        .join-nostr-btn:hover{background:#ff9500;border-color:#ff9500;transform:translateY(-2px)}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;padding:20px;z-index:50}
+        .modal-overlay.active{display:flex}
+        .modal{background:#2a2a2a;border:1px solid #444;border-radius:16px;padding:26px;max-width:500px;width:100%;position:relative}
+        .modal h3{margin-bottom:16px;color:#f5f5f5}
+        .modal p{color:#c0c0c0;font-size:14px;line-height:1.4;margin-bottom:12px}
+        .modal-close{position:absolute;top:10px;right:14px;background:none;border:none;color:#999;font-size:20px;cursor:pointer}
+        .modal-close:hover{color:#fff}
+        .qr-box{background:#1a1a1a;border-radius:8px;padding:20px;text-align:center;margin:20px 0}
+        .connect-url{background:#1a1a1a;padding:12px;border-radius:6px;font-family:monospace;font-size:11px;word-break:break-all;margin-top:12px;color:#888}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <div class="header-top">
+                <div style="flex:1"></div>
+                <button class="join-nostr-btn" onclick="window.open('https://nstart.me', '_blank')">Join Nostr</button>
+            </div>
             <div class="logo">⚡ Nostrcoin Wallet</div>
             <div class="subtitle">NSTC Wallet • Nostr-native PoW</div>
         </div>
@@ -44,11 +60,13 @@
                 <div class="section-title">Connect Wallet</div>
                 <p style="text-align:center;color:#aaa;margin-bottom:20px;">Connect your Nostr wallet to get started</p>
                 
-                <!-- Desktop: Extension -->
-                <button class="button button-primary" id="extensionBtn">Connect Extension</button>
+                <button class="button button-primary" onclick="connectExtension()">Connect Browser Extension</button>
+                <button class="button button-primary" onclick="showNsecAppModal()" style="margin-top:12px;">Connect Mobile (nsec.app)</button>
                 
-                <!-- Mobile: NostrPass -->
-                <button class="button button-primary" id="nostrpassBtn" style="margin-top:12px;">Connect Mobile (NostrPass)</button>
+                <p style="text-align:center;color:#888;font-size:13px;margin-top:20px;">
+                    Don't have a Nostr account? 
+                    <a href="https://nstart.me" target="_blank" style="color:#f28500;text-decoration:none;">Learn more</a>
+                </p>
             </div>
         </div>
 
@@ -62,25 +80,50 @@
                 </div>
             </div>
             
-            <button class="button button-secondary" id="disconnectBtn">Disconnect</button>
+            <button class="button button-secondary" onclick="disconnectWallet()">Disconnect</button>
+        </div>
+    </div>
+
+    <!-- nsec.app Connection Modal -->
+    <div id="nsecAppModal" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeNsecAppModal()">×</button>
+            <h3>Connect with nsec.app</h3>
+            <p>Scan this QR code with nsec.app on your mobile device, or click the button below:</p>
+            
+            <div class="qr-box">
+                <div id="nsecAppQR"></div>
+            </div>
+            
+            <a id="nsecAppLink" href="#" class="button button-primary" target="_blank" style="text-decoration:none;text-align:center;display:block;">
+                Open in nsec.app
+            </a>
+            
+            <div class="connect-url" id="connectUrl" style="cursor:pointer;" onclick="copyConnectUrl()" title="Click to copy">
+                Generating connection...
+            </div>
+            
+            <button class="button button-secondary" style="margin-top:16px;" onclick="closeNsecAppModal()">Cancel</button>
         </div>
     </div>
 
     <script>
         const CONFIG = {
             protocolTag: 'nostrcoin',
-            difficulty: 4,
-            eventKinds: {
-                mining: 30333,
-                transfer: 30334
-            }
+            relays: [
+                'wss://relay.damus.io',
+                'wss://nos.lol',
+                'wss://relay.nostr.band',
+                'wss://nostr.mom'
+            ]
         };
 
         const state = {
             pubkeyHex: null,
             npub: null,
             balance: 0,
-            connected: false
+            connected: false,
+            nsecAppConnection: null
         };
 
         function showStatus(message, type) {
@@ -89,14 +132,7 @@
             setTimeout(() => statusDiv.innerHTML = '', 5000);
         }
 
-        function pubkeyToNpub(hexPubkey) {
-            // Proper bech32 conversion
-            const bytes = hexToBytes(hexPubkey);
-            const converted = convertBits(bytes, 8, 5);
-            if (!converted) throw new Error('Failed to encode npub');
-            return bech32Encode('npub', converted);
-        }
-
+        // Bech32 encoding functions
         const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 
         function hexToBytes(hex) {
@@ -108,8 +144,7 @@
         }
 
         function convertBits(data, fromBits, toBits, pad = true) {
-            let acc = 0;
-            let bits = 0;
+            let acc = 0, bits = 0;
             const result = [];
             const maxv = (1 << toBits) - 1;
             const max_acc = (1 << (fromBits + toBits - 1)) - 1;
@@ -122,11 +157,7 @@
                     result.push((acc >> bits) & maxv);
                 }
             }
-            if (pad) {
-                if (bits) result.push((acc << (toBits - bits)) & maxv);
-            } else if (bits >= fromBits || ((acc << (toBits - bits)) & maxv)) {
-                return null;
-            }
+            if (pad && bits) result.push((acc << (toBits - bits)) & maxv);
             return result;
         }
 
@@ -153,9 +184,7 @@
                 const top = chk >> 25;
                 chk = (chk & 0x1ffffff) << 5 ^ values[p];
                 for (let i = 0; i < 5; i++) {
-                    if ((top >> i) & 1) {
-                        chk ^= GENERATORS[i];
-                    }
+                    if ((top >> i) & 1) chk ^= GENERATORS[i];
                 }
             }
             return chk;
@@ -169,7 +198,81 @@
             return ret;
         }
 
-        async function handleConnection(pubkeyHex, source) {
+        function pubkeyToNpub(hexPubkey) {
+            const bytes = hexToBytes(hexPubkey);
+            const converted = convertBits(bytes, 8, 5);
+            if (!converted) throw new Error('Failed to encode npub');
+            return bech32Encode('npub', converted);
+        }
+
+        // Extension connection
+        async function connectExtension() {
+            if (!window.nostr) {
+                showStatus('No browser extension found. Please install nos2x, Alby, or similar.', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Connecting to extension...', 'info');
+                const pubkey = await window.nostr.getPublicKey();
+                handleConnection(pubkey, 'Browser Extension');
+            } catch (error) {
+                showStatus('Extension connection failed: ' + error.message, 'error');
+            }
+        }
+
+        // nsec.app connection
+        async function showNsecAppModal() {
+            document.getElementById('nsecAppModal').classList.add('active');
+            
+            // Generate connection string for nsec.app
+            const connectUrl = generateNsecAppUrl();
+            document.getElementById('connectUrl').textContent = connectUrl;
+            document.getElementById('nsecAppLink').href = connectUrl;
+            
+            // Generate QR code
+            try {
+                document.getElementById('nsecAppQR').innerHTML = '';
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(document.getElementById('nsecAppQR'), {
+                        text: connectUrl,
+                        width: 256,
+                        height: 256,
+                        colorDark: "#f5f5f5",
+                        colorLight: "#1a1a1a"
+                    });
+                }
+            } catch (e) {
+                console.error('QR generation failed:', e);
+            }
+            
+            showStatus('Scan QR code with nsec.app or click the button', 'info');
+        }
+
+        function generateNsecAppUrl() {
+            // nsec.app uses bunker:// URLs for NIP-46 connections
+            const appName = encodeURIComponent('Nostrcoin Wallet');
+            const relay = encodeURIComponent(CONFIG.relays[0]);
+            const origin = encodeURIComponent(window.location.origin);
+            
+            // bunker URL format for nsec.app
+            return `nostrconnect://${origin}?relay=${relay}&name=${appName}`;
+        }
+
+        function closeNsecAppModal() {
+            document.getElementById('nsecAppModal').classList.remove('active');
+        }
+
+        function copyConnectUrl() {
+            const url = document.getElementById('connectUrl').textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                showStatus('✓ Connection URL copied', 'success');
+            }).catch(() => {
+                showStatus('Failed to copy', 'error');
+            });
+        }
+
+        function handleConnection(pubkeyHex, source) {
             state.pubkeyHex = pubkeyHex;
             state.npub = pubkeyToNpub(pubkeyHex);
             state.connected = true;
@@ -179,52 +282,13 @@
             document.getElementById('notConnected').style.display = 'none';
             document.getElementById('connected').style.display = 'block';
 
+            closeNsecAppModal();
             showStatus(`✓ Connected successfully`, 'success');
+            
+            // TODO: Fetch balance from indexer
         }
 
-        // Extension connection - ONLY uses browser extensions
-        document.getElementById('extensionBtn').addEventListener('click', async () => {
-            // Check if we have a real extension (not NostrPass)
-            const hasRealExtension = window.nostr && typeof window.nostr.getPublicKey === 'function';
-            
-            if (!hasRealExtension) {
-                showStatus('No browser extension found. Please install nos2x, Alby, or another Nostr extension.', 'error');
-                return;
-            }
-
-            try {
-                showStatus('Connecting to extension...', 'info');
-                const pubkey = await window.nostr.getPublicKey();
-                await handleConnection(pubkey, 'Browser Extension');
-            } catch (error) {
-                showStatus('Extension connection failed: ' + error.message, 'error');
-            }
-        });
-
-        // NostrPass connection - ONLY uses NostrPass (ignores extensions)
-        document.getElementById('nostrpassBtn').addEventListener('click', async () => {
-            try {
-                showStatus('Opening NostrPass...', 'info');
-                
-                // NostrPass creates window.nostr just like extensions do
-                // The difference is that on mobile, NostrPass bridges to native apps
-                // We can't really distinguish them, so we just attempt the connection
-                
-                if (!window.nostr) {
-                    showStatus('NostrPass not loaded. Please refresh and try again, or use on mobile.', 'error');
-                    return;
-                }
-
-                const pubkey = await window.nostr.getPublicKey();
-                await handleConnection(pubkey, 'NostrPass');
-            } catch (error) {
-                console.error('NostrPass error:', error);
-                showStatus('NostrPass failed: ' + error.message, 'error');
-            }
-        });
-
-        // Disconnect
-        document.getElementById('disconnectBtn').addEventListener('click', () => {
+        function disconnectWallet() {
             state.pubkeyHex = null;
             state.npub = null;
             state.connected = false;
@@ -232,12 +296,16 @@
             document.getElementById('connected').style.display = 'none';
             document.getElementById('notConnected').style.display = 'block';
             showStatus('Wallet disconnected', 'info');
-        });
+        }
 
-        // Initialize NostrPass on load
-        window.addEventListener('load', () => {
-            console.log('Page loaded, NostrPass should be available');
-            console.log('window.nostr available:', !!window.nostr);
+        // Close modal on escape key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeNsecAppModal();
+        });
+        
+        // Close modal on background click
+        document.getElementById('nsecAppModal').addEventListener('click', (e) => {
+            if (e.target.id === 'nsecAppModal') closeNsecAppModal();
         });
     </script>
 </body>
