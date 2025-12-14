@@ -1,269 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Nostrcoin Wallet v0.0.9 -->
+    <!-- Nostrcoin Wallet v0.1.0 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin (NSTC) Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
+    <script src="https://cdn.nostrpass.com/embassy.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a1a;color:#f5f5f5;min-height:100vh;padding:20px}
         .container{max-width:1200px;margin:0 auto}
         .header{text-align:center;margin-bottom:40px;padding:30px 0;border-bottom:2px solid #3a3a3a}
-        .header-top{display:flex;justify-content:flex-end;align-items:center;margin-bottom:20px;padding-bottom:20px;text-align:right}
-        .header-top-left{display:flex;align-items:center;gap:12px}
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:20px}
         .logo{font-size:42px;font-weight:700;color:#32CD32;margin-bottom:8px}
         .subtitle{color:#bbb;font-size:16px}
-        .card{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
-        .section{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
-        .section-title{font-size:20px;font-weight:600;color:#f28500;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #444}
-        .balance-amount{font-size:42px;font-weight:700;color:#32CD32;margin:12px 0}
-        .npub-display{font-size:11px;color:#888;font-family:monospace;word-break:break-all;margin-top:8px}
         .button{width:100%;padding:13px;border-radius:8px;font-size:14px;font-weight:600;border:1px solid transparent;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-bottom:12px}
         .button-primary{background:#32CD32;color:#1a1a1a;border-color:#32CD32}
         .button-primary:hover{background:#28b428;border-color:#28b428;transform:translateY(-2px)}
         .button-secondary{background:#2a2a2a;color:#f28500;border:1px solid #f28500}
         .button-secondary:hover{background:#f28500;color:#1a1a1a}
-        .refresh-btn{background:#32CD32;color:#1a1a1a;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;margin-bottom:20px}
-        .refresh-btn:hover{background:#28b428;transform:translateY(-2px)}
-        .button-refresh{margin-top:10px;padding:8px 16px;background:#32CD32;color:#1a1a1a;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;width:auto;display:inline-block;text-transform:uppercase;letter-spacing:.5px;transition:all .2s}
-        .button-refresh:hover{background:#28b428;transform:translateY(-2px)}
-        .tab-buttons{display:flex;gap:10px;margin-bottom:30px}
-        .tab-btn{flex:1;padding:12px;border-radius:8px;border:1px solid #444;background:#2a2a2a;color:#f5f5f5;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
-        .tab-btn.active{background:#f28500;color:#1a1a1a;border-color:#f28500}
-        .tab-btn:hover:not(.active){border-color:#32CD32}
-        .tab-content{display:none}
-        .tab-content.active{display:block}
-        .form-group{margin-bottom:20px}
-        .form-label{font-size:12px;font-weight:600;color:#e0e0e0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-        .form-input{width:100%;padding:12px;border-radius:8px;border:1px solid #444;background:#1a1a1a;color:#f5f5f5;font-family:monospace;font-size:14px}
-        .form-input:focus{outline:none;border-color:#32CD32;box-shadow:0 0 0 2px rgba(50,205,50,.3)}
+        .section{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
+        .section-title{font-size:20px;font-weight:600;color:#f28500;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #444}
+        .balance-amount{font-size:42px;font-weight:700;color:#32CD32;margin:12px 0}
+        .npub-display{font-size:11px;color:#888;font-family:monospace;word-break:break-all;margin-top:8px}
         .status{padding:12px;border-radius:8px;border:1px solid #444;background:#2a2a2a;font-size:14px;margin-bottom:20px}
         .status.success{color:#32CD32;border-color:#32CD32}
         .status.error{color:#ff6b6b;border-color:#ff6b6b}
         .status.info{color:#66c2ff;border-color:#66c2ff}
-        .tx-item{background:#333;border:1px solid #444;border-radius:8px;padding:16px;margin-bottom:12px;transition:all .2s;font-size:14px}
-        .tx-item:hover{border-color:#32CD32;transform:translateX(4px)}
-        .tx-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-        .tx-type{font-weight:600;padding:6px 12px;border-radius:6px;font-size:12px;text-transform:uppercase}
-        .tx-type.received{background:#d4edda;color:#155724}
-        .tx-type.sent{background:#f8d7da;color:#721c24}
-        .tx-type.mined{background:#d1ecf1;color:#0c5460}
-        .tx-amount{font-weight:700;color:#32CD32;font-size:16px}
-        .tx-hash{color:#999;font-family:monospace;font-size:12px;line-height:1.6}
-        .mining-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-        .stat-box{background:#333;border:1px solid #444;border-radius:8px;padding:16px;text-align:center}
-        .stat-label{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
-        .stat-value{font-size:24px;font-weight:700;color:#f28500}
-        .progress-bar{width:100%;height:10px;border-radius:5px;background:#1a1a1a;border:1px solid #444;overflow:hidden;margin-bottom:16px}
-        .progress-fill{height:100%;background:#f28500;transition:width .1s}
-        .qr-container{background:#1a1a1a;border-radius:8px;border:1px solid #444;padding:24px;text-align:center}
-        #qrcode{margin:0 auto}
-        .version-footer{text-align:center;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-top:30px;padding-top:20px;border-top:1px solid #3a3a3a}
-        .about-link{text-align:center;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-top:6px}
-        .about-link button{background:none;border:none;color:inherit;cursor:pointer;opacity:.7;transition:opacity .2s}
-        .about-link button:hover{opacity:1}
-        .join-nostr-btn{background:#f28500;color:#1a1a1a;border:1px solid #f28500;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;text-decoration:none;display:inline-block;transition:all .2s}
-        .join-nostr-btn:hover{background:#ff9500;border-color:#ff9500;transform:translateY(-2px)}
-        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:20px;border-bottom:2px solid #3a3a3a}
-        .modal .join-nostr-btn{color:#1a1a1a!important}
-        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;padding:20px;z-index:50}
-        .modal-overlay.active{display:flex}
-        .modal{background:#2a2a2a;border:1px solid #444;border-radius:16px;padding:26px;max-width:380px;width:100%;position:relative}
-        .modal h3{margin-bottom:6px;color:#f5f5f5}
-        .modal p{color:#c0c0c0;font-size:14px;line-height:1.4}
-        .modal a{color:#f28500;text-decoration:none}
-        .modal a:hover{text-decoration:underline}
-        .modal-close{position:absolute;top:10px;right:14px;background:none;border:none;color:#999;font-size:20px;cursor:pointer}
-        .modal-close:hover{color:#fff}
     </style>
 </head>
 <body>
-        <div class="container">
+    <div class="container">
         <div class="header">
-            <div class="header-top">
-                <div style="flex:1;"></div>
-                <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
-            </div>
             <div class="logo">⚡ Nostrcoin Wallet</div>
             <div class="subtitle">NSTC Wallet • Nostr-native PoW</div>
         </div>
 
-        <button class="refresh-btn" onclick="refreshWallet()" id="refreshBtn" style="display:none;">🔄 Refresh Balance</button>
-
         <div id="status"></div>
-
-        <div id="indexerStatus" style="font-size:11px;color:#888;margin-bottom:20px;text-align:center;display:none;">
-            Checking indexers...
-        </div>
 
         <div id="notConnected">
             <div class="section">
                 <div class="section-title">Connect Wallet</div>
-                <p style="text-align:center;color:#aaa;margin-bottom:12px;">Connect your Nostr wallet to get started</p>
-                <p style="text-align:center;color:#888;font-size:13px;margin-bottom:20px;">Don't have a Nostr account? <button onclick="toggleJoinNostrModal(true)" style="background:none;border:none;color:#f28500;cursor:pointer;text-decoration:underline;font-size:13px;">Learn more about Nostr</button></p>
-                <button class="button button-primary" onclick="connectWallet()">Connect Extension</button>
-                <button class="button button-primary" onclick="connectNostrConnect()" style="margin-top:12px;">Connect Mobile (NIP-46)</button>
-                <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Login with nsec (Demo)</button>
-                <div id="nsecLoginForm" style="display:none;margin-top:20px;">
-                    <div class="form-group">
-                        <label class="form-label">Your nsec (private key)</label>
-                        <input type="password" class="form-input" id="nsecInput" placeholder="nsec1...">
-                        <p style="font-size:12px;color:#ff6b6b;margin-top:8px;">Demo only – never share your nsec</p>
-                    </div>
-                    <button class="button button-primary" onclick="loginWithNsec()">Login (Demo)</button>
-                    <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Cancel</button>
-                </div>
+                <p style="text-align:center;color:#aaa;margin-bottom:20px;">Connect your Nostr wallet to get started</p>
+                
+                <!-- Desktop: Extension -->
+                <button class="button button-primary" id="extensionBtn">Connect Extension</button>
+                
+                <!-- Mobile: NostrPass -->
+                <button class="button button-primary" id="nostrpassBtn" style="margin-top:12px;">Connect Mobile (NostrPass)</button>
             </div>
         </div>
 
         <div id="connected" style="display:none;">
-            <div class="balance-card" style="background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:32px;margin-bottom:30px;text-align:center;">
-                <div style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Balance</div>
-                <div class="balance-amount" id="balanceAmount">0.00000000</div>
-                <div style="font-size:13px;color:#aaa;margin-bottom:12px;" id="balanceSubtext">Connected</div>
-                <div class="npub-display" id="npubDisplay">npub...</div>
-            </div>
-
-            <div class="tab-buttons">
-                <button class="tab-btn active" onclick="switchTab('send')">💸 Send</button>
-                <button class="tab-btn" onclick="switchTab('mine')">⛏️ Mine</button>
-                <button class="tab-btn" onclick="switchTab('history')">📜 History</button>
-                <button class="tab-btn" onclick="switchTab('qr')">📱 Receive</button>
-            </div>
-
-            <div id="send" class="tab-content active">
-                <div class="section">
-                    <div class="section-title">💸 Send NSTC</div>
-                    <div class="form-group">
-                        <label class="form-label">Recipient npub</label>
-                        <input type="text" class="form-input" id="recipientNpub" placeholder="npub1...">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Amount (NSTC)</label>
-                        <input type="number" class="form-input" id="sendAmount" placeholder="0.00000000" step="0.00000001">
-                    </div>
-                    <button class="button button-primary" onclick="sendTransaction()">Send NSTC</button>
+            <div class="section">
+                <div style="text-align:center;">
+                    <div style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Balance</div>
+                    <div class="balance-amount" id="balanceAmount">0.00000000</div>
+                    <div style="font-size:13px;color:#aaa;margin-bottom:12px;" id="balanceSubtext">Connected</div>
+                    <div class="npub-display" id="npubDisplay">npub...</div>
                 </div>
             </div>
-
-            <div id="mine" class="tab-content">
-                <div class="section">
-                    <div class="section-title">⛏️ Mining</div>
-                    <p style="text-align:center;font-size:13px;color:#aaa;margin-bottom:20px;">Difficulty 4 • Reward 50 NSTC</p>
-                    <div class="mining-stats">
-                        <div class="stat-box">
-                            <div class="stat-label">Hash Rate</div>
-                            <div class="stat-value" id="hashRate">0 H/s</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-label">Attempts</div>
-                            <div class="stat-value" id="attempts">0</div>
-                        </div>
-                    </div>
-                    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-                    <button class="button button-primary" id="mineBtn" onclick="startMining()">Start Mining</button>
-                </div>
-            </div>
-
-            <div id="history" class="tab-content">
-                <div class="section">
-                    <div class="section-title">📜 Transaction History</div>
-                    <div id="historyList">
-                        <div style="text-align:center;color:#888;padding:30px;">No transactions yet</div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="qr" class="tab-content">
-                <div class="section">
-                    <div class="section-title">📱 Receive NSTC</div>
-                    <div class="qr-container">
-                        <div id="qrcode"></div>
-                        <p style="margin-top:16px;font-size:13px;color:#aaa;">Share to receive NSTC</p>
-                    </div>
-                </div>
-            </div>
-
-            <button class="button button-secondary" onclick="disconnectWallet()" style="margin-top:30px;">Disconnect Wallet</button>
-        </div>
-
-        <div class="version-footer">
-            Nostrcoin Wallet v0.0.9
-        </div>
-
-        <div class="about-link">
-            <button type="button" onclick="toggleAboutModal(true)">About</button>
-        </div>
-    </div>
-
-    <div id="joinNostrModal" class="modal-overlay" aria-hidden="true">
-        <div class="modal">
-            <button class="modal-close" onclick="toggleJoinNostrModal(false)" aria-label="Close">×</button>
-            <h3>What is Nostr?</h3>
-            <p style="margin-top:12px;">
-                <strong>Nostr</strong> (Notes and Other Stuff Transmitted by Relays) is a decentralized social protocol that enables global, decentralized, and censorship-resistant social networking.
-            </p>
-            <p style="margin-top:12px;">
-                <strong>Why do I need Nostr for Nostrcoin?</strong> Nostrcoin is built on top of Nostr's event system. Since Nostrcoin uses Nostr events for its blockchain (mining events and transfer events), you need a Nostr account to use the wallet and interact with the network.
-            </p>
-            <p style="margin-top:12px;">
-                To get started with Nostrcoin, you'll need to:
-            </p>
-            <ul style="margin-top:8px;margin-left:20px;line-height:1.8;">
-                <li>Create a Nostr account</li>
-                <li>Install a Nostr signing extension to your web browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others)</li>
-            </ul>
-            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Join Nostr</a>
-            <button class="button button-secondary" style="margin-top:16px;" onclick="toggleJoinNostrModal(false)">Close</button>
-        </div>
-    </div>
-
-    <div id="aboutModal" class="modal-overlay" aria-hidden="true">
-        <div class="modal">
-            <button class="modal-close" onclick="toggleAboutModal(false)" aria-label="Close">×</button>
-            <h3>About Nostrcoin</h3>
-            <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.0.9</p>
-            <p style="margin-top:12px;">
-                Nostrcoin is an experimental, Nostr-native proof-of-work cryptocurrency. It is for education and fun only. This wallet allows you to send, receive, and mine NSTC.
-            </p>
-            <p style="margin-top:12px;">
-                <strong>About Nostr:</strong> Nostrcoin is built on <strong>Nostr</strong> (Notes and Other Stuff Transmitted by Relays), a decentralized social protocol. Nostr is an open protocol that enables global, decentralized, and censorship-resistant social networking. Since Nostrcoin uses Nostr events for its blockchain, you need a Nostr account to use the wallet and interact with the network.
-            </p>
-            <p style="margin-top:12px;">
-                To get started, you'll need two things: (1) a Nostr account. (2) A Nostr signing extension for your browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others).
-            </p>
-            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:12px;text-align:center;display:block;">Join Nostr</a>
-            <p style="margin-top:12px;font-size:12px;color:#ff6b6b;">
-                <strong>Disclaimer:</strong> This is for education and fun only. Expect bugs, potential loss of coins, and no monetary value. Do not invest real money.
-            </p>
-            <button class="button button-secondary" style="margin-top:16px;" onclick="toggleAboutModal(false)">Close</button>
+            
+            <button class="button button-secondary" id="disconnectBtn">Disconnect</button>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // CONFIGURATION - SAFE TO EDIT
-        // ============================================
-        const INDEXER_CONFIG = {
-            indexers: [
-                'https://vm-182.lnvps.cloud',
-                // Add more indexers below (one per line):
-                // 'https://another-indexer.com',
-                // 'https://third-indexer.org',
-            ],
-            relays: [
-                'wss://relay.damus.io',
-                'wss://nos.lol',
-                'wss://relay.nostr.band',
-                'wss://nostr.mom'
-            ]
-        };
-        // ============================================
-        // DO NOT EDIT BELOW THIS LINE
-        // ============================================
-
         const CONFIG = {
             protocolTag: 'nostrcoin',
             difficulty: 4,
@@ -277,334 +80,86 @@
             pubkeyHex: null,
             npub: null,
             balance: 0,
-            transactions: [],
-            mining: false,
-            hashesPerSecond: 0,
-            indexerStatus: {} // Track which indexers are responding
+            connected: false
         };
 
-        // Define NIP-46 functions globally BEFORE they're called
-        window.connectNostrConnect = async function() {
-            showStatus('Generating connection string...', 'info');
-            
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => statusDiv.innerHTML = '', 5000);
+        }
+
+        function pubkeyToNpub(hexPubkey) {
+            // Simplified conversion - in production use proper library
+            return 'npub1' + hexPubkey.substring(0, 16) + '...';
+        }
+
+        async function handleConnection(pubkeyHex, source) {
+            state.pubkeyHex = pubkeyHex;
+            state.npub = pubkeyToNpub(pubkeyHex);
+            state.connected = true;
+
+            document.getElementById('npubDisplay').textContent = state.npub;
+            document.getElementById('balanceSubtext').textContent = `Connected via ${source}`;
+            document.getElementById('notConnected').style.display = 'none';
+            document.getElementById('connected').style.display = 'block';
+
+            showStatus(`✓ Connected successfully`, 'success');
+        }
+
+        // Extension connection
+        document.getElementById('extensionBtn').addEventListener('click', async () => {
+            if (!window.nostr) {
+                showStatus('No Nostr extension found. Install nos2x, Alby, or similar.', 'error');
+                return;
+            }
+
             try {
-                const connectionString = await generateNostrConnectURI();
-                showNostrConnectModal(connectionString);
+                showStatus('Connecting to extension...', 'info');
+                const pubkey = await window.nostr.getPublicKey();
+                await handleConnection(pubkey, 'Extension');
             } catch (error) {
-                showStatus('Failed to generate connection string: ' + error.message, 'error');
-            }
-        };
-
-        window.closeNostrConnectModal = function() {
-            const modal = document.getElementById('nostrConnectModal');
-            if (modal) modal.remove();
-        };
-
-        window.copyToClipboard = function(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showStatus('✓ Connection string copied to clipboard', 'success');
-            }).catch(() => {
-                showStatus('Failed to copy to clipboard', 'error');
-            });
-        };
-
-        async function generateNostrConnectURI() {
-            const privateKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-                .map(b => b.toString(16).padStart(2, '0')).join('');
-            
-            const metadata = encodeURIComponent(JSON.stringify({
-                name: "Nostrcoin Wallet",
-                url: window.location.origin,
-                description: "Connect to Nostrcoin Wallet"
-            }));
-            
-            const relay = encodeURIComponent('wss://relay.damus.io');
-            const uri = `nostrconnect://${privateKey}?relay=${relay}&metadata=${metadata}`;
-            
-            return uri;
-        }
-
-        function showNostrConnectModal(connectionString) {
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay active';
-            modal.id = 'nostrConnectModal';
-            modal.innerHTML = `
-                <div class="modal" style="max-width: 500px;">
-                    <button class="modal-close" onclick="closeNostrConnectModal()">×</button>
-                    <h3>Connect with Nostr Connect</h3>
-                    <p style="margin-top:12px;color:#c0c0c0;font-size:14px;">
-                        Scan this QR code with your mobile Nostr signer app (nsec.app, Amber, etc.) or copy the connection string below:
-                    </p>
-                    <div style="background:#1a1a1a;border-radius:8px;padding:24px;margin:20px 0;text-align:center;">
-                        <div id="nostrConnectQR"></div>
-                    </div>
-                    <div style="margin-top:16px;">
-                        <label style="font-size:12px;color:#888;display:block;margin-bottom:8px;">Connection String:</label>
-                        <textarea 
-                            readonly 
-                            style="width:100%;padding:12px;border-radius:8px;border:1px solid #444;background:#1a1a1a;color:#f5f5f5;font-family:monospace;font-size:11px;resize:none;height:80px;"
-                            onclick="this.select()"
-                        >${connectionString}</textarea>
-                        <button class="button button-secondary" style="margin-top:12px;" onclick="copyToClipboard('${connectionString}')">
-                            Copy Connection String
-                        </button>
-                    </div>
-                    <button class="button button-primary" style="margin-top:20px;" onclick="closeNostrConnectModal()">
-                        Cancel
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            try {
-                if (typeof QRCode !== 'undefined') {
-                    new QRCode(document.getElementById('nostrConnectQR'), {
-                        text: connectionString,
-                        width: 256,
-                        height: 256,
-                        colorDark: "#f5f5f5",
-                        colorLight: "#1a1a1a"
-                    });
-                }
-            } catch (e) {
-                console.error('QR generation failed:', e);
-            }
-            
-            showStatus('⏳ Waiting for mobile app to connect...', 'info');
-        }
-
-        function toggleJoinNostrModal(show) {
-            const modal = document.getElementById('joinNostrModal');
-            if (show) {
-                modal.classList.add('active');
-                modal.setAttribute('aria-hidden', 'false');
-            } else {
-                modal.classList.remove('active');
-                modal.setAttribute('aria-hidden', 'true');
-            }
-        }
-
-        function toggleAboutModal(show) {
-            const modal = document.getElementById('aboutModal');
-            if (show) {
-                modal.classList.add('active');
-                modal.setAttribute('aria-hidden', 'false');
-            } else {
-                modal.classList.remove('active');
-                modal.setAttribute('aria-hidden', 'true');
-            }
-        }
-
-        window.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                toggleJoinNostrModal(false);
-                toggleAboutModal(false);
+                showStatus('Extension connection failed: ' + error.message, 'error');
             }
         });
 
-        window.addEventListener('click', (event) => {
-            if (event.target === document.getElementById('joinNostrModal')) toggleJoinNostrModal(false);
-            if (event.target === document.getElementById('aboutModal')) toggleAboutModal(false);
+        // NostrPass connection
+        document.getElementById('nostrpassBtn').addEventListener('click', async () => {
+            try {
+                showStatus('Connecting to NostrPass...', 'info');
+                
+                // Wait a moment for NostrPass to initialize if needed
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                if (!window.nostr || !window.nostr.getPublicKey) {
+                    showStatus('NostrPass not loaded. Please refresh the page and try again.', 'error');
+                    return;
+                }
+
+                const pubkey = await window.nostr.getPublicKey();
+                await handleConnection(pubkey, 'NostrPass');
+            } catch (error) {
+                console.error('NostrPass error:', error);
+                showStatus('NostrPass connection failed. Make sure you have a Nostr signer app.', 'error');
+            }
         });
 
-        async function connectWallet() {
-            if (!window.nostr) {
-                showStatus('No Nostr extension found', 'error');
-                return;
-            }
+        // Disconnect
+        document.getElementById('disconnectBtn').addEventListener('click', () => {
+            state.pubkeyHex = null;
+            state.npub = null;
+            state.connected = false;
 
-            try {
-                const pubkeyHex = await window.nostr.getPublicKey();
-                state.pubkeyHex = pubkeyHex;
-                state.npub = pubkeyToNpub(pubkeyHex);
+            document.getElementById('connected').style.display = 'none';
+            document.getElementById('notConnected').style.display = 'block';
+            showStatus('Wallet disconnected', 'info');
+        });
 
-                document.getElementById('npubDisplay').textContent = state.npub;
-                document.getElementById('balanceSubtext').textContent = 'Connected to Nostr';
-
-                document.getElementById('notConnected').style.display = 'none';
-                document.getElementById('connected').style.display = 'block';
-                document.getElementById('refreshBtn').style.display = 'block';
-                document.getElementById('indexerStatus').style.display = 'block';
-
-                await fetchBalance();
-                await fetchHistory();
-                updateUI();
-
-                try {
-                    if (typeof QRCode !== 'undefined') {
-                        document.getElementById('qrcode').innerHTML = '';
-                        new QRCode(document.getElementById('qrcode'), {
-                            text: 'nostr:' + state.npub,
-                            width: 200,
-                            height: 200,
-                            colorDark: "#f5f5f5",
-                            colorLight: "#1a1a1a"
-                        });
-                    }
-                } catch (e) {
-                    console.error('QR code generation failed:', e);
-                }
-            } catch (error) {
-                showStatus('Failed to connect: ' + error.message, 'error');
-            }
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tab).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        async function refreshWallet() {
-            showStatus('🔄 Refreshing...', 'info');
-            await fetchBalance();
-            await fetchHistory();
-            updateUI();
-            showStatus('✔ Updated', 'success');
-        }
-
-        async function sendTransaction() {
-            const recipientInput = document.getElementById('recipientNpub').value.trim();
-            const amount = parseFloat(document.getElementById('sendAmount').value);
-
-            if (!recipientInput) return showStatus('Please enter recipient npub', 'error');
-            if (isNaN(amount) || amount <= 0) return showStatus('Enter a valid amount', 'error');
-            if (amount > state.balance) return showStatus('Insufficient balance', 'error');
-
-            if (!window.nostr) {
-                showStatus('Extension required to send transactions', 'error');
-                return;
-            }
-
-            try {
-                let recipientHex;
-                if (recipientInput.startsWith('npub1')) {
-                    recipientHex = npubToHex(recipientInput);
-                    if (!recipientHex) {
-                        return showStatus('Invalid npub format', 'error');
-                    }
-                } else if (recipientInput.length === 64) {
-                    recipientHex = recipientInput;
-                } else {
-                    return showStatus('Invalid recipient format. Use npub or hex pubkey', 'error');
-                }
-
-                const event = {
-                    kind: CONFIG.eventKinds.transfer,
-                    created_at: Math.floor(Date.now() / 1000),
-                    tags: [
-                        ['protocol', CONFIG.protocolTag],
-                        ['p', recipientHex],
-                        ['amount', amount.toFixed(8)]
-                    ],
-                    content: `Sending ${amount} NSTC`
-                };
-
-                const signedEvent = await window.nostr.signEvent(event);
-                await publishToRelays(signedEvent);
-
-                document.getElementById('recipientNpub').value = '';
-                document.getElementById('sendAmount').value = '';
-
-                showStatus(`💸 Transfer broadcast! ${amount} NSTC sent`, 'success');
-
-                // AUTO-REFRESH balance after 3 seconds
-                setTimeout(async () => {
-                    await fetchBalance();
-                    updateUI();
-                    showStatus('✔ Balance updated', 'info');
-                }, 3000);
-
-                // AUTO-REFRESH history after 5 seconds (gives indexers more time)
-                setTimeout(async () => {
-                    await fetchHistory();
-                    updateHistoryDisplay();
-                }, 5000);
-            } catch (error) {
-                showStatus('Transaction failed: ' + error.message, 'error');
-            }
-        }
-
-        async function publishToRelays(event) {
-            const promises = INDEXER_CONFIG.relays.map(relay => new Promise((resolve) => {
-                const ws = new WebSocket(relay);
-                ws.onopen = () => {
-                    ws.send(JSON.stringify(['EVENT', event]));
-                    ws.close();
-                    resolve();
-                };
-                ws.onerror = () => resolve();
-                setTimeout(() => {
-                    ws.close();
-                    resolve();
-                }, 5000);
-            }));
-            await Promise.allSettled(promises);
-        }
-
-        async function startMining() {
-            if (!window.nostr) {
-                showStatus('Extension required for mining', 'error');
-                return;
-            }
-
-            if (state.mining) {
-                state.mining = false;
-                document.getElementById('mineBtn').textContent = 'Start Mining';
-                return;
-            }
-
-            state.mining = true;
-            document.getElementById('mineBtn').textContent = 'Mining...';
-            showStatus('Mining started... Looking for valid proof-of-work', 'info');
-
-            const difficulty = CONFIG.difficulty;
-            const target = '0'.repeat(difficulty);
-            let attempts = 0;
-            const startTime = Date.now();
-
-            while (state.mining) {
-                const nonce = Math.random().toString(36).substring(2);
-                const event = {
-                    kind: CONFIG.eventKinds.mining,
-                    created_at: Math.floor(Date.now() / 1000),
-                    tags: [
-                        ['protocol', CONFIG.protocolTag],
-                        ['difficulty', difficulty.toString()],
-                        ['nonce', nonce]
-                    ],
-                    content: 'Mining NSTC',
-                    pubkey: state.pubkeyHex
-                };
-
-                const eventId = await calculateEventId(event);
-                event.id = eventId;
-                attempts++;
-
-                if (eventId.startsWith(target)) {
-                    try {
-                        const signed = await window.nostr.signEvent(event);
-                        await publishToRelays(signed);
-                        showStatus('⛏️ Block mined! Reward: 50 NSTC', 'success');
-                    } catch (e) {
-                        showStatus('Mining event failed: ' + e.message, 'error');
-                    }
-                    state.mining = false;
-                    document.getElementById('mineBtn').textContent = 'Start Mining';
-                    document.getElementById('progressFill').style.width = '100%';
-                    setTimeout(async () => {
-                        document.getElementById('progressFill').style.width = '0%';
-                        document.getElementById('hashRate').textContent = '0 H/s';
-                        document.getElementById('attempts').textContent = '0';
-                        await fetchBalance();
-                        await fetchHistory();
-                        updateUI();
-                    }, 3000);
-                    break;
-                }
-
-                if (attempts % 1000 === 0) {
-                    const elapsed = (Date.now() - startTime) / 1000;
-                    state.hashesPerSecond = Math.round(attempts / elapsed);
-                    document.getElementByI
+        // Initialize NostrPass on load
+        window.addEventListener('load', () => {
+            console.log('Page loaded, NostrPass should be available');
+            console.log('window.nostr available:', !!window.nostr);
+        });
+    </script>
+</body>
+</html>
