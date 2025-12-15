@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin (NSTC) Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
+    <!-- Add noble curves for secp256k1 schnorr pubkey derivation -->
+    <script type="module">
+        import { secp256k1 } from 'https://cdn.jsdelivr.net/npm/@noble/curves@1.4.0/secp256k1.js';
+        window.secp256k1 = secp256k1;
+    </script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a1a;color:#f5f5f5;min-height:100vh;padding:20px}
@@ -132,7 +137,7 @@
             setTimeout(() => statusDiv.innerHTML = '', 5000);
         }
 
-        // Bech32 encoding functions
+        // Bech32 encoding functions (unchanged)
         const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 
         function hexToBytes(hex) {
@@ -205,7 +210,7 @@
             return bech32Encode('npub', converted);
         }
 
-        // Extension connection
+        // Extension connection (unchanged)
         async function connectExtension() {
             if (!window.nostr) {
                 showStatus('No browser extension found. Please install nos2x, Alby, or similar.', 'error');
@@ -221,21 +226,27 @@
             }
         }
 
-        // nsec.app connection
+        // nsec.app connection - NEW CORRECT FORMAT
         async function showNsecAppModal() {
             document.getElementById('nsecAppModal').classList.add('active');
             
-            // Small delay to ensure modal is visible before generating QR
+            // Wait for secp256k1 to load
+            if (!window.secp256k1) {
+                showStatus('Loading cryptography library...', 'info');
+                await new Promise(resolve => {
+                    const check = () => window.secp256k1 ? resolve() : setTimeout(check, 100);
+                    check();
+                });
+            }
+
             setTimeout(() => {
-                // Generate connection string for nsec.app
                 const connectUrl = generateNsecAppUrl();
                 document.getElementById('connectUrl').textContent = connectUrl;
                 document.getElementById('nsecAppLink').href = connectUrl;
                 
-                // Generate QR code
                 try {
                     const qrContainer = document.getElementById('nsecAppQR');
-                    qrContainer.innerHTML = ''; // Clear any existing QR
+                    qrContainer.innerHTML = '';
                     
                     if (typeof QRCode !== 'undefined') {
                         new QRCode(qrContainer, {
@@ -248,7 +259,6 @@
                         showStatus('Scan QR code with nsec.app', 'info');
                     } else {
                         qrContainer.innerHTML = '<p style="color:#ff6b6b;">QRCode library not loaded</p>';
-                        showStatus('QR code failed to load', 'error');
                     }
                 } catch (e) {
                     console.error('QR generation failed:', e);
@@ -258,22 +268,28 @@
         }
 
         function generateNsecAppUrl() {
-            // Generate a temporary pubkey for this connection session
-            const tempKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-                .map(b => b.toString(16).padStart(2, '0')).join('');
+            // Generate temporary client secret key
+            const secretBytes = crypto.getRandomValues(new Uint8Array(32));
             
-            // nsec.app expects: bunker://<pubkey>?relay=<relay>&secret=<secret>
-            // For nostrconnect, the format is: nostrconnect://<pubkey>?relay=<relay>&metadata=<metadata>
+            // Derive public key (hex) using schnorr
+            const pubkeyHex = window.secp256k1.schnorr.getPublicKey(secretBytes);
+            
+            // Build query params
+            const params = new URLSearchParams();
+            CONFIG.relays.forEach(relay => params.append('relay', encodeURIComponent(relay)));
+            
+            // Metadata as JSON (standard per NIP-46)
             const metadata = {
                 name: 'Nostrcoin Wallet',
-                url: window.location.origin
+                url: window.location.origin,
+                description: 'Nostr-native PoW wallet'
             };
+            params.append('metadata', JSON.stringify(metadata));
             
-            const relay = CONFIG.relays[0]; // Use first relay
-            const metadataEncoded = encodeURIComponent(JSON.stringify(metadata));
+            // Optional: some signers prefer flat params for smaller QR
+            // params.append('name', 'Nostrcoin Wallet');
             
-            // Return bunker URL for nsec.app
-            return `bunker://${tempKey}?relay=${encodeURIComponent(relay)}&secret=${tempKey.substring(0, 16)}`;
+            return `nostrconnect://${pubkeyHex}?${params.toString()}`;
         }
 
         function closeNsecAppModal() {
