@@ -2,3 +2,5 @@
 
 Running nostrcoin
 Call me Sacco
+
+https://github.com/saccoci
