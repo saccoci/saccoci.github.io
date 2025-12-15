@@ -6,11 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin (NSTC) Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
-    <!-- Use dedicated noble-secp256k1 for Nostr-compatible Schnorr -->
-    <script type="module">
-        import { schnorr } from 'https://cdn.jsdelivr.net/npm/@noble/secp256k1@2.0.0/+esm';
-        window.schnorr = schnorr;
-    </script>
+    <!-- NostrPass integration -->
+    <script src="https://cdn.nostrpass.com/embassy.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a1a;color:#f5f5f5;min-height:100vh;padding:20px}
@@ -36,15 +33,7 @@
         .status.info{color:#66c2ff;border-color:#66c2ff}
         .join-nostr-btn{background:#f28500;color:#1a1a1a;border:1px solid #f28500;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;text-decoration:none;display:inline-block;transition:all .2s}
         .join-nostr-btn:hover{background:#ff9500;border-color:#ff9500;transform:translateY(-2px)}
-        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;padding:20px;z-index:50}
-        .modal-overlay.active{display:flex}
-        .modal{background:#2a2a2a;border:1px solid #444;border-radius:16px;padding:26px;max-width:500px;width:100%;position:relative}
-        .modal h3{margin-bottom:16px;color:#f5f5f5}
-        .modal p{color:#c0c0c0;font-size:14px;line-height:1.4;margin-bottom:12px}
-        .modal-close{position:absolute;top:10px;right:14px;background:none;border:none;color:#999;font-size:20px;cursor:pointer}
-        .modal-close:hover{color:#fff}
-        .qr-box{background:#1a1a1a;border-radius:8px;padding:20px;text-align:center;margin:20px 0}
-        .connect-url{background:#1a1a1a;padding:12px;border-radius:6px;font-family:monospace;font-size:11px;word-break:break-all;margin-top:12px;color:#888}
+        .nostrpass-container{margin-top:20px;text-align:center}
     </style>
 </head>
 <body>
@@ -66,7 +55,12 @@
                 <p style="text-align:center;color:#aaa;margin-bottom:20px;">Connect your Nostr wallet to get started</p>
                 
                 <button class="button button-primary" onclick="connectExtension()">Connect Browser Extension</button>
-                <button class="button button-primary" onclick="showNsecAppModal()" style="margin-top:12px;">Connect Mobile (nsec.app)</button>
+                
+                <!-- NostrPass Mobile/Web Login Button -->
+                <div class="nostrpass-container">
+                    <p style="color:#aaa;margin-bottom:12px;">Or connect via mobile or web vault</p>
+                    <div id="nostrpass-login"></div>
+                </div>
                 
                 <p style="text-align:center;color:#888;font-size:13px;margin-top:20px;">
                     Don't have a Nostr account? 
@@ -89,29 +83,6 @@
         </div>
     </div>
 
-    <!-- nsec.app Connection Modal -->
-    <div id="nsecAppModal" class="modal-overlay">
-        <div class="modal">
-            <button class="modal-close" onclick="closeNsecAppModal()">×</button>
-            <h3>Connect with nsec.app</h3>
-            <p>Scan this QR code with nsec.app on your mobile device, or click the button below:</p>
-            
-            <div class="qr-box">
-                <div id="nsecAppQR"></div>
-            </div>
-            
-            <a id="nsecAppLink" href="#" class="button button-primary" target="_blank" style="text-decoration:none;text-align:center;display:block;">
-                Open in nsec.app
-            </a>
-            
-            <div class="connect-url" id="connectUrl" style="cursor:pointer;" onclick="copyConnectUrl()" title="Click to copy">
-                Generating connection...
-            </div>
-            
-            <button class="button button-secondary" style="margin-top:16px;" onclick="closeNsecAppModal()">Cancel</button>
-        </div>
-    </div>
-
     <script>
         const CONFIG = {
             protocolTag: 'nostrcoin',
@@ -127,8 +98,7 @@
             pubkeyHex: null,
             npub: null,
             balance: 0,
-            connected: false,
-            nsecAppConnection: null
+            connected: false
         };
 
         function showStatus(message, type) {
@@ -210,7 +180,7 @@
             return bech32Encode('npub', converted);
         }
 
-        // Extension connection (unchanged)
+        // Extension connection (NIP-46 or standard window.nostr)
         async function connectExtension() {
             if (!window.nostr) {
                 showStatus('No browser extension found. Please install nos2x, Alby, or similar.', 'error');
@@ -226,69 +196,22 @@
             }
         }
 
-        // Fixed nsec.app connection
-        async function showNsecAppModal() {
-            document.getElementById('nsecAppModal').classList.add('active');
-            
-            // Wait for schnorr lib to load
-            if (!window.schnorr) {
-                showStatus('Loading cryptography library...', 'info');
-                await new Promise(resolve => {
-                    const check = () => window.schnorr ? resolve() : setTimeout(check, 50);
-                    check();
-                });
+        // NostrPass integration - mounts the ready-made login button
+        function initNostrPass() {
+            if (typeof window.nostr !== 'undefined') {
+                window.nostr.createNostrPassButton({
+                    onLogin: (user) => {
+                        // user.publicKey is hex
+                        handleConnection(user.publicKey, 'NostrPass');
+                    },
+                    onError: (err) => {
+                        showStatus('NostrPass error: ' + err.message, 'error');
+                    }
+                }).mount('#nostrpass-login');
+            } else {
+                // Fallback if script didn't load
+                document.getElementById('nostrpass-login').innerHTML = '<p style="color:#ff6b6b;">NostrPass failed to load</p>';
             }
-
-            setTimeout(() => {
-                const connectUrl = generateNsecAppUrl();
-                document.getElementById('connectUrl').textContent = connectUrl;
-                document.getElementById('nsecAppLink').href = connectUrl;
-                
-                try {
-                    const qrContainer = document.getElementById('nsecAppQR');
-                    qrContainer.innerHTML = '';
-                    
-                    new QRCode(qrContainer, {
-                        text: connectUrl,
-                        width: 256,
-                        height: 256,
-                        colorDark: "#f5f5f5",
-                        colorLight: "#1a1a1a"
-                    });
-                    showStatus('Scan QR code with nsec.app', 'info');
-                } catch (e) {
-                    console.error('QR generation failed:', e);
-                    document.getElementById('nsecAppQR').innerHTML = '<p style="color:#ff6b6b;">QR generation failed</p>';
-                }
-            }, 100);
-        }
-
-        function generateNsecAppUrl() {
-            // Generate temporary client secret key (32 bytes)
-            const secretBytes = crypto.getRandomValues(new Uint8Array(32));
-            
-            // Derive Schnorr public key (hex string)
-            const pubkeyHex = window.schnorr.getPublicKey(secretBytes);
-            
-            // Build query params (flat for better QR compatibility)
-            const params = new URLSearchParams();
-            CONFIG.relays.forEach(relay => params.append('relay', relay)); // no encodeURIComponent needed for basic wss URLs
-            params.append('name', 'Nostrcoin Wallet');
-            
-            return `nostrconnect://${pubkeyHex}?${params.toString()}`;
-        }
-
-        function closeNsecAppModal() {
-            document.getElementById('nsecAppModal').classList.remove('active');
-        }
-
-        function copyConnectUrl() {
-            const url = document.getElementById('connectUrl').textContent;
-            navigator.clipboard.writeText(url).then(() => {
-                showStatus('✓ Connection URL copied', 'success');
-            }).catch(() => {
-                showStatus('Failed to copy', 'error');
-            });
         }
 
         function handleConnection(pubkeyHex, source) {
@@ -301,8 +224,7 @@
             document.getElementById('notConnected').style.display = 'none';
             document.getElementById('connected').style.display = 'block';
 
-            closeNsecAppModal();
-            showStatus(`✓ Connected successfully`, 'success');
+            showStatus(`✓ Connected successfully via ${source}`, 'success');
             
             // TODO: Fetch balance from indexer
         }
@@ -317,15 +239,8 @@
             showStatus('Wallet disconnected', 'info');
         }
 
-        // Close modal on escape key
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeNsecAppModal();
-        });
-        
-        // Close modal on background click
-        document.getElementById('nsecAppModal').addEventListener('click', (e) => {
-            if (e.target.id === 'nsecAppModal') closeNsecAppModal();
-        });
+        // Initialize NostrPass button when page loads
+        window.addEventListener('load', initNostrPass);
     </script>
 </body>
 </html>
