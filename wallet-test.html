@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin (NSTC) Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
-    <!-- NostrPass integration -->
-    <script src="https://cdn.nostrpass.com/embassy.js"></script>
+    <!-- NostrPass integration script -->
+    <script src="https://cdn.nostrpass.com/embassy.js" async></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a1a;color:#f5f5f5;min-height:100vh;padding:20px}
@@ -34,6 +34,7 @@
         .join-nostr-btn{background:#f28500;color:#1a1a1a;border:1px solid #f28500;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;text-decoration:none;display:inline-block;transition:all .2s}
         .join-nostr-btn:hover{background:#ff9500;border-color:#ff9500;transform:translateY(-2px)}
         .nostrpass-container{margin-top:20px;text-align:center}
+        #nostrpass-login {min-height: 50px;}
     </style>
 </head>
 <body>
@@ -56,10 +57,10 @@
                 
                 <button class="button button-primary" onclick="connectExtension()">Connect Browser Extension</button>
                 
-                <!-- NostrPass Mobile/Web Login Button -->
+                <!-- NostrPass Mobile/Web Login -->
                 <div class="nostrpass-container">
-                    <p style="color:#aaa;margin-bottom:12px;">Or connect via mobile or web vault</p>
-                    <div id="nostrpass-login"></div>
+                    <p style="color:#aaa;margin-bottom:12px;">Or connect with mobile/web (NostrPass)</p>
+                    <div id="nostrpass-login">Loading NostrPass button...</div>
                 </div>
                 
                 <p style="text-align:center;color:#888;font-size:13px;margin-top:20px;">
@@ -101,13 +102,13 @@
             connected: false
         };
 
-        function showStatus(message, type) {
+        function showStatus(message, type = 'info') {
             const statusDiv = document.getElementById('status');
             statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
-            setTimeout(() => statusDiv.innerHTML = '', 5000);
+            setTimeout(() => statusDiv.innerHTML = '', 6000);
         }
 
-        // Bech32 encoding functions (unchanged)
+        // Bech32 functions remain the same
         const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 
         function hexToBytes(hex) {
@@ -180,38 +181,37 @@
             return bech32Encode('npub', converted);
         }
 
-        // Extension connection (NIP-46 or standard window.nostr)
+        // Browser Extension connection
         async function connectExtension() {
             if (!window.nostr) {
-                showStatus('No browser extension found. Please install nos2x, Alby, or similar.', 'error');
+                showStatus('No browser extension detected (e.g., Alby, nos2x). Install one to use this option.', 'error');
                 return;
             }
 
             try {
-                showStatus('Connecting to extension...', 'info');
+                showStatus('Requesting connection to extension...', 'info');
                 const pubkey = await window.nostr.getPublicKey();
                 handleConnection(pubkey, 'Browser Extension');
             } catch (error) {
-                showStatus('Extension connection failed: ' + error.message, 'error');
+                showStatus('Extension rejected or error: ' + error.message, 'error');
             }
         }
 
-        // NostrPass integration - mounts the ready-made login button
-        function initNostrPass() {
-            if (typeof window.nostr !== 'undefined') {
-                window.nostr.createNostrPassButton({
-                    onLogin: (user) => {
-                        // user.publicKey is hex
-                        handleConnection(user.publicKey, 'NostrPass');
-                    },
-                    onError: (err) => {
-                        showStatus('NostrPass error: ' + err.message, 'error');
-                    }
-                }).mount('#nostrpass-login');
-            } else {
-                // Fallback if script didn't load
-                document.getElementById('nostrpass-login').innerHTML = '<p style="color:#ff6b6b;">NostrPass failed to load</p>';
+        // NostrPass button initialization
+        function initNostrPassButton() {
+            if (typeof window.nostr === 'undefined' || typeof window.nostr.createNostrPassButton === 'undefined') {
+                document.getElementById('nostrpass-login').innerHTML = '<p style="color:#ff6b6b;">NostrPass failed to load. Try refreshing or check https://nostrpass.com</p>';
+                return;
             }
+
+            window.nostr.createNostrPassButton({
+                onLogin: (user) => {
+                    handleConnection(user.publicKey, 'NostrPass');
+                },
+                onError: (err) => {
+                    showStatus('NostrPass error: ' + (err.message || err), 'error');
+                }
+            }).mount('#nostrpass-login');
         }
 
         function handleConnection(pubkeyHex, source) {
@@ -224,9 +224,7 @@
             document.getElementById('notConnected').style.display = 'none';
             document.getElementById('connected').style.display = 'block';
 
-            showStatus(`✓ Connected successfully via ${source}`, 'success');
-            
-            // TODO: Fetch balance from indexer
+            showStatus(`Connected successfully via ${source}`, 'success');
         }
 
         function disconnectWallet() {
@@ -239,8 +237,10 @@
             showStatus('Wallet disconnected', 'info');
         }
 
-        // Initialize NostrPass button when page loads
-        window.addEventListener('load', initNostrPass);
+        // Run init after page load and a short delay for async script
+        window.addEventListener('load', () => {
+            setTimeout(initNostrPassButton, 1000); // Give time for embassy.js to load
+        });
     </script>
 </body>
 </html>
