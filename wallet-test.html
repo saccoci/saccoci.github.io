@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin (NSTC) Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
-    <!-- Add noble curves for secp256k1 schnorr pubkey derivation -->
+    <!-- Use dedicated noble-secp256k1 for Nostr-compatible Schnorr -->
     <script type="module">
-        import { secp256k1 } from 'https://cdn.jsdelivr.net/npm/@noble/curves@1.4.0/secp256k1.js';
-        window.secp256k1 = secp256k1;
+        import { schnorr } from 'https://cdn.jsdelivr.net/npm/@noble/secp256k1@2.0.0/+esm';
+        window.schnorr = schnorr;
     </script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
@@ -226,15 +226,15 @@
             }
         }
 
-        // nsec.app connection - NEW CORRECT FORMAT
+        // Fixed nsec.app connection
         async function showNsecAppModal() {
             document.getElementById('nsecAppModal').classList.add('active');
             
-            // Wait for secp256k1 to load
-            if (!window.secp256k1) {
+            // Wait for schnorr lib to load
+            if (!window.schnorr) {
                 showStatus('Loading cryptography library...', 'info');
                 await new Promise(resolve => {
-                    const check = () => window.secp256k1 ? resolve() : setTimeout(check, 100);
+                    const check = () => window.schnorr ? resolve() : setTimeout(check, 50);
                     check();
                 });
             }
@@ -248,18 +248,14 @@
                     const qrContainer = document.getElementById('nsecAppQR');
                     qrContainer.innerHTML = '';
                     
-                    if (typeof QRCode !== 'undefined') {
-                        new QRCode(qrContainer, {
-                            text: connectUrl,
-                            width: 256,
-                            height: 256,
-                            colorDark: "#f5f5f5",
-                            colorLight: "#1a1a1a"
-                        });
-                        showStatus('Scan QR code with nsec.app', 'info');
-                    } else {
-                        qrContainer.innerHTML = '<p style="color:#ff6b6b;">QRCode library not loaded</p>';
-                    }
+                    new QRCode(qrContainer, {
+                        text: connectUrl,
+                        width: 256,
+                        height: 256,
+                        colorDark: "#f5f5f5",
+                        colorLight: "#1a1a1a"
+                    });
+                    showStatus('Scan QR code with nsec.app', 'info');
                 } catch (e) {
                     console.error('QR generation failed:', e);
                     document.getElementById('nsecAppQR').innerHTML = '<p style="color:#ff6b6b;">QR generation failed</p>';
@@ -268,26 +264,16 @@
         }
 
         function generateNsecAppUrl() {
-            // Generate temporary client secret key
+            // Generate temporary client secret key (32 bytes)
             const secretBytes = crypto.getRandomValues(new Uint8Array(32));
             
-            // Derive public key (hex) using schnorr
-            const pubkeyHex = window.secp256k1.schnorr.getPublicKey(secretBytes);
+            // Derive Schnorr public key (hex string)
+            const pubkeyHex = window.schnorr.getPublicKey(secretBytes);
             
-            // Build query params
+            // Build query params (flat for better QR compatibility)
             const params = new URLSearchParams();
-            CONFIG.relays.forEach(relay => params.append('relay', encodeURIComponent(relay)));
-            
-            // Metadata as JSON (standard per NIP-46)
-            const metadata = {
-                name: 'Nostrcoin Wallet',
-                url: window.location.origin,
-                description: 'Nostr-native PoW wallet'
-            };
-            params.append('metadata', JSON.stringify(metadata));
-            
-            // Optional: some signers prefer flat params for smaller QR
-            // params.append('name', 'Nostrcoin Wallet');
+            CONFIG.relays.forEach(relay => params.append('relay', relay)); // no encodeURIComponent needed for basic wss URLs
+            params.append('name', 'Nostrcoin Wallet');
             
             return `nostrconnect://${pubkeyHex}?${params.toString()}`;
         }
