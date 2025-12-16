@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin (NSTC) Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
-    <!-- Nostr / secp256k1 helper (provides signing + key utils) -->
+    <!-- Nostr / secp256k1 helper -->
     <script src="https://unpkg.com/nostr-tools@2.7.0/lib/nostr.bundle.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
@@ -14,16 +14,10 @@
         .container{max-width:1200px;margin:0 auto}
         .header{text-align:center;margin-bottom:40px;padding:30px 0;border-bottom:2px solid #3a3a3a}
         .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:20px}
-        .header-top-left{display:flex;align-items:center;gap:12px}
         .hamburger-btn{background:#2a2a2a;border:1px solid #444;color:#f5f5f5;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:20px;line-height:1;transition:all .2s;display:flex;align-items:center;justify-content:center}
         .hamburger-btn:hover{background:#333;border-color:#32CD32}
-        .menu-modal .modal-link{display:block;padding:12px 16px;color:#f5f5f5;text-decoration:none;border-radius:8px;margin-bottom:8px;transition:all .2s;border:1px solid transparent}
-        .menu-modal .modal-link:hover{background:#333;border-color:#32CD32;color:#32CD32}
-        .menu-modal .modal-link.about-link{color:#f28500}
-        .menu-modal .modal-link.about-link:hover{color:#ff9500;border-color:#f28500}
         .logo{font-size:42px;font-weight:700;color:#32CD32;margin-bottom:8px}
         .subtitle{color:#bbb;font-size:16px}
-        .card{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
         .section{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
         .section-title{font-size:20px;font-weight:600;color:#f28500;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #444}
         .balance-amount{font-size:42px;font-weight:700;color:#32CD32;margin:12px 0}
@@ -31,13 +25,10 @@
         .button{width:100%;padding:13px;border-radius:8px;font-size:14px;font-weight:600;border:1px solid transparent;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-bottom:12px}
         .button-primary{background:#32CD32;color:#1a1a1a;border-color:#32CD32}
         .button-primary:hover{background:#28b428;border-color:#28b428;transform:translateY(-2px)}
-        #connectExtensionBtn.button-primary:hover{background:#f28500;border-color:#f28500}
         .button-secondary{background:#2a2a2a;color:#f28500;border:1px solid #f28500}
         .button-secondary:hover{background:#f28500;color:#1a1a1a}
         .refresh-btn{background:#32CD32;color:#1a1a1a;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;margin-bottom:20px}
         .refresh-btn:hover{background:#28b428;transform:translateY(-2px)}
-        .button-refresh{margin-top:10px;padding:8px 16px;background:#32CD32;color:#1a1a1a;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;width:auto;display:inline-block;text-transform:uppercase;letter-spacing:.5px;transition:all .2s}
-        .button-refresh:hover{background:#28b428;transform:translateY(-2px)}
         .tab-buttons{display:flex;gap:10px;margin-bottom:30px}
         .tab-btn{flex:1;padding:12px;border-radius:8px;border:1px solid #444;background:#2a2a2a;color:#f5f5f5;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
         .tab-btn.active{background:#f28500;color:#1a1a1a;border-color:#f28500}
@@ -61,39 +52,17 @@
         .tx-type.mined{background:#d1ecf1;color:#0c5460}
         .tx-amount{font-weight:700;color:#32CD32;font-size:16px}
         .tx-hash{color:#999;font-family:monospace;font-size:12px;line-height:1.6}
-        .mining-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-        .stat-box{background:#333;border:1px solid #444;border-radius:8px;padding:16px;text-align:center}
-        .stat-label{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
-        .stat-value{font-size:24px;font-weight:700;color:#f28500}
-        .progress-bar{width:100%;height:10px;border-radius:5px;background:#1a1a1a;border:1px solid #444;overflow:hidden;margin-bottom:16px}
-        .progress-fill{height:100%;background:#f28500;transition:width .1s}
         .qr-container{background:#1a1a1a;border-radius:8px;border:1px solid #444;padding:24px;text-align:center}
         #qrcode{margin:0 auto}
-        .version-footer{text-align:center;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-top:30px;padding-top:20px;border-top:1px solid #3a3a3a}
-        .about-link{text-align:center;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-top:6px}
-        .about-link button{background:none;border:none;color:inherit;cursor:pointer;opacity:.7;transition:opacity .2s}
-        .about-link button:hover{opacity:1}
-        .join-nostr-btn{background:#f28500;color:#1a1a1a;border:1px solid #f28500;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;text-decoration:none;display:inline-block;transition:all .2s}
-        .join-nostr-btn:hover{background:#ff9500;border-color:#ff9500;transform:translateY(-2px)}
-        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:20px;border-bottom:2px solid #3a3a3a}
-        .modal .join-nostr-btn{color:#1a1a1a!important}
-        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;padding:20px;z-index:50}
-        .modal-overlay.active{display:flex}
-        .modal{background:#2a2a2a;border:1px solid #444;border-radius:16px;padding:26px;max-width:380px;width:100%;position:relative}
-        .modal h3{margin-bottom:6px;color:#f5f5f5}
-        .modal p{color:#c0c0c0;font-size:14px;line-height:1.4}
-        .modal a{color:#f28500;text-decoration:none}
-        .modal a:hover{text-decoration:underline}
-        .modal-close{position:absolute;top:10px;right:14px;background:none;border:none;color:#999;font-size:20px;cursor:pointer}
-        .modal-close:hover{color:#fff}
+        #indexerStatus{font-size:11px;color:#888;margin-bottom:20px;text-align:center;display:none;}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="header-top">
-                <button class="hamburger-btn" onclick="toggleMenuModal(true)" aria-label="Menu">☰</button>
-                <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
+                <button class="hamburger-btn" onclick="alert('Menu not implemented')">☰</button>
+                <button class="join-nostr-btn" onclick="alert('Join Nostr modal not implemented')">Join Nostr</button>
             </div>
             <div class="logo">⚡ Nostrcoin Wallet</div>
             <div class="subtitle">NSTC Wallet • Nostr-native PoW</div>
@@ -103,28 +72,24 @@
 
         <div id="status"></div>
 
-        <div id="indexerStatus" style="font-size:11px;color:#888;margin-bottom:20px;text-align:center;display:none;">
-            Checking indexers...
-        </div>
+        <div id="indexerStatus">Checking indexer...</div>
 
         <div id="notConnected">
             <div class="section">
                 <div class="section-title">Connect Wallet</div>
                 <p style="text-align:center;color:#aaa;margin-bottom:12px;">Connect your Nostr wallet to get started</p>
-                <p style="text-align:center;color:#888;font-size:13px;margin-bottom:20px;">Don't have a Nostr account? <button onclick="toggleJoinNostrModal(true)" style="background:none;border:none;color:#f28500;cursor:pointer;text-decoration:underline;font-size:13px;">Learn more about Nostr</button></p>
-                <button class="button button-primary" id="connectExtensionBtn" onclick="connectWallet()">Connect Extension</button>
+                <button class="button button-primary" onclick="connectExtension()">Connect Extension</button>
                 <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Login with nsec</button>
                 <div id="nsecLoginForm" style="display:none;margin-top:20px;">
                     <div class="form-group">
                         <label class="form-label">Your nsec (private key)</label>
                         <input type="password" class="form-input" id="nsecInput" placeholder="nsec1...">
                         <p style="font-size:12px;color:#ff6b6b;margin-top:8px;">
-                            Your nsec is used locally in this browser to derive your key and sign events. It is never sent to the server.
-                            Only paste an nsec if you fully understand the risks.
+                            Your nsec is used locally in this browser only.
                         </p>
                     </div>
                     <button class="button button-primary" onclick="loginWithNsec()">Login with nsec</button>
-                    <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Cancel</button>
+                    <button class="button button-secondary" onclick="toggleNsecLogin()">Cancel</button>
                 </div>
             </div>
         </div>
@@ -133,7 +98,7 @@
             <div class="balance-card" style="background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:32px;margin-bottom:30px;text-align:center;">
                 <div style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Balance</div>
                 <div class="balance-amount" id="balanceAmount">0.00000000</div>
-                <div style="font-size:13px;color:#aaa;margin-bottom:12px;" id="balanceSubtext">Connected</div>
+                <div style="font-size:13px;color:#aaa;margin-bottom:12px;">Connected</div>
                 <div class="npub-display" id="npubDisplay">npub...</div>
             </div>
 
@@ -162,26 +127,14 @@
             <div id="mine" class="tab-content">
                 <div class="section">
                     <div class="section-title">⛏️ Mining</div>
-                    <p style="text-align:center;font-size:13px;color:#aaa;margin-bottom:20px;">Difficulty 4 • Reward 50 NSTC</p>
-                    <div class="mining-stats">
-                        <div class="stat-box">
-                            <div class="stat-label">Hash Rate</div>
-                            <div class="stat-value" id="hashRate">0 H/s</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-label">Attempts</div>
-                            <div class="stat-value" id="attempts">0</div>
-                        </div>
-                    </div>
-                    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-                    <button class="button button-primary" id="mineBtn" onclick="startMining()">Start Mining</button>
+                    <p style="text-align:center;color:#aaa;">Mining not implemented in this test version</p>
                 </div>
             </div>
 
             <div id="history" class="tab-content">
                 <div class="section">
                     <div class="section-title">📜 Transaction History</div>
-                    <div id="historyList">No transactions yet</div>
+                    <div id="historyList">Loading...</div>
                 </div>
             </div>
 
@@ -190,7 +143,7 @@
                     <div class="section-title">📱 Receive NSTC</div>
                     <div class="qr-container">
                         <div id="qrcode"></div>
-                        <p style="margin-top:16px;font-size:13px;color:#aaa;">Scan with any Nostr wallet to send NSTC</p>
+                        <p style="margin-top:16px;color:#aaa;">Your npub QR code</p>
                     </div>
                 </div>
             </div>
@@ -198,11 +151,9 @@
     </div>
 
     <script>
-        // === CONFIGURATION ===
-        const INDEXER_BASE = 'https://vm-182.lnvps.cloud';  // Public indexer
+        const INDEXER_BASE = 'https://vm-182.lnvps.cloud';
 
         const CONFIG = {
-            protocolTag: 'nostrcoin',
             relays: [
                 'wss://relay.damus.io',
                 'wss://nos.lol',
@@ -216,35 +167,29 @@
             npub: null,
             balance: 0,
             transactions: [],
-            mining: false,
             indexerStatus: {}
         };
 
-        let nsecPrivKeyHex = null;
         let usingNsecLogin = false;
         let originalNostr = null;
 
         function showStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
-            setTimeout(() => statusDiv.innerHTML = '', 8000);
+            const div = document.getElementById('status');
+            div.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => div.innerHTML = '', 8000);
         }
 
-        // === TAB SWITCHING ===
+        // Tab switching
         function switchTab(tabId) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-            // Show selected
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
 
-            // Special handling for QR tab
             if (tabId === 'qr' && state.npub) {
-                const qrDiv = document.getElementById('qrcode');
-                qrDiv.innerHTML = '';
-                new QRCode(qrDiv, {
+                const qr = document.getElementById('qrcode');
+                qr.innerHTML = '';
+                new QRCode(qr, {
                     text: state.npub,
                     width: 256,
                     height: 256,
@@ -254,25 +199,38 @@
             }
         }
 
-        // Attach click handlers to tab buttons
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => switchTab(btn.dataset.tab));
         });
 
-        // === INDEXER FETCHING ===
+        // Extension connect
+        async function connectExtension() {
+            if (!window.nostr) {
+                showStatus('No Nostr extension detected (e.g., Alby, nos2x)', 'error');
+                return;
+            }
+            try {
+                const pubkey = await window.nostr.getPublicKey();
+                state.pubkeyHex = pubkey;
+                await onWalletConnected('Extension');
+            } catch (e) {
+                showStatus('Extension rejected request', 'error');
+            }
+        }
+
+        // Fetchers
         async function fetchBalance() {
             if (!state.pubkeyHex) return;
             try {
-                const response = await fetch(`${INDEXER_BASE}/balance/${state.pubkeyHex}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    state.balance = data.balance || 0;
+                const res = await fetch(`${INDEXER_BASE}/balance/${state.pubkeyHex}`);
+                if (res.ok) {
+                    const json = await res.json();
+                    state.balance = json.balance || 0;
                     state.indexerStatus[INDEXER_BASE] = 'online';
                 } else {
                     state.indexerStatus[INDEXER_BASE] = 'error';
                 }
             } catch (e) {
-                console.warn('Balance fetch failed:', e);
                 state.indexerStatus[INDEXER_BASE] = 'offline';
             }
             updateUI();
@@ -281,136 +239,101 @@
         async function fetchHistory() {
             if (!state.pubkeyHex) return;
             try {
-                const response = await fetch(`${INDEXER_BASE}/history/${state.pubkeyHex}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    state.transactions = data.history || [];
+                const res = await fetch(`${INDEXER_BASE}/history/${state.pubkeyHex}`);
+                if (res.ok) {
+                    const json = await res.json();
+                    state.transactions = json.history || [];
                     state.indexerStatus[INDEXER_BASE] = 'online';
                 } else {
                     state.indexerStatus[INDEXER_BASE] = 'error';
                 }
             } catch (e) {
-                console.warn('History fetch failed:', e);
                 state.indexerStatus[INDEXER_BASE] = 'offline';
             }
             updateUI();
         }
 
         async function refreshWallet() {
-            showStatus('Refreshing balance & history...', 'info');
+            showStatus('Refreshing...', 'info');
             await Promise.all([fetchBalance(), fetchHistory()]);
-            showStatus('Refresh complete', 'success');
         }
 
-        async function onWalletConnected() {
+        async function onWalletConnected(source = 'nsec') {
+            state.npub = pubkeyToNpub(state.pubkeyHex);
+            document.getElementById('npubDisplay').textContent = state.npub;
             document.getElementById('notConnected').style.display = 'none';
             document.getElementById('connected').style.display = 'block';
             document.getElementById('refreshBtn').style.display = 'block';
             document.getElementById('indexerStatus').style.display = 'block';
 
-            state.npub = pubkeyToNpub(state.pubkeyHex);
-            document.getElementById('npubDisplay').textContent = state.npub;
-
-            // Generate QR for receive tab
-            switchTab('send'); // reset to send tab
-            if (state.npub) {
-                const qrDiv = document.getElementById('qrcode');
-                qrDiv.innerHTML = '';
-                new QRCode(qrDiv, {
-                    text: state.npub,
-                    width: 256,
-                    height: 256,
-                    colorDark: "#f5f5f5",
-                    colorLight: "#1a1a1a"
-                });
-            }
+            // Generate QR
+            switchTab('send');
+            const qr = document.getElementById('qrcode');
+            qr.innerHTML = '';
+            new QRCode(qr, {
+                text: state.npub,
+                width: 256,
+                height: 256,
+                colorDark: "#f5f5f5",
+                colorLight: "#1a1a1a"
+            });
 
             await refreshWallet();
+            showStatus(`Connected via ${source}`, 'success');
         }
 
-        // === SEND TRANSACTION ===
+        // Send
         async function sendTransaction() {
             if (!window.nostr) {
-                showStatus('No signer available', 'error');
+                showStatus('No signer', 'error');
                 return;
             }
 
-            const recipientInput = document.getElementById('recipientNpub').value.trim();
+            const recipientNpub = document.getElementById('recipientNpub').value.trim();
             const amountStr = document.getElementById('sendAmount').value.trim();
-
-            if (!recipientInput || !amountStr) {
-                showStatus('Please fill recipient and amount', 'error');
-                return;
-            }
+            if (!recipientNpub || !amountStr) return showStatus('Fill fields', 'error');
 
             const amount = parseFloat(amountStr);
-            if (isNaN(amount) || amount <= 0) {
-                showStatus('Invalid amount', 'error');
-                return;
-            }
+            if (amount <= 0) return showStatus('Invalid amount', 'error');
 
-            let recipientHex;
-            try {
-                recipientHex = npubToHex(recipientInput);
-                if (!recipientHex) throw new Error();
-            } catch (e) {
-                showStatus('Invalid recipient npub', 'error');
-                return;
-            }
-
-            if (recipientHex === state.pubkeyHex) {
-                showStatus('Cannot send to yourself', 'error');
-                return;
-            }
+            const recipientHex = npubToHex(recipientNpub);
+            if (!recipientHex) return showStatus('Invalid recipient npub', 'error');
+            if (recipientHex === state.pubkeyHex) return showStatus('Cannot send to self', 'error');
 
             try {
                 const event = {
                     kind: 30334,
                     created_at: Math.floor(Date.now() / 1000),
-                    tags: [
-                        ['p', recipientHex],
-                        ['amount', amount.toFixed(8)]
-                    ],
+                    tags: [['p', recipientHex], ['amount', amount.toFixed(8)]],
                     content: `Sending ${amount.toFixed(8)} NSTC`
                 };
 
-                console.log('Signing event:', event);
-                const signedEvent = await window.nostr.signEvent(event);
-                console.log('Signed event:', signedEvent);
+                const signed = await window.nostr.signEvent(event);
 
-                const pubs = CONFIG.relays.map(relay => {
-                    const ws = new WebSocket(relay);
-                    return new Promise((resolve) => {
-                        ws.onopen = () => {
-                            ws.send(JSON.stringify(['EVENT', signedEvent]));
-                            resolve(true);
-                        };
-                        ws.onerror = () => resolve(false);
-                        ws.onmessage = (msg) => {
-                            if (JSON.parse(msg.data)[1] === 'OK') resolve(true);
-                        };
-                        setTimeout(() => resolve(false), 8000);
-                    });
-                });
+                const pubs = CONFIG.relays.map(r => new Promise(resolve => {
+                    const ws = new WebSocket(r);
+                    ws.onopen = () => ws.send(JSON.stringify(['EVENT', signed]));
+                    ws.onmessage = m => m.data.includes('"OK"') && resolve(true);
+                    ws.onerror = () => resolve(false);
+                    setTimeout(() => resolve(false), 8000);
+                }));
 
-                console.log('Publishing to relays...');
                 const results = await Promise.all(pubs);
-                const success = results.some(r => r);
+                const ok = results.some(r => r);
 
-                if (success) {
-                    const shortId = signedEvent.id.substring(0, 12);
-                    showStatus(`✓ Sent ${amount.toFixed(8)} NSTC! Event ID: ${shortId}... (published)`, 'success');
-                    setTimeout(refreshWallet, 6000);
+                if (ok) {
+                    const shortId = signed.id.substring(0, 12);
+                    showStatus(`✓ Sent ${amount.toFixed(8)} NSTC! Event: ${shortId}...`, 'success');
+                    setTimeout(refreshWallet, 8000);
                 } else {
-                    showStatus('Failed to publish to any relay', 'error');
+                    showStatus('Failed to publish to relays', 'error');
                 }
-            } catch (error) {
-                console.error('Send failed:', error);
-                showStatus('Send failed: ' + (error.message || error), 'error');
+            } catch (e) {
+                showStatus('Send error: ' + e.message, 'error');
             }
         }
 
-        // === UI UPDATE FUNCTIONS ===
+        // UI updates
         function updateUI() {
             document.getElementById('balanceAmount').textContent = state.balance.toFixed(8);
             updateHistoryDisplay();
@@ -418,206 +341,86 @@
         }
 
         function updateHistoryDisplay() {
-            const list = document.getElementById('historyList') || document.createElement('div');
-            if (state.transactions.length === 0) {
-                list.innerHTML = '<p style="color:#888;text-align:center;">No transactions yet</p>';
+            const container = document.getElementById('historyList');
+            if (!state.transactions || state.transactions.length === 0) {
+                container.innerHTML = '<p style="color:#888;text-align:center;">No transactions yet</p>';
                 return;
             }
 
-            list.innerHTML = '';
+            container.innerHTML = '';
             state.transactions.forEach(tx => {
-                const item = document.createElement('div');
-                item.className = 'tx-item';
-
-                const isSent = tx.type === 'sent';
-                const isReceived = tx.type === 'received';
-                const isMined = tx.type === 'mined';
-
-                item.innerHTML = `
+                if (!tx || !tx.id) return; // safety
+                const div = document.createElement('div');
+                div.className = 'tx-item';
+                const sign = tx.type === 'sent' ? '-' : '+';
+                div.innerHTML = `
                     <div class="tx-header">
-                        <span class="tx-type ${isSent ? 'sent' : isReceived ? 'received' : 'mined'}">${tx.type.toUpperCase()}</span>
-                        <span class="tx-amount">${isSent ? '-' : '+'}${tx.amount.toFixed(8)} NSTC</span>
+                        <span class="tx-type ${tx.type}">${tx.type.toUpperCase()}</span>
+                        <span class="tx-amount">${sign}${tx.amount.toFixed(8)} NSTC</span>
                     </div>
                     <div class="tx-hash">ID: ${tx.id.substring(0, 16)}...</div>
                 `;
-                list.appendChild(item);
+                container.appendChild(div);
             });
         }
 
         function updateIndexerStatusDisplay() {
-            const statusDiv = document.getElementById('indexerStatus');
-            if (!statusDiv) return;
-
-            const statuses = Object.entries(state.indexerStatus).map(([url, status]) => {
-                const icon = status === 'online' ? '✓' : '✗';
-                const color = status === 'online' ? '#32CD32' : '#ff6b6b';
-                const shortUrl = url.replace('https://', '').split('/')[0];
-                return `<span style="color:${color}">${icon} ${shortUrl}</span>`;
+            const div = document.getElementById('indexerStatus');
+            const statuses = Object.entries(state.indexerStatus).map(([url, s]) => {
+                const icon = s === 'online' ? '✓' : '✗';
+                const color = s === 'online' ? '#32CD32' : '#ff6b6b';
+                return `<span style="color:${color}">${icon} indexer</span>`;
             });
-
-            statusDiv.innerHTML = statuses.length > 0 ? `Indexers: ${statuses.join(' • ')}` : 'Checking indexers...';
+            div.innerHTML = statuses.length ? `Indexer: ${statuses.join(' ')}` : 'Checking indexer...';
         }
 
-        // === NSEC LOGIN & SIGNER ===
+        // nsec login
         function toggleNsecLogin() {
             const form = document.getElementById('nsecLoginForm');
             form.style.display = form.style.display === 'block' ? 'none' : 'block';
             document.getElementById('nsecInput').value = '';
         }
 
-        function bytesToHex(bytes) {
-            return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        function createNsecSigner(privKeyHex) {
-            if (typeof NostrTools === 'undefined') throw new Error('nostr-tools not loaded');
-
-            const pubkey = NostrTools.getPublicKey(privKeyHex);
-
+        function createNsecSigner(priv) {
+            const pub = NostrTools.getPublicKey(priv);
             return {
-                getPublicKey: async () => pubkey,
-                signEvent: async (event) => {
-                    const ev = { ...event, pubkey };
-                    if (typeof NostrTools.finalizeEvent === 'function') {
-                        return NostrTools.finalizeEvent(ev, privKeyHex);
-                    }
-                    if (!ev.id) ev.id = NostrTools.getEventHash(ev);
-                    ev.sig = NostrTools.getSignature(ev, privKeyHex);
-                    return ev;
-                }
+                getPublicKey: async () => pub,
+                signEvent: async (e) => NostrTools.finalizeEvent({ ...e, pubkey: pub }, priv)
             };
         }
 
         async function loginWithNsec() {
             try {
                 const nsec = document.getElementById('nsecInput').value.trim();
-                if (!nsec || !nsec.startsWith('nsec1')) {
-                    showStatus('Invalid nsec', 'error');
-                    return;
-                }
+                if (!nsec.startsWith('nsec1')) throw new Error('Invalid nsec');
 
-                const decoded = NostrTools.nip19.decode(nsec);
-                if (decoded.type !== 'nsec') {
-                    showStatus('Not a valid nsec', 'error');
-                    return;
-                }
+                const { type, data } = NostrTools.nip19.decode(nsec);
+                if (type !== 'nsec') throw new Error('Not nsec');
 
-                const privKeyHex = typeof decoded.data === 'string' ? decoded.data : bytesToHex(decoded.data);
-                state.pubkeyHex = NostrTools.getPublicKey(privKeyHex);
+                const privHex = typeof data === 'string' ? data : Array.from(data).map(b => b.toString(16).padStart(2,'0')).join('');
+                state.pubkeyHex = NostrTools.getPublicKey(privHex);
 
-                if (!originalNostr && window.nostr) originalNostr = window.nostr;
-                window.nostr = createNsecSigner(privKeyHex);
+                if (window.nostr) originalNostr = window.nostr;
+                window.nostr = createNsecSigner(privHex);
                 usingNsecLogin = true;
 
-                await onWalletConnected();
+                await onWalletConnected('nsec');
                 toggleNsecLogin();
-                showStatus('Logged in with nsec', 'success');
-            } catch (error) {
-                console.error(error);
-                showStatus('nsec login failed: ' + (error.message || error), 'error');
-            }
-        }
-
-        function disconnectWallet() {
-            state.pubkeyHex = null;
-            state.npub = null;
-            state.balance = 0;
-            state.transactions = [];
-            state.indexerStatus = {};
-
-            if (usingNsecLogin) {
-                if (originalNostr) window.nostr = originalNostr;
-                else delete window.nostr;
-                usingNsecLogin = false;
-            }
-
-            document.getElementById('connected').style.display = 'none';
-            document.getElementById('notConnected').style.display = 'block';
-            document.getElementById('refreshBtn').style.display = 'none';
-            document.getElementById('indexerStatus').style.display = 'none';
-
-            showStatus('Wallet disconnected', 'info');
-        }
-
-        // === BECH32 HELPERS ===
-        const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
-
-        function hexToBytes(hex) {
-            const bytes = [];
-            for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substr(i, 2), 16));
-            return bytes;
-        }
-
-        function convertBits(data, fromBits, toBits, pad = true) {
-            let acc = 0, bits = 0, result = [], maxv = (1 << toBits) - 1, max_acc = (1 << (fromBits + toBits - 1)) - 1;
-            for (let value of data) {
-                acc = ((acc << fromBits) | value) & max_acc;
-                bits += fromBits;
-                while (bits >= toBits) {
-                    bits -= toBits;
-                    result.push((acc >> bits) & maxv);
-                }
-            }
-            if (pad && bits) result.push((acc << (toBits - bits)) & maxv);
-            return result;
-        }
-
-        function bech32Encode(hrp, data) {
-            const checksum = createChecksum(hrp, data);
-            return hrp + '1' + data.concat(checksum).map(v => CHARSET[v]).join('');
-        }
-
-        function createChecksum(hrp, data) {
-            const values = hrpExpand(hrp).concat(data).concat([0,0,0,0,0,0]);
-            let polymodResult = polymod(values) ^ 1;
-            const checksum = [];
-            for (let i = 0; i < 6; i++) checksum.push((polymodResult >> 5 * (5 - i)) & 31);
-            return checksum;
-        }
-
-        function polymod(values) {
-            const GENERATORS = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
-            let chk = 1;
-            for (let v of values) {
-                let top = chk >> 25;
-                chk = (chk & 0x1ffffff) << 5 ^ v;
-                for (let i = 0; i < 5; i++) if ((top >> i) & 1) chk ^= GENERATORS[i];
-            }
-            return chk;
-        }
-
-        function hrpExpand(hrp) {
-            return [...hrp].map(c => c.charCodeAt(0) >> 5).concat(0).concat([...hrp].map(c => c.charCodeAt(0) & 31));
-        }
-
-        function pubkeyToNpub(hex) {
-            const bytes = hexToBytes(hex);
-            const words = convertBits(bytes, 8, 5);
-            return bech32Encode('npub', words);
-        }
-
-        function npubToHex(npub) {
-            if (!npub.startsWith('npub1')) return null;
-            try {
-                const { data } = NostrTools.nip19.decode(npub);
-                return typeof data === 'string' ? data : bytesToHex(data);
             } catch (e) {
-                return null;
+                showStatus('nsec error: ' + e.message, 'error');
             }
         }
 
-        // Initial QR for receive tab (in case someone connects via extension later)
-        document.addEventListener('DOMContentLoaded', () => {
-            if (state.npub) {
-                new QRCode(document.getElementById('qrcode'), {
-                    text: state.npub,
-                    width: 256,
-                    height: 256,
-                    colorDark: "#f5f5f5",
-                    colorLight: "#1a1a1a"
-                });
-            }
-        });
+        // Bech32 helpers
+        const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+        function hexToBytes(h) { const b=[]; for(let i=0;i<h.length;i+=2) b.push(parseInt(h.substr(i,2),16)); return b; }
+        function convertBits(d,f,t,p=true){let a=0,b=0,r=[],m=(1<<t)-1; for(let v of d){a=(a<<f|v)&((1<<(f+t-1))-1);b+=f;while(b>=t){b-=t;r.push((a>>b)&m)}} if(p&&b)r.push((a<<(t-b))&m);return r;}
+        function bech32Encode(h,d){const c=createChecksum(h,d);return h+'1'+d.concat(c).map(v=>CHARSET[v]).join('');}
+        function createChecksum(h,d){const v=hrpExpand(h).concat(d).concat([0,0,0,0,0,0]);let p=polymod(v)^1;const c=[];for(let i=0;i<6;i++)c.push((p>>5*(5-i))&31);return c;}
+        function polymod(v){const G=[0x3b6a57b2,0x26508e6d,0x1ea119fa,0x3d4233dd,0x2a1462b3];let c=1;for(let x of v){let t=c>>25;c=(c&0x1ffffff)<<5^x;for(let i=0;i<5;i++)if((t>>i)&1)c^=G[i]}return c;}
+        function hrpExpand(h){return [...h].flatMap(c=>[(c.charCodeAt(0)>>5),(c.charCodeAt(0)&31)]).concat(0);}
+        function pubkeyToNpub(h){return bech32Encode('npub',convertBits(hexToBytes(h),8,5));}
+        function npubToHex(n){try{const {data}=NostrTools.nip19.decode(n);return typeof data==='string'?data:Array.from(data).map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){return null;}}
     </script>
 </body>
 </html>
