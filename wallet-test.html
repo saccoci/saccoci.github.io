@@ -138,10 +138,10 @@
             </div>
 
             <div class="tab-buttons">
-                <button class="tab-btn active" onclick="switchTab('send')">💸 Send</button>
-                <button class="tab-btn" onclick="switchTab('mine')">⛏️ Mine</button>
-                <button class="tab-btn" onclick="switchTab('history')">📜 History</button>
-                <button class="tab-btn" onclick="switchTab('qr')">📱 Receive</button>
+                <button class="tab-btn active" data-tab="send">💸 Send</button>
+                <button class="tab-btn" data-tab="mine">⛏️ Mine</button>
+                <button class="tab-btn" data-tab="history">📜 History</button>
+                <button class="tab-btn" data-tab="qr">📱 Receive</button>
             </div>
 
             <div id="send" class="tab-content active">
@@ -181,7 +181,7 @@
             <div id="history" class="tab-content">
                 <div class="section">
                     <div class="section-title">📜 Transaction History</div>
-                    <!-- history items inserted here -->
+                    <div id="historyList">No transactions yet</div>
                 </div>
             </div>
 
@@ -230,6 +230,35 @@
             setTimeout(() => statusDiv.innerHTML = '', 8000);
         }
 
+        // === TAB SWITCHING ===
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            // Show selected
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+
+            // Special handling for QR tab
+            if (tabId === 'qr' && state.npub) {
+                const qrDiv = document.getElementById('qrcode');
+                qrDiv.innerHTML = '';
+                new QRCode(qrDiv, {
+                    text: state.npub,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#f5f5f5",
+                    colorLight: "#1a1a1a"
+                });
+            }
+        }
+
+        // Attach click handlers to tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+        });
+
         // === INDEXER FETCHING ===
         async function fetchBalance() {
             if (!state.pubkeyHex) return;
@@ -274,17 +303,28 @@
         }
 
         async function onWalletConnected() {
-            // Show connected UI
             document.getElementById('notConnected').style.display = 'none';
             document.getElementById('connected').style.display = 'block';
             document.getElementById('refreshBtn').style.display = 'block';
             document.getElementById('indexerStatus').style.display = 'block';
 
-            // Update npub display
             state.npub = pubkeyToNpub(state.pubkeyHex);
             document.getElementById('npubDisplay').textContent = state.npub;
 
-            // Initial fetch
+            // Generate QR for receive tab
+            switchTab('send'); // reset to send tab
+            if (state.npub) {
+                const qrDiv = document.getElementById('qrcode');
+                qrDiv.innerHTML = '';
+                new QRCode(qrDiv, {
+                    text: state.npub,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#f5f5f5",
+                    colorLight: "#1a1a1a"
+                });
+            }
+
             await refreshWallet();
         }
 
@@ -338,7 +378,6 @@
                 const signedEvent = await window.nostr.signEvent(event);
                 console.log('Signed event:', signedEvent);
 
-                // Publish to relays
                 const pubs = CONFIG.relays.map(relay => {
                     const ws = new WebSocket(relay);
                     return new Promise((resolve) => {
@@ -348,23 +387,20 @@
                         };
                         ws.onerror = () => resolve(false);
                         ws.onmessage = (msg) => {
-                            if (msg.data.includes('"OK"')) resolve(true);
+                            if (JSON.parse(msg.data)[1] === 'OK') resolve(true);
                         };
-                        setTimeout(() => resolve(false), 5000);
+                        setTimeout(() => resolve(false), 8000);
                     });
                 });
 
                 console.log('Publishing to relays...');
                 const results = await Promise.all(pubs);
                 const success = results.some(r => r);
-                console.log('Published to relays:', success);
 
                 if (success) {
                     const shortId = signedEvent.id.substring(0, 12);
-                    showStatus(`✓ Sent ${amount} NSTC! Event ID: ${shortId}... (published to relays)`, 'success');
-
-                    // Auto-refresh after a few seconds
-                    setTimeout(refreshWallet, 5000);
+                    showStatus(`✓ Sent ${amount.toFixed(8)} NSTC! Event ID: ${shortId}... (published)`, 'success');
+                    setTimeout(refreshWallet, 6000);
                 } else {
                     showStatus('Failed to publish to any relay', 'error');
                 }
@@ -374,44 +410,59 @@
             }
         }
 
-        // === REST OF YOUR ORIGINAL SCRIPT (unchanged below) ===
-        // (All the remaining functions: updateUI, toggleNsecLogin, createNsecSigner, loginWithNsec, disconnectWallet, etc.)
-        // For brevity, they are the same as in your original file.
-
+        // === UI UPDATE FUNCTIONS ===
         function updateUI() {
             document.getElementById('balanceAmount').textContent = state.balance.toFixed(8);
             updateHistoryDisplay();
             updateIndexerStatusDisplay();
         }
 
+        function updateHistoryDisplay() {
+            const list = document.getElementById('historyList') || document.createElement('div');
+            if (state.transactions.length === 0) {
+                list.innerHTML = '<p style="color:#888;text-align:center;">No transactions yet</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            state.transactions.forEach(tx => {
+                const item = document.createElement('div');
+                item.className = 'tx-item';
+
+                const isSent = tx.type === 'sent';
+                const isReceived = tx.type === 'received';
+                const isMined = tx.type === 'mined';
+
+                item.innerHTML = `
+                    <div class="tx-header">
+                        <span class="tx-type ${isSent ? 'sent' : isReceived ? 'received' : 'mined'}">${tx.type.toUpperCase()}</span>
+                        <span class="tx-amount">${isSent ? '-' : '+'}${tx.amount.toFixed(8)} NSTC</span>
+                    </div>
+                    <div class="tx-hash">ID: ${tx.id.substring(0, 16)}...</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
         function updateIndexerStatusDisplay() {
             const statusDiv = document.getElementById('indexerStatus');
             if (!statusDiv) return;
-            
+
             const statuses = Object.entries(state.indexerStatus).map(([url, status]) => {
                 const icon = status === 'online' ? '✓' : '✗';
                 const color = status === 'online' ? '#32CD32' : '#ff6b6b';
-                const shortUrl = url.replace('https://', '').replace('http://', '').split('/')[0];
+                const shortUrl = url.replace('https://', '').split('/')[0];
                 return `<span style="color:${color}">${icon} ${shortUrl}</span>`;
             });
-            
-            if (statuses.length > 0) {
-                statusDiv.innerHTML = `Indexers: ${statuses.join(' • ')}`;
-            } else {
-                statusDiv.innerHTML = 'No indexers configured';
-            }
+
+            statusDiv.innerHTML = statuses.length > 0 ? `Indexers: ${statuses.join(' • ')}` : 'Checking indexers...';
         }
 
+        // === NSEC LOGIN & SIGNER ===
         function toggleNsecLogin() {
             const form = document.getElementById('nsecLoginForm');
-            const input = document.getElementById('nsecInput');
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'block';
-                if (input) input.value = '';
-            } else {
-                form.style.display = 'none';
-                if (input) input.value = '';
-            }
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+            document.getElementById('nsecInput').value = '';
         }
 
         function bytesToHex(bytes) {
@@ -419,140 +470,50 @@
         }
 
         function createNsecSigner(privKeyHex) {
-            if (typeof NostrTools === 'undefined') {
-                throw new Error('nostr-tools library not loaded; cannot use nsec login');
-            }
+            if (typeof NostrTools === 'undefined') throw new Error('nostr-tools not loaded');
 
             const pubkey = NostrTools.getPublicKey(privKeyHex);
-            console.log('Created nsec signer with pubkey:', pubkey);
 
             return {
                 getPublicKey: async () => pubkey,
                 signEvent: async (event) => {
-                    try {
-                        const ev = { ...event };
-                        ev.pubkey = ev.pubkey || pubkey;
-                        
-                        console.log('Signing event with nsec signer:', ev);
-
-                        if (typeof NostrTools.finalizeEvent === 'function') {
-                            try {
-                                const signed = NostrTools.finalizeEvent(ev, privKeyHex);
-                                console.log('finalizeEvent succeeded:', signed);
-                                if (signed && signed.id && signed.sig) {
-                                    return signed;
-                                }
-                            } catch (e) {
-                                console.warn('finalizeEvent failed, trying alternatives:', e);
-                            }
-                        }
-
-                        if (typeof NostrTools.getEventHash === 'function' && typeof NostrTools.getSignature === 'function') {
-                            if (!ev.id) {
-                                ev.id = NostrTools.getEventHash(ev);
-                            }
-                            ev.sig = NostrTools.getSignature(ev, privKeyHex);
-                            console.log('getEventHash + getSignature succeeded:', ev);
-                            if (ev.id && ev.sig) {
-                                return ev;
-                            }
-                        }
-
-                        if (typeof NostrTools.getEventHash === 'function') {
-                            if (!ev.id) {
-                                ev.id = NostrTools.getEventHash(ev);
-                            }
-                        }
-                        
-                        if (typeof NostrTools.signEvent === 'function') {
-                            ev.sig = NostrTools.signEvent(ev, privKeyHex);
-                            console.log('getEventHash + signEvent succeeded:', ev);
-                            if (ev.id && ev.sig) {
-                                return ev;
-                            }
-                        }
-
-                        const available = [];
-                        if (typeof NostrTools.finalizeEvent === 'function') available.push('finalizeEvent');
-                        if (typeof NostrTools.getEventHash === 'function') available.push('getEventHash');
-                        if (typeof NostrTools.getSignature === 'function') available.push('getSignature');
-                        if (typeof NostrTools.signEvent === 'function') available.push('signEvent');
-                        
-                        throw new Error(`Cannot sign event. Available functions: ${available.join(', ')}.`);
-                    } catch (error) {
-                        console.error('Error in nsec signEvent:', error);
-                        throw error;
+                    const ev = { ...event, pubkey };
+                    if (typeof NostrTools.finalizeEvent === 'function') {
+                        return NostrTools.finalizeEvent(ev, privKeyHex);
                     }
+                    if (!ev.id) ev.id = NostrTools.getEventHash(ev);
+                    ev.sig = NostrTools.getSignature(ev, privKeyHex);
+                    return ev;
                 }
             };
         }
 
         async function loginWithNsec() {
             try {
-                const input = document.getElementById('nsecInput');
-                const nsec = (input.value || '').trim();
-
-                if (!nsec) {
-                    showStatus('Please paste your nsec', 'error');
+                const nsec = document.getElementById('nsecInput').value.trim();
+                if (!nsec || !nsec.startsWith('nsec1')) {
+                    showStatus('Invalid nsec', 'error');
                     return;
                 }
 
-                if (!nsec.startsWith('nsec1')) {
-                    showStatus('Invalid nsec format (must start with nsec1)', 'error');
+                const decoded = NostrTools.nip19.decode(nsec);
+                if (decoded.type !== 'nsec') {
+                    showStatus('Not a valid nsec', 'error');
                     return;
                 }
 
-                if (typeof NostrTools === 'undefined' || !NostrTools.nip19) {
-                    showStatus('nostr-tools not available; cannot use nsec login.', 'error');
-                    return;
-                }
+                const privKeyHex = typeof decoded.data === 'string' ? decoded.data : bytesToHex(decoded.data);
+                state.pubkeyHex = NostrTools.getPublicKey(privKeyHex);
 
-                let decoded;
-                try {
-                    decoded = NostrTools.nip19.decode(nsec);
-                } catch (e) {
-                    console.error('Failed to decode nsec:', e);
-                    showStatus('Failed to decode nsec. Please check it and try again.', 'error');
-                    return;
-                }
-
-                if (!decoded || decoded.type !== 'nsec' || !decoded.data) {
-                    showStatus('Provided key is not a valid nsec.', 'error');
-                    return;
-                }
-
-                let privKeyHex;
-                if (typeof decoded.data === 'string') {
-                    privKeyHex = decoded.data;
-                } else if (decoded.data instanceof Uint8Array || Array.isArray(decoded.data)) {
-                    privKeyHex = bytesToHex(decoded.data);
-                } else {
-                    showStatus('Unsupported nsec format.', 'error');
-                    return;
-                }
-
-                if (!/^[0-9a-fA-F]{64}$/.test(privKeyHex)) {
-                    showStatus('Decoded nsec did not produce a valid 32-byte private key.', 'error');
-                    return;
-                }
-
-                nsecPrivKeyHex = privKeyHex;
-                const pubkeyHex = NostrTools.getPublicKey(privKeyHex);
-                state.pubkeyHex = pubkeyHex;
-
-                if (!originalNostr && typeof window.nostr !== 'undefined') {
-                    originalNostr = window.nostr;
-                }
-
+                if (!originalNostr && window.nostr) originalNostr = window.nostr;
                 window.nostr = createNsecSigner(privKeyHex);
                 usingNsecLogin = true;
 
                 await onWalletConnected();
                 toggleNsecLogin();
-
-                showStatus('Logged in with nsec. Signing is done locally in your browser.', 'success');
+                showStatus('Logged in with nsec', 'success');
             } catch (error) {
-                console.error('nsec login failed:', error);
+                console.error(error);
                 showStatus('nsec login failed: ' + (error.message || error), 'error');
             }
         }
@@ -562,20 +523,12 @@
             state.npub = null;
             state.balance = 0;
             state.transactions = [];
-            state.mining = false;
+            state.indexerStatus = {};
 
             if (usingNsecLogin) {
-                if (originalNostr) {
-                    window.nostr = originalNostr;
-                } else {
-                    try {
-                        delete window.nostr;
-                    } catch (e) {
-                        window.nostr = undefined;
-                    }
-                }
+                if (originalNostr) window.nostr = originalNostr;
+                else delete window.nostr;
                 usingNsecLogin = false;
-                nsecPrivKeyHex = null;
             }
 
             document.getElementById('connected').style.display = 'none';
@@ -586,50 +539,18 @@
             showStatus('Wallet disconnected', 'info');
         }
 
-        function pubkeyToNpub(hexPubkey) {
-            const bytes = hexToBytes(hexPubkey);
-            const converted = convertBits(bytes, 8, 5);
-            if (!converted) throw new Error('Failed to encode npub');
-            return bech32Encode('npub', converted);
-        }
-
-        function npubToHex(npub) {
-            try {
-                if (!npub.startsWith('npub1')) return null;
-                const data = npub.substring(5);
-                const decoded = [];
-                for (let i = 0; i < data.length - 6; i++) {
-                    const idx = CHARSET.indexOf(data[i]);
-                    if (idx === -1) return null;
-                    decoded.push(idx);
-                }
-                const converted = convertBits(decoded, 5, 8, false);
-                if (!converted) return null;
-                return converted.map(b => b.toString(16).padStart(2, '0')).join('');
-            } catch (e) {
-                console.error('Failed to decode npub:', e);
-                return null;
-            }
-        }
-
+        // === BECH32 HELPERS ===
         const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 
         function hexToBytes(hex) {
             const bytes = [];
-            for (let i = 0; i < hex.length; i += 2) {
-                bytes.push(parseInt(hex.substr(i, 2), 16));
-            }
+            for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substr(i, 2), 16));
             return bytes;
         }
 
         function convertBits(data, fromBits, toBits, pad = true) {
-            let acc = 0;
-            let bits = 0;
-            const result = [];
-            const maxv = (1 << toBits) - 1;
-            const max_acc = (1 << (fromBits + toBits - 1)) - 1;
+            let acc = 0, bits = 0, result = [], maxv = (1 << toBits) - 1, max_acc = (1 << (fromBits + toBits - 1)) - 1;
             for (let value of data) {
-                if (value < 0 || (value >> fromBits)) return null;
                 acc = ((acc << fromBits) | value) & max_acc;
                 bits += fromBits;
                 while (bits >= toBits) {
@@ -637,52 +558,66 @@
                     result.push((acc >> bits) & maxv);
                 }
             }
-            if (pad) {
-                if (bits) result.push((acc << (toBits - bits)) & maxv);
-            } else if (bits >= fromBits || ((acc << (toBits - bits)) & maxv)) {
-                return null;
-            }
+            if (pad && bits) result.push((acc << (toBits - bits)) & maxv);
             return result;
         }
 
         function bech32Encode(hrp, data) {
             const checksum = createChecksum(hrp, data);
-            const values = data.concat(checksum);
-            return hrp + '1' + values.map(v => CHARSET[v]).join('');
+            return hrp + '1' + data.concat(checksum).map(v => CHARSET[v]).join('');
         }
 
         function createChecksum(hrp, data) {
-            const values = hrpExpand(hrp).concat(data);
-            const polymodResult = polymod(values.concat([0, 0, 0, 0, 0, 0])) ^ 1;
+            const values = hrpExpand(hrp).concat(data).concat([0,0,0,0,0,0]);
+            let polymodResult = polymod(values) ^ 1;
             const checksum = [];
-            for (let p = 0; p < 6; ++p) {
-                checksum.push((polymodResult >> 5 * (5 - p)) & 31);
-            }
+            for (let i = 0; i < 6; i++) checksum.push((polymodResult >> 5 * (5 - i)) & 31);
             return checksum;
         }
 
         function polymod(values) {
             const GENERATORS = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
             let chk = 1;
-            for (let p = 0; p < values.length; ++p) {
-                const top = chk >> 25;
-                chk = (chk & 0x1ffffff) << 5 ^ values[p];
-                for (let i = 0; i < 5; i++) {
-                    if ((top >> i) & 1) {
-                        chk ^= GENERATORS[i];
-                    }
-                }
+            for (let v of values) {
+                let top = chk >> 25;
+                chk = (chk & 0x1ffffff) << 5 ^ v;
+                for (let i = 0; i < 5; i++) if ((top >> i) & 1) chk ^= GENERATORS[i];
             }
             return chk;
         }
 
         function hrpExpand(hrp) {
-            const ret = [];
-            for (let i = 0; i < hrp.length; i++) ret.push(hrp.charCodeAt(i) >> 5);
-            ret.push(0);
-            for (let i = 0; i < hrp.length; i++) ret.push(hrp.charCodeAt(i) & 31);
-            return ret;
+            return [...hrp].map(c => c.charCodeAt(0) >> 5).concat(0).concat([...hrp].map(c => c.charCodeAt(0) & 31));
         }
+
+        function pubkeyToNpub(hex) {
+            const bytes = hexToBytes(hex);
+            const words = convertBits(bytes, 8, 5);
+            return bech32Encode('npub', words);
+        }
+
+        function npubToHex(npub) {
+            if (!npub.startsWith('npub1')) return null;
+            try {
+                const { data } = NostrTools.nip19.decode(npub);
+                return typeof data === 'string' ? data : bytesToHex(data);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Initial QR for receive tab (in case someone connects via extension later)
+        document.addEventListener('DOMContentLoaded', () => {
+            if (state.npub) {
+                new QRCode(document.getElementById('qrcode'), {
+                    text: state.npub,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#f5f5f5",
+                    colorLight: "#1a1a1a"
+                });
+            }
+        });
     </script>
 </body>
 </html>
