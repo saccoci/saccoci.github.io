@@ -464,8 +464,22 @@
                     content: `Sending ${amount} NSTC`
                 };
 
-                const signedEvent = await window.nostr.signEvent(event);
+                console.log('Signing event:', event);
+                let signedEvent;
+                try {
+                    signedEvent = await window.nostr.signEvent(event);
+                    console.log('Signed event:', signedEvent);
+                    if (!signedEvent || !signedEvent.id || !signedEvent.sig) {
+                        throw new Error('Event signing failed: missing id or sig');
+                    }
+                } catch (signError) {
+                    console.error('Error signing event:', signError);
+                    throw new Error('Failed to sign transaction: ' + (signError.message || signError));
+                }
+
+                console.log('Publishing to relays...');
                 await publishToRelays(signedEvent);
+                console.log('Published to relays');
 
                 document.getElementById('recipientNpub').value = '';
                 document.getElementById('sendAmount').value = '';
@@ -783,33 +797,70 @@
             }
 
             const pubkey = NostrTools.getPublicKey(privKeyHex);
+            console.log('Created nsec signer with pubkey:', pubkey);
 
             return {
                 getPublicKey: async () => pubkey,
                 signEvent: async (event) => {
-                    const ev = { ...event };
-                    // Ensure pubkey is present
-                    ev.pubkey = ev.pubkey || pubkey;
+                    try {
+                        const ev = { ...event };
+                        // Ensure pubkey is present
+                        ev.pubkey = ev.pubkey || pubkey;
+                        
+                        console.log('Signing event with nsec signer:', ev);
 
-                    // Prefer finalizeEvent if available (nostr-tools v2+)
-                    if (typeof NostrTools.finalizeEvent === 'function') {
-                        // finalizeEvent will compute id and sig
-                        return NostrTools.finalizeEvent(ev, privKeyHex);
-                    }
-
-                    // Fallback to legacy getEventHash + signEvent if present
-                    if (typeof NostrTools.getEventHash === 'function') {
-                        if (!ev.id) {
-                            ev.id = NostrTools.getEventHash(ev);
+                        // Method 1: Try finalizeEvent (nostr-tools v2+)
+                        if (typeof NostrTools.finalizeEvent === 'function') {
+                            try {
+                                const signed = NostrTools.finalizeEvent(ev, privKeyHex);
+                                console.log('finalizeEvent succeeded:', signed);
+                                if (signed && signed.id && signed.sig) {
+                                    return signed;
+                                }
+                            } catch (e) {
+                                console.warn('finalizeEvent failed, trying alternatives:', e);
+                            }
                         }
-                    }
 
-                    if (typeof NostrTools.signEvent === 'function') {
-                        ev.sig = NostrTools.signEvent(ev, privKeyHex);
-                        return ev;
-                    }
+                        // Method 2: Use getEventHash + getSignature (most reliable)
+                        if (typeof NostrTools.getEventHash === 'function' && typeof NostrTools.getSignature === 'function') {
+                            if (!ev.id) {
+                                ev.id = NostrTools.getEventHash(ev);
+                            }
+                            ev.sig = NostrTools.getSignature(ev, privKeyHex);
+                            console.log('getEventHash + getSignature succeeded:', ev);
+                            if (ev.id && ev.sig) {
+                                return ev;
+                            }
+                        }
 
-                    throw new Error('nostr-tools does not expose finalizeEvent or signEvent; cannot sign event');
+                        // Method 3: Use getEventHash + signEvent (legacy)
+                        if (typeof NostrTools.getEventHash === 'function') {
+                            if (!ev.id) {
+                                ev.id = NostrTools.getEventHash(ev);
+                            }
+                        }
+                        
+                        if (typeof NostrTools.signEvent === 'function') {
+                            ev.sig = NostrTools.signEvent(ev, privKeyHex);
+                            console.log('getEventHash + signEvent succeeded:', ev);
+                            if (ev.id && ev.sig) {
+                                return ev;
+                            }
+                        }
+
+                        // If we get here, nothing worked
+                        const available = [];
+                        if (typeof NostrTools.finalizeEvent === 'function') available.push('finalizeEvent');
+                        if (typeof NostrTools.getEventHash === 'function') available.push('getEventHash');
+                        if (typeof NostrTools.getSignature === 'function') available.push('getSignature');
+                        if (typeof NostrTools.signEvent === 'function') available.push('signEvent');
+                        
+                        throw new Error(`Cannot sign event. Available functions: ${available.join(', ')}. Event: ${JSON.stringify(ev)}`);
+                    } catch (error) {
+                        console.error('Error in nsec signEvent:', error);
+                        throw error;
+                    }
                 }
             };
         }
