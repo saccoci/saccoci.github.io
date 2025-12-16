@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <!-- Nostrcoin Wallet v0.0.9 -->
+    <head>
+    <!-- Nostrcoin Wallet v0.1.0 login with nsec, shows correct balance, cannot send NSTC-->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin (NSTC) Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
+    <!-- Nostr / secp256k1 helper (provides signing + key utils) -->
+    <script src="https://unpkg.com/nostr-tools@2.7.0/lib/nostr.bundle.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a1a;color:#f5f5f5;min-height:100vh;padding:20px}
@@ -29,6 +31,7 @@
         .button{width:100%;padding:13px;border-radius:8px;font-size:14px;font-weight:600;border:1px solid transparent;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-bottom:12px}
         .button-primary{background:#32CD32;color:#1a1a1a;border-color:#32CD32}
         .button-primary:hover{background:#28b428;border-color:#28b428;transform:translateY(-2px)}
+        #connectExtensionBtn.button-primary:hover{background:#f28500;border-color:#f28500}
         .button-secondary{background:#2a2a2a;color:#f28500;border:1px solid #f28500}
         .button-secondary:hover{background:#f28500;color:#1a1a1a}
         .refresh-btn{background:#32CD32;color:#1a1a1a;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;margin-bottom:20px}
@@ -109,15 +112,18 @@
                 <div class="section-title">Connect Wallet</div>
                 <p style="text-align:center;color:#aaa;margin-bottom:12px;">Connect your Nostr wallet to get started</p>
                 <p style="text-align:center;color:#888;font-size:13px;margin-bottom:20px;">Don't have a Nostr account? <button onclick="toggleJoinNostrModal(true)" style="background:none;border:none;color:#f28500;cursor:pointer;text-decoration:underline;font-size:13px;">Learn more about Nostr</button></p>
-                <button class="button button-primary" onclick="connectWallet()">Connect Extension</button>
-                <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Login with nsec (Demo)</button>
+                <button class="button button-primary" id="connectExtensionBtn" onclick="connectWallet()">Connect Extension</button>
+                <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Login with nsec</button>
                 <div id="nsecLoginForm" style="display:none;margin-top:20px;">
                     <div class="form-group">
                         <label class="form-label">Your nsec (private key)</label>
                         <input type="password" class="form-input" id="nsecInput" placeholder="nsec1...">
-                        <p style="font-size:12px;color:#ff6b6b;margin-top:8px;">Demo only – never share your nsec</p>
+                        <p style="font-size:12px;color:#ff6b6b;margin-top:8px;">
+                            Your nsec is used locally in this browser to derive your key and sign events. It is never sent to the server.
+                            Only paste an nsec if you fully understand the risks.
+                        </p>
                     </div>
-                    <button class="button button-primary" onclick="loginWithNsec()">Login (Demo)</button>
+                    <button class="button button-primary" onclick="loginWithNsec()">Login with nsec</button>
                     <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Cancel</button>
                 </div>
             </div>
@@ -195,7 +201,7 @@
         </div>
 
         <div class="version-footer">
-            Nostrcoin Wallet v0.0.9
+            Nostrcoin Wallet v0.1.0
         </div>
 
         <div class="about-link">
@@ -211,7 +217,8 @@
             <a href="https://saccoci.github.io/explorer.html" target="_blank" class="modal-link">Explorer</a>
             <a href="https://saccoci.github.io/wallet.html" target="_blank" class="modal-link">Wallet</a>
             <a href="https://nostrcoin.boards.net" target="_blank" class="modal-link">Forum</a>
-            <a href="https://github.com/saccoci/saccoci.github.io" target="_blank" class="modal-link">GitHub Repo</a>
+            <a href="https://github.com/saccoci" target="_blank" class="modal-link">GitHub Repo</a>
+            <button class="button button-secondary" style="margin-top:8px;" onclick="toggleMenuModal(false)">Close</button>
         </div>
     </div>
 
@@ -241,7 +248,7 @@
         <div class="modal">
             <button class="modal-close" onclick="toggleAboutModal(false)" aria-label="Close">×</button>
             <h3>About Nostrcoin</h3>
-            <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.0.9</p>
+            <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.1.0</p>
             <p style="margin-top:12px;">
                 Nostrcoin is an experimental, Nostr-native proof-of-work cryptocurrency. It is for education and fun only. This wallet allows you to send, receive, and mine NSTC.
             </p>
@@ -301,6 +308,11 @@
             indexerStatus: {} // Track which indexers are responding
         };
 
+        // Keep track of whether we're using an in-page nsec signer
+        let originalNostr = null;
+        let usingNsecLogin = false;
+        let nsecPrivKeyHex = null;
+
         function toggleMenuModal(show) {
             const modal = document.getElementById('menuModal');
             if (show) {
@@ -359,34 +371,44 @@
                 state.pubkeyHex = pubkeyHex;
                 state.npub = pubkeyToNpub(pubkeyHex);
 
-                document.getElementById('npubDisplay').textContent = state.npub;
-                document.getElementById('balanceSubtext').textContent = 'Connected to Nostr';
-
-                document.getElementById('notConnected').style.display = 'none';
-                document.getElementById('connected').style.display = 'block';
-                document.getElementById('refreshBtn').style.display = 'block';
-                document.getElementById('indexerStatus').style.display = 'block';
-
-                await fetchBalance();
-                await fetchHistory();
-                updateUI();
-
-                try {
-                    if (typeof QRCode !== 'undefined') {
-                        document.getElementById('qrcode').innerHTML = '';
-                        new QRCode(document.getElementById('qrcode'), {
-                            text: 'nostr:' + state.npub,
-                            width: 200,
-                            height: 200,
-                            colorDark: "#f5f5f5",
-                            colorLight: "#1a1a1a"
-                        });
-                    }
-                } catch (e) {
-                    console.error('QR code generation failed:', e);
-                }
+                await onWalletConnected();
             } catch (error) {
                 showStatus('Failed to connect: ' + error.message, 'error');
+            }
+        }
+
+        async function onWalletConnected() {
+            if (!state.pubkeyHex) {
+                throw new Error('No pubkey set on state');
+            }
+
+            state.npub = state.npub || pubkeyToNpub(state.pubkeyHex);
+
+            document.getElementById('npubDisplay').textContent = state.npub;
+            document.getElementById('balanceSubtext').textContent = 'Connected to Nostr';
+
+            document.getElementById('notConnected').style.display = 'none';
+            document.getElementById('connected').style.display = 'block';
+            document.getElementById('refreshBtn').style.display = 'block';
+            document.getElementById('indexerStatus').style.display = 'block';
+
+            await fetchBalance();
+            await fetchHistory();
+            updateUI();
+
+            try {
+                if (typeof QRCode !== 'undefined') {
+                    document.getElementById('qrcode').innerHTML = '';
+                    new QRCode(document.getElementById('qrcode'), {
+                        text: 'nostr:' + state.npub,
+                        width: 200,
+                        height: 200,
+                        colorDark: "#f5f5f5",
+                        colorLight: "#1a1a1a"
+                    });
+                }
+            } catch (e) {
+                console.error('QR code generation failed:', e);
             }
         }
 
@@ -442,8 +464,22 @@
                     content: `Sending ${amount} NSTC`
                 };
 
-                const signedEvent = await window.nostr.signEvent(event);
+                console.log('Signing event:', event);
+                let signedEvent;
+                try {
+                    signedEvent = await window.nostr.signEvent(event);
+                    console.log('Signed event:', signedEvent);
+                    if (!signedEvent || !signedEvent.id || !signedEvent.sig) {
+                        throw new Error('Event signing failed: missing id or sig');
+                    }
+                } catch (signError) {
+                    console.error('Error signing event:', signError);
+                    throw new Error('Failed to sign transaction: ' + (signError.message || signError));
+                }
+
+                console.log('Publishing to relays...');
                 await publishToRelays(signedEvent);
+                console.log('Published to relays');
 
                 document.getElementById('recipientNpub').value = '';
                 document.getElementById('sendAmount').value = '';
@@ -741,11 +777,164 @@
 
         function toggleNsecLogin() {
             const form = document.getElementById('nsecLoginForm');
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            const input = document.getElementById('nsecInput');
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+                if (input) input.value = '';
+            } else {
+                form.style.display = 'none';
+                if (input) input.value = '';
+            }
         }
 
-        function loginWithNsec() {
-            showStatus('nsec login is demo-only and cannot sign transactions', 'info');
+        function bytesToHex(bytes) {
+            return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function createNsecSigner(privKeyHex) {
+            if (typeof NostrTools === 'undefined') {
+                throw new Error('nostr-tools library not loaded; cannot use nsec login');
+            }
+
+            const pubkey = NostrTools.getPublicKey(privKeyHex);
+            console.log('Created nsec signer with pubkey:', pubkey);
+
+            return {
+                getPublicKey: async () => pubkey,
+                signEvent: async (event) => {
+                    try {
+                        const ev = { ...event };
+                        // Ensure pubkey is present
+                        ev.pubkey = ev.pubkey || pubkey;
+                        
+                        console.log('Signing event with nsec signer:', ev);
+
+                        // Method 1: Try finalizeEvent (nostr-tools v2+)
+                        if (typeof NostrTools.finalizeEvent === 'function') {
+                            try {
+                                const signed = NostrTools.finalizeEvent(ev, privKeyHex);
+                                console.log('finalizeEvent succeeded:', signed);
+                                if (signed && signed.id && signed.sig) {
+                                    return signed;
+                                }
+                            } catch (e) {
+                                console.warn('finalizeEvent failed, trying alternatives:', e);
+                            }
+                        }
+
+                        // Method 2: Use getEventHash + getSignature (most reliable)
+                        if (typeof NostrTools.getEventHash === 'function' && typeof NostrTools.getSignature === 'function') {
+                            if (!ev.id) {
+                                ev.id = NostrTools.getEventHash(ev);
+                            }
+                            ev.sig = NostrTools.getSignature(ev, privKeyHex);
+                            console.log('getEventHash + getSignature succeeded:', ev);
+                            if (ev.id && ev.sig) {
+                                return ev;
+                            }
+                        }
+
+                        // Method 3: Use getEventHash + signEvent (legacy)
+                        if (typeof NostrTools.getEventHash === 'function') {
+                            if (!ev.id) {
+                                ev.id = NostrTools.getEventHash(ev);
+                            }
+                        }
+                        
+                        if (typeof NostrTools.signEvent === 'function') {
+                            ev.sig = NostrTools.signEvent(ev, privKeyHex);
+                            console.log('getEventHash + signEvent succeeded:', ev);
+                            if (ev.id && ev.sig) {
+                                return ev;
+                            }
+                        }
+
+                        // If we get here, nothing worked
+                        const available = [];
+                        if (typeof NostrTools.finalizeEvent === 'function') available.push('finalizeEvent');
+                        if (typeof NostrTools.getEventHash === 'function') available.push('getEventHash');
+                        if (typeof NostrTools.getSignature === 'function') available.push('getSignature');
+                        if (typeof NostrTools.signEvent === 'function') available.push('signEvent');
+                        
+                        throw new Error(`Cannot sign event. Available functions: ${available.join(', ')}. Event: ${JSON.stringify(ev)}`);
+                    } catch (error) {
+                        console.error('Error in nsec signEvent:', error);
+                        throw error;
+                    }
+                }
+            };
+        }
+
+        async function loginWithNsec() {
+            try {
+                const input = document.getElementById('nsecInput');
+                const nsec = (input.value || '').trim();
+
+                if (!nsec) {
+                    showStatus('Please paste your nsec', 'error');
+                    return;
+                }
+
+                if (!nsec.startsWith('nsec1')) {
+                    showStatus('Invalid nsec format (must start with nsec1)', 'error');
+                    return;
+                }
+
+                if (typeof NostrTools === 'undefined' || !NostrTools.nip19) {
+                    showStatus('nostr-tools not available; cannot use nsec login.', 'error');
+                    return;
+                }
+
+                let decoded;
+                try {
+                    decoded = NostrTools.nip19.decode(nsec);
+                } catch (e) {
+                    console.error('Failed to decode nsec:', e);
+                    showStatus('Failed to decode nsec. Please check it and try again.', 'error');
+                    return;
+                }
+
+                if (!decoded || decoded.type !== 'nsec' || !decoded.data) {
+                    showStatus('Provided key is not a valid nsec.', 'error');
+                    return;
+                }
+
+                let privKeyHex;
+                if (typeof decoded.data === 'string') {
+                    privKeyHex = decoded.data;
+                } else if (decoded.data instanceof Uint8Array || Array.isArray(decoded.data)) {
+                    privKeyHex = bytesToHex(decoded.data);
+                } else {
+                    showStatus('Unsupported nsec format.', 'error');
+                    return;
+                }
+
+                if (!/^[0-9a-fA-F]{64}$/.test(privKeyHex)) {
+                    showStatus('Decoded nsec did not produce a valid 32-byte private key.', 'error');
+                    return;
+                }
+
+                // Prepare signer and state
+                nsecPrivKeyHex = privKeyHex;
+                const pubkeyHex = NostrTools.getPublicKey(privKeyHex);
+                state.pubkeyHex = pubkeyHex;
+
+                // Preserve any existing extension so we can restore on disconnect
+                if (!originalNostr && typeof window.nostr !== 'undefined') {
+                    originalNostr = window.nostr;
+                }
+
+                window.nostr = createNsecSigner(privKeyHex);
+                usingNsecLogin = true;
+
+                await onWalletConnected();
+                toggleNsecLogin(); // hide form
+
+                showStatus('Logged in with nsec. Signing is done locally in your browser.', 'success');
+            } catch (error) {
+                console.error('nsec login failed:', error);
+                showStatus('nsec login failed: ' + (error.message || error), 'error');
+            }
         }
 
         function disconnectWallet() {
@@ -754,6 +943,22 @@
             state.balance = 0;
             state.transactions = [];
             state.mining = false;
+
+            // Restore original nostr provider (if any) when disconnecting nsec login
+            if (usingNsecLogin) {
+                if (originalNostr) {
+                    window.nostr = originalNostr;
+                } else {
+                    // If there was no original extension, remove our shim
+                    try {
+                        delete window.nostr;
+                    } catch (e) {
+                        window.nostr = undefined;
+                    }
+                }
+                usingNsecLogin = false;
+                nsecPrivKeyHex = null;
+            }
 
             document.getElementById('connected').style.display = 'none';
             document.getElementById('notConnected').style.display = 'block';
@@ -863,3 +1068,5 @@
     </script>
 </body>
 </html>
+
+<!-- Nostrcoin Wallet v0.1.0 login with nsec, shows correct balance, cannot send NSTC-->
