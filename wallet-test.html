@@ -788,12 +788,26 @@
                     const ev = { ...event };
                     // Ensure pubkey is present
                     ev.pubkey = ev.pubkey || pubkey;
-                    // Only compute id if not already computed (e.g. mining uses its own hash)
-                    if (!ev.id) {
-                        ev.id = NostrTools.getEventHash(ev);
+
+                    // Prefer finalizeEvent if available (nostr-tools v2+)
+                    if (typeof NostrTools.finalizeEvent === 'function') {
+                        // finalizeEvent will compute id and sig
+                        return NostrTools.finalizeEvent(ev, privKeyHex);
                     }
-                    ev.sig = NostrTools.signEvent(ev, privKeyHex);
-                    return ev;
+
+                    // Fallback to legacy getEventHash + signEvent if present
+                    if (typeof NostrTools.getEventHash === 'function') {
+                        if (!ev.id) {
+                            ev.id = NostrTools.getEventHash(ev);
+                        }
+                    }
+
+                    if (typeof NostrTools.signEvent === 'function') {
+                        ev.sig = NostrTools.signEvent(ev, privKeyHex);
+                        return ev;
+                    }
+
+                    throw new Error('nostr-tools does not expose finalizeEvent or signEvent; cannot sign event');
                 }
             };
         }
