@@ -31,6 +31,7 @@
         .button{width:100%;padding:13px;border-radius:8px;font-size:14px;font-weight:600;border:1px solid transparent;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-bottom:12px}
         .button-primary{background:#32CD32;color:#1a1a1a;border-color:#32CD32}
         .button-primary:hover{background:#28b428;border-color:#28b428;transform:translateY(-2px)}
+        #connectExtensionBtn.button-primary:hover{background:#f28500;border-color:#f28500}
         .button-secondary{background:#2a2a2a;color:#f28500;border:1px solid #f28500}
         .button-secondary:hover{background:#f28500;color:#1a1a1a}
         .refresh-btn{background:#32CD32;color:#1a1a1a;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;margin-bottom:20px}
@@ -111,7 +112,7 @@
                 <div class="section-title">Connect Wallet</div>
                 <p style="text-align:center;color:#aaa;margin-bottom:12px;">Connect your Nostr wallet to get started</p>
                 <p style="text-align:center;color:#888;font-size:13px;margin-bottom:20px;">Don't have a Nostr account? <button onclick="toggleJoinNostrModal(true)" style="background:none;border:none;color:#f28500;cursor:pointer;text-decoration:underline;font-size:13px;">Learn more about Nostr</button></p>
-                <button class="button button-primary" onclick="connectWallet()">Connect Extension</button>
+                <button class="button button-primary" id="connectExtensionBtn" onclick="connectWallet()">Connect Extension</button>
                 <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Login with nsec</button>
                 <div id="nsecLoginForm" style="display:none;margin-top:20px;">
                     <div class="form-group">
@@ -216,7 +217,8 @@
             <a href="https://saccoci.github.io/explorer.html" target="_blank" class="modal-link">Explorer</a>
             <a href="https://saccoci.github.io/wallet.html" target="_blank" class="modal-link">Wallet</a>
             <a href="https://nostrcoin.boards.net" target="_blank" class="modal-link">Forum</a>
-            <a href="https://github.com/saccoci/saccoci.github.io" target="_blank" class="modal-link">GitHub Repo</a>
+            <a href="https://github.com/saccoci" target="_blank" class="modal-link">GitHub Repo</a>
+            <button class="button button-secondary" style="margin-top:8px;" onclick="toggleMenuModal(false)">Close</button>
         </div>
     </div>
 
