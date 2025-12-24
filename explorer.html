@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Nostrcoin Block Explorer v0.0.5 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin Block Explorer</title>
@@ -282,70 +281,6 @@
             color: #888;
         }
 
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid #3a3a3a;
-            gap: 8px;
-        }
-
-        .leaderboard-item:last-child {
-            border-bottom: none;
-        }
-
-        .rank {
-            font-size: 18px;
-            font-weight: 700;
-            color: #f28500;
-            min-width: 35px;
-            flex-shrink: 0;
-        }
-
-        .holder-info {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-        }
-
-        .holder-pubkey {
-            font-family: monospace;
-            font-size: 12px;
-            color: #aaa;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .holder-balance {
-            font-size: 16px;
-            font-weight: 700;
-            color: #32CD32;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .show-more-btn {
-            width: 100%;
-            background: #2a2a2a;
-            color: #f28500;
-            border: 1px solid #f28500;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.2s;
-            margin-top: 12px;
-        }
-
-        .show-more-btn:hover {
-            background: #f28500;
-            color: #1a1a1a;
-        }
-
         .version-footer {
             text-align: center;
             font-size: 11px;
@@ -463,10 +398,6 @@
         }
 
         @media (max-width: 600px) {
-            .holder-balance {
-                font-size: 14px;
-            }
-
             .rank {
                 font-size: 16px;
                 min-width: 30px;
@@ -515,9 +446,9 @@
                 <div class="stat-subtext">10-Minute Intervals</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Total Events</div>
-                <div class="stat-value" id="totalEvents">-</div>
-                <div class="stat-subtext">Blocks + Transfers</div>
+                <div class="stat-label">Difficulty</div>
+                <div class="stat-value">5</div>
+                <div class="stat-subtext">Current Network Difficulty</div>
             </div>
         </div>
 
@@ -532,13 +463,6 @@
             <div class="section-title">💸 Recent Transfers</div>
             <div id="recentTransfers">
                 <div class="loading">Loading transfers...</div>
-            </div>
-        </div>
-
-        <div class="section">
-            <div class="section-title">📊 Top Holders</div>
-            <div id="leaderboard">
-                <div class="loading">Loading leaderboard...</div>
             </div>
         </div>
 
@@ -592,7 +516,7 @@
             <h3>About Nostrcoin Block Explorer</h3>
             <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.0.5</p>
             <p style="margin-top:12px;">
-                The Nostrcoin Block Explorer provides real-time network statistics, transaction history, and blockchain data for the Nostrcoin (NSTC) network. View recent blocks, transfers, top holders, and network metrics.
+                The Nostrcoin Block Explorer provides real-time network statistics, transaction history, and blockchain data for the Nostrcoin (NSTC) network. View recent blocks, transfers, and network metrics.
             </p>
             <p style="margin-top:10px;font-size:12px;color:#ff6b6b;">
                 <strong>Disclaimer:</strong> This is for education and fun only. Expect bugs, potential loss of coins, and no monetary value. Do not invest real money.
@@ -632,21 +556,12 @@
             indexers: [
 				'http://localhost:3000',  // Your local indexer
 				'https://vm-182.lnvps.cloud',  // VPS indexer
-                // Add more indexers below (one per line):
-                // 'https://another-indexer.com',
-                // 'https://third-indexer.org',
             ]
         };
-        // ============================================
-        // DO NOT EDIT BELOW THIS LINE
-        // ============================================
 
-        let allBalances = {};
         let allEvents = [];
-        let showAllHolders = false;
-        let indexerStatus = {}; // Track which indexers are responding
+        let indexerStatus = {};
 
-        // Bech32 encoding for npub conversion
         const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 
         function hexToBytes(hex) {
@@ -733,7 +648,6 @@
 
         async function fetchStats() {
             try {
-                // Query all indexers in parallel
                 const promises = INDEXER_CONFIG.indexers.map(async (indexerUrl) => {
                     try {
                         const response = await fetch(`${indexerUrl}/stats`, { timeout: 5000 });
@@ -749,31 +663,17 @@
                 const results = await Promise.all(promises);
                 const validResults = results.filter(r => r.data !== null);
 
-                if (validResults.length === 0) {
-                    console.error('All indexers failed to respond');
-                    return;
-                }
+                if (validResults.length === 0) return;
 
-                // Use the first valid result (or implement consensus logic)
                 const data = validResults[0].data;
 
                 document.getElementById('totalSupply').textContent = data.totalSupply.toLocaleString();
-                document.getElementById('totalEvents').textContent = data.totalEvents;
                 document.getElementById('currentEpoch').textContent = data.currentEpoch.toLocaleString();
 
-                // Update block height display (calculated from events)
                 const totalBlocks = allEvents.filter(e => e.kind === 30333).length;
                 const blockHeight = totalBlocks > 0 ? totalBlocks - 1 : 0;
                 document.getElementById('blockHeight').textContent = blockHeight;
 
-                // Check for disagreements
-                if (validResults.length > 1) {
-                    const supplies = validResults.map(r => r.data.totalSupply);
-                    const allAgree = supplies.every(s => s === supplies[0]);
-                    if (!allAgree) {
-                        console.warn('Indexers disagree on total supply:', validResults);
-                    }
-                }
             } catch (error) {
                 console.error('Failed to fetch stats:', error);
             }
@@ -781,7 +681,6 @@
 
         async function fetchEvents() {
             try {
-                // Query all indexers in parallel
                 const promises = INDEXER_CONFIG.indexers.map(async (indexerUrl) => {
                     try {
                         const response = await fetch(`${indexerUrl}/events`, { timeout: 5000 });
@@ -795,12 +694,8 @@
                 const results = await Promise.all(promises);
                 const validResults = results.filter(r => r.events.length > 0);
 
-                if (validResults.length === 0) {
-                    console.error('All indexers failed to return events');
-                    return;
-                }
+                if (validResults.length === 0) return;
 
-                // Use the result with the most events (or implement merge logic)
                 const mostEvents = validResults.reduce((max, r) =>
                     r.events.length > max.events.length ? r : max
                 );
@@ -809,116 +704,9 @@
 
                 displayRecentBlocks();
                 displayRecentTransfers();
-
-                // Check for disagreements
-                if (validResults.length > 1) {
-                    const eventCounts = validResults.map(r => r.events.length);
-                    const allAgree = eventCounts.every(c => c === eventCounts[0]);
-                    if (!allAgree) {
-                        console.warn('Indexers have different event counts:', validResults.map(r => ({
-                            indexer: r.indexerUrl,
-                            count: r.events.length
-                        })));
-                    }
-                }
             } catch (error) {
                 console.error('Failed to fetch events:', error);
             }
-        }
-
-        async function fetchLeaderboard() {
-            try {
-                const pubkeys = new Set();
-                allEvents.forEach(event => {
-                    pubkeys.add(event.pubkey);
-                });
-
-                const balancePromises = Array.from(pubkeys).map(async pubkey => {
-                    // Query all indexers for this pubkey
-                    const indexerPromises = INDEXER_CONFIG.indexers.map(async (indexerUrl) => {
-                        try {
-                            const response = await fetch(`${indexerUrl}/balance/${pubkey}`, { timeout: 5000 });
-                            const data = await response.json();
-                            return { indexerUrl, balance: data.balance, error: null };
-                        } catch (error) {
-                            return { indexerUrl, balance: 0, error: error.message };
-                        }
-                    });
-
-                    const indexerResults = await Promise.all(indexerPromises);
-                    const validResults = indexerResults.filter(r => r.error === null);
-
-                    if (validResults.length === 0) {
-                        return { pubkey, balance: 0 };
-                    }
-
-                    // Use majority consensus or average
-                    const balances = validResults.map(r => r.balance);
-                    const allAgree = balances.every(b => b === balances[0]);
-
-                    if (!allAgree) {
-                        console.warn(`Indexers disagree on balance for ${pubkey}:`, validResults);
-                    }
-
-                    // Use the most common balance (majority)
-                    const balance = balances[0];
-                    return { pubkey, balance };
-                });
-
-                const balances = await Promise.all(balancePromises);
-                allBalances = balances.reduce((acc, item) => {
-                    acc[item.pubkey] = item.balance;
-                    return acc;
-                }, {});
-
-                displayLeaderboard(balances);
-            } catch (error) {
-                console.error('Failed to fetch leaderboard:', error);
-            }
-        }
-
-        function displayLeaderboard(balances) {
-            const sorted = balances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance);
-            const container = document.getElementById('leaderboard');
-
-            if (sorted.length === 0) {
-                container.innerHTML = '<div class="no-data">No holders yet</div>';
-                return;
-            }
-
-            const displayCount = showAllHolders ? Math.min(sorted.length, 25) : Math.min(sorted.length, 3);
-            const hasMore = sorted.length > 3;
-
-            container.innerHTML = sorted.slice(0, displayCount).map((item, index) => {
-                const npub = pubkeyToNpub(item.pubkey);
-                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
-                return `
-                <div class="leaderboard-item">
-                    <div class="rank">${medal || '#' + (index + 1)}</div>
-                    <div class="holder-info">
-                        <div class="holder-pubkey">${npub}</div>
-                    </div>
-                    <div class="holder-balance">${item.balance.toFixed(8)} NSTC</div>
-                </div>
-            `}).join('');
-
-            if (hasMore) {
-                const buttonText = showAllHolders ? 'Show Less' : `Show All Holders (${sorted.length})`;
-                container.innerHTML += `
-                    <button class="show-more-btn" onclick="toggleHolders()">
-                        ${buttonText}
-                    </button>
-                `;
-            }
-        }
-
-        function toggleHolders() {
-            showAllHolders = !showAllHolders;
-            const balances = Object.keys(allBalances).map(pubkey => ({
-                pubkey,
-                balance: allBalances[pubkey]
-            }));
-            displayLeaderboard(balances);
         }
 
         function displayRecentBlocks() {
@@ -931,14 +719,13 @@
                 return;
             }
 
-            // Calculate block numbers: total blocks mined minus position from end
             const totalBlocks = allBlocks.length;
 
             container.innerHTML = blocks.map((block, index) => {
                 const date = new Date(block.created_at * 1000).toLocaleString();
                 const npub = pubkeyToNpub(block.pubkey);
                 const epochNumber = block.epoch !== undefined ? block.epoch : 'N/A';
-                const blockNumber = totalBlocks - index - 1; // Sequential block number starting from 0
+                const blockNumber = totalBlocks - index - 1;
 
                 return `
                     <div class="event-item">
@@ -970,7 +757,6 @@
                 const date = new Date(tx.created_at * 1000).toLocaleString();
                 const senderNpub = pubkeyToNpub(tx.pubkey);
 
-                // Parse recipient and amount from tags (since indexer doesn't expand them)
                 let recipientHex = null;
                 let amount = null;
 
@@ -978,12 +764,8 @@
                     const recipientTag = tx.tags.find(t => Array.isArray(t) && t[0] === 'p');
                     const amountTag = tx.tags.find(t => Array.isArray(t) && t[0] === 'amount');
 
-                    if (recipientTag && recipientTag[1]) {
-                        recipientHex = recipientTag[1];
-                    }
-                    if (amountTag && amountTag[1]) {
-                        amount = parseFloat(amountTag[1]);
-                    }
+                    if (recipientTag && recipientTag[1]) recipientHex = recipientTag[1];
+                    if (amountTag && amountTag[1]) amount = parseFloat(amountTag[1]);
                 }
 
                 let recipientNpub = 'Unknown';
@@ -1015,10 +797,8 @@
         }
 
         async function refreshData() {
-            // Fetch events FIRST so we have the data for block height calculation
             await fetchEvents();
             await fetchStats();
-            await fetchLeaderboard();
             updateIndexerStatusDisplay();
         }
 
@@ -1098,10 +878,8 @@
             }
         }
 
-        // Initial load
         document.addEventListener('DOMContentLoaded', () => {
             refreshData();
-            // Auto-refresh every 30 seconds
             setInterval(refreshData, 30000);
         });
     </script>
