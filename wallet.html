@@ -1,10 +1,4 @@
-To address the issue of mining success notifications disappearing too quickly, I have modified the `startMining` function in the `wallet.html` file.
-
-Instead of cycling through two different status messages, I have combined them into a single, comprehensive notification: **"⛏️ Valid proof-of-work found! Broadcasting... (Must be validated by indexers. Check your balance in ~10 seconds)"**. Additionally, I increased the display duration for this combined message to **30 seconds** to ensure it is easily readable.
-
-Here is the updated code for your `wallet.html`:
-
-```html
+<!-- nostrcoin wallet v0.1.0 -->
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -101,7 +95,7 @@ Here is the updated code for your `wallet.html`:
                 <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
             </div>
             <div class="logo">⚡ Nostrcoin Wallet</div>
-            <div class="subtitle">NSTC Wallet • Nostr-native PoW • v0.1.0</div>
+            <div class="subtitle">NSCT Wallet • v0.1.0</div>
         </div>
 
         <button class="refresh-btn" onclick="refreshWallet()" id="refreshBtn" style="display:none;">🔄 Refresh Balance</button>
@@ -222,7 +216,7 @@ Here is the updated code for your `wallet.html`:
             <a href="https://saccoci.github.io/explorer.html" target="_blank" class="modal-link">Explorer</a>
             <a href="https://saccoci.github.io/wallet.html" target="_blank" class="modal-link">Wallet</a>
             <a href="https://nostrcoin.boards.net" target="_blank" class="modal-link">Forum</a>
-            <a href="https://github.com/saccoci" target="_blank" class="modal-link">GitHub Repo</a>
+            <a href="https://github.com/saccoci" target="_blank" class="modal-link">GitHub</a>
             <button class="button button-secondary" style="margin-top:8px;" onclick="toggleMenuModal(false)">Close</button>
         </div>
     </div>
@@ -1077,4 +1071,3 @@ Here is the updated code for your `wallet.html`:
 </body>
 </html>
 
-```
