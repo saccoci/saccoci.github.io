@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-    <!-- Nostrcoin Wallet v0.1.0 login with nsec, shows correct balance, cannot send NSTC-->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin (NSTC) Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
-    <!-- Nostr / secp256k1 helper (provides signing + key utils) -->
     <script src="https://unpkg.com/nostr-tools@2.7.0/lib/nostr.bundle.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
@@ -26,7 +24,7 @@
         .card{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
         .section{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
         .section-title{font-size:20px;font-weight:600;color:#f28500;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #444}
-        .balance-amount{font-size:42px;font-weight:700;color:#32CD32;margin:12px 0}
+        .balance-amount{font-size:32px;font-weight:700;color:#32CD32;margin:12px 0}
         .npub-display{font-size:11px;color:#888;font-family:monospace;word-break:break-all;margin-top:8px}
         .button{width:100%;padding:13px;border-radius:8px;font-size:14px;font-weight:600;border:1px solid transparent;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-bottom:12px}
         .button-primary{background:#32CD32;color:#1a1a1a;border-color:#32CD32}
@@ -272,7 +270,7 @@
         // ============================================
         const INDEXER_CONFIG = {
             indexers: [
-                'http://localhost:3000',  // Your local indexer    
+                'http://localhost:3000',  // Your local indexer
 				'https://vm-182.lnvps.cloud',  // VPS indexer
                 // Add more indexers below (one per line):
                 // 'https://another-indexer.com',
@@ -696,7 +694,7 @@
                 // Check for disagreements
                 const balances = validResults.map(r => r.balance);
                 const allAgree = balances.every(b => Math.abs(b - balances[0]) < 0.00000001);
-                
+
                 if (!allAgree) {
                     console.warn('Indexers disagree on balance:', validResults);
                     showStatus('⚠️ Indexers showing different balances', 'info');
@@ -705,7 +703,7 @@
                 // Use the most common balance (or first valid one)
                 state.balance = balances[0];
                 document.getElementById('balanceAmount').textContent = state.balance.toFixed(8);
-                
+
                 updateIndexerStatusDisplay();
             } catch (error) {
                 console.error('Failed to fetch balance', error);
@@ -735,10 +733,10 @@
                 }
 
                 // Use the result with the most transactions
-                const mostTxs = validResults.reduce((max, r) => 
+                const mostTxs = validResults.reduce((max, r) =>
                     r.history.length > max.history.length ? r : max
                 );
-                
+
                 state.transactions = mostTxs.history;
 
                 // Check for disagreements
@@ -766,14 +764,14 @@
         function updateIndexerStatusDisplay() {
             const statusDiv = document.getElementById('indexerStatus');
             if (!statusDiv) return;
-            
+
             const statuses = Object.entries(state.indexerStatus).map(([url, status]) => {
                 const icon = status === 'online' ? '✓' : '✗';
                 const color = status === 'online' ? '#32CD32' : '#ff6b6b';
                 const shortUrl = url.replace('https://', '').replace('http://', '').split('/')[0];
                 return `<span style="color:${color}">${icon} ${shortUrl}</span>`;
             });
-            
+
             if (statuses.length > 0) {
                 statusDiv.innerHTML = `Indexers: ${statuses.join(' • ')}`;
             } else {
@@ -812,7 +810,7 @@
                         const ev = { ...event };
                         // Ensure pubkey is present
                         ev.pubkey = ev.pubkey || pubkey;
-                        
+
                         console.log('Signing event with nsec signer:', ev);
 
                         // Method 1: Try finalizeEvent (nostr-tools v2+)
@@ -846,7 +844,7 @@
                                 ev.id = NostrTools.getEventHash(ev);
                             }
                         }
-                        
+
                         if (typeof NostrTools.signEvent === 'function') {
                             ev.sig = NostrTools.signEvent(ev, privKeyHex);
                             console.log('getEventHash + signEvent succeeded:', ev);
@@ -861,7 +859,7 @@
                         if (typeof NostrTools.getEventHash === 'function') available.push('getEventHash');
                         if (typeof NostrTools.getSignature === 'function') available.push('getSignature');
                         if (typeof NostrTools.signEvent === 'function') available.push('signEvent');
-                        
+
                         throw new Error(`Cannot sign event. Available functions: ${available.join(', ')}. Event: ${JSON.stringify(ev)}`);
                     } catch (error) {
                         console.error('Error in nsec signEvent:', error);
@@ -1075,4 +1073,3 @@
 </body>
 </html>
 
-<!-- Nostrcoin Wallet v0.1.0 login with nsec, shows correct balance, cannot send NSTC-->
