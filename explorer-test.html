@@ -48,42 +48,11 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 20px;
-            line-height: 1;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .hamburger-btn:hover {
             background: #333;
             border-color: #32CD32;
-        }
-
-        .menu-modal .modal-link {
-            display: block;
-            padding: 12px 16px;
-            color: #f5f5f5;
-            text-decoration: none;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .menu-modal .modal-link:hover {
-            background: #333;
-            border-color: #32CD32;
-            color: #32CD32;
-        }
-
-        .menu-modal .modal-link.about-link {
-            color: #f28500;
-        }
-
-        .menu-modal .modal-link.about-link:hover {
-            color: #ff9500;
-            border-color: #f28500;
         }
 
         .logo {
@@ -108,20 +77,6 @@
             font-weight: 600;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
-        }
-
-        .join-nostr-btn:hover {
-            background: #ff9500;
-            border-color: #ff9500;
-            transform: translateY(-2px);
-        }
-
-        .modal .join-nostr-btn {
-            color: #1a1a1a !important;
         }
 
         .stats-grid {
@@ -182,12 +137,6 @@
             border-radius: 8px;
             padding: 16px;
             margin-bottom: 12px;
-            transition: all 0.2s;
-        }
-
-        .event-item:hover {
-            border-color: #32CD32;
-            transform: translateX(4px);
         }
 
         .event-header {
@@ -211,235 +160,189 @@
         }
 
         .event-type.transfer {
-            background: #f8d7da;
-            color: #721c24;
+            background: #d4edda;
+            color: #155724;
         }
 
         .event-time {
-            font-size: 12px;
+            font-size: 13px;
             color: #888;
         }
 
         .event-details {
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-
-        .pubkey {
-            font-family: monospace;
-            font-size: 13px;
-            color: #32CD32;
-        }
-
-        .amount {
-            font-weight: 700;
-            color: #32CD32;
-            font-size: 16px;
+            font-size: 14px;
+            color: #ccc;
         }
 
         .event-hash {
             font-family: monospace;
             font-size: 12px;
             color: #999;
+            margin-top: 8px;
             word-break: break-all;
         }
 
-        #indexerStatus {
-            text-align: center;
-            font-size: 13px;
-            color: #888;
+        .refresh-btn {
+            background: #32CD32;
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
             margin-bottom: 20px;
+        }
+
+        .loading,
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+        }
+
+        .version-footer {
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #3a3a3a;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="header-top">
-                <button class="hamburger-btn" onclick="toggleMenuModal(true)">☰</button>
-                <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
-            </div>
-            <div class="logo">⚡ Nostrcoin Explorer</div>
-            <div class="subtitle">Nostr-native PoW Blockchain</div>
+<div class="container">
+
+    <div class="header">
+        <div class="header-top">
+            <button class="hamburger-btn">☰</button>
+            <button class="join-nostr-btn">Join Nostr</button>
+        </div>
+        <div class="logo">⚡ Nostrcoin Explorer</div>
+        <div class="subtitle">Live Nostrcoin Network Statistics & Blockchain Data • v0.0.5</div>
+    </div>
+
+    <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Supply</div>
+            <div class="stat-value" id="totalSupply">-</div>
+            <div class="stat-subtext">NSTC Mined</div>
         </div>
 
-        <div id="indexerStatus">Loading indexer status...</div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total Supply</div>
-                <div class="stat-value" id="totalSupply">0</div>
-                <div class="stat-subtext">NSTC</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Unique Holders</div>
-                <div class="stat-value" id="uniqueHolders">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Current Epoch</div>
-                <div class="stat-value" id="currentEpoch">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Difficulty</div>
-                <div class="stat-value">5</div>
-                <div class="stat-subtext">leading zeros</div>
-            </div>
+        <div class="stat-card">
+            <div class="stat-label">Block Height</div>
+            <div class="stat-value" id="blockHeight">-</div>
+            <div class="stat-subtext">Latest Block</div>
         </div>
 
-        <div class="section">
-            <div class="section-title">Recent Blocks & Transactions</div>
-            <div id="eventsList">Loading events...</div>
+        <div class="stat-card">
+            <div class="stat-label">Current Epoch</div>
+            <div class="stat-value" id="currentEpoch">-</div>
+            <div class="stat-subtext">10-Minute Intervals</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Difficulty</div>
+            <div class="stat-value" id="difficulty">5</div>
+            <div class="stat-subtext">Current Network Difficulty</div>
         </div>
     </div>
 
-    <!-- Modals remain unchanged (menu, join nostr, about, epoch) -->
-    <!-- ... your existing modal HTML ... -->
+    <div class="section">
+        <div class="section-title">⛏️ Recent Blocks</div>
+        <div id="recentBlocks">
+            <div class="loading">Loading recent blocks...</div>
+        </div>
+    </div>
 
-    <script>
-        const INDEXER_URL = 'https://vm-182.lnvps.cloud'; // or 'http://localhost:3000' for local
+    <div class="section">
+        <div class="section-title">💸 Recent Transfers</div>
+        <div id="recentTransfers">
+            <div class="loading">Loading transfers...</div>
+        </div>
+    </div>
 
-        let events = [];
-        let stats = {};
-        let indexerStatus = {};
+    <div class="version-footer">
+        Nostrcoin Block Explorer v0.0.5
+    </div>
 
-        async function fetchEvents() {
-            try {
-                const response = await fetch(`${INDEXER_URL}/events`);
-                if (response.ok) {
-                    const data = await response.json();
-                    events = data.events || [];
-                    renderEvents();
-                }
-            } catch (e) {
-                document.getElementById('eventsList').innerHTML = '<p style="color:#ff6b6b;text-align:center;">Failed to load events</p>';
-            }
-        }
+</div>
 
-        async function fetchStats() {
-            try {
-                const response = await fetch(`${INDEXER_URL}/stats`);
-                if (response.ok) {
-                    stats = await response.json();
-                    document.getElementById('totalSupply').textContent = Number(stats.totalSupply || 0).toFixed(8);
-                    document.getElementById('uniqueHolders').textContent = stats.uniqueHolders || 0;
-                    document.getElementById('currentEpoch').textContent = stats.currentEpoch || 0;
-                    indexerStatus[INDEXER_URL] = 'online';
-                } else {
-                    indexerStatus[INDEXER_URL] = 'error';
-                }
-            } catch (e) {
-                indexerStatus[INDEXER_URL] = 'offline';
-            }
-            updateIndexerStatusDisplay();
-        }
+<script>
+const INDEXER_CONFIG = {
+    indexers: [
+        'http://localhost:3000',
+        'https://vm-182.lnvps.cloud'
+    ]
+};
 
-        function renderEvents() {
-            if (events.length === 0) {
-                document.getElementById('eventsList').innerHTML = '<p style="color:#888;text-align:center;">No events yet</p>';
-                return;
-            }
+let allEvents = [];
 
-            const sorted = events.slice().reverse();
+async function fetchStats() {
+    const res = await fetch(`${INDEXER_CONFIG.indexers[0]}/stats`);
+    const data = await res.json();
 
-            document.getElementById('eventsList').innerHTML = sorted.map(event => {
-                const date = new Date(event.created_at * 1000).toLocaleString();
+    document.getElementById('totalSupply').textContent = data.totalSupply.toLocaleString();
+    document.getElementById('currentEpoch').textContent = data.currentEpoch;
+    document.getElementById('difficulty').textContent = '00005';
+}
 
-                if (event.kind === 30333) {
-                    // Mining block
-                    const npub = pubkeyToNpub(event.pubkey);
-                    return `
-                        <div class="event-item">
-                            <div class="event-header">
-                                <span class="event-type mining">⛏️ Block Mined</span>
-                                <span class="event-time">${date}</span>
-                            </div>
-                            <div class="event-details">
-                                Miner: <span class="pubkey">${npub.substring(0, 20)}...</span><br>
-                                Reward: <span class="amount">50.00000000 NSTC</span>
-                            </div>
-                            <div class="event-hash">Block ID: ${event.id}</div>
-                        </div>
-                    `;
-                } else if (event.kind === 30334) {
-                    // Transfer
-                    const recipientTag = event.tags.find(t => t[0] === 'p');
-                    const amountTag = event.tags.find(t => t[0] === 'amount');
-                    if (!recipientTag || !amountTag) return '';
+async function fetchEvents() {
+    const res = await fetch(`${INDEXER_CONFIG.indexers[0]}/events`);
+    const data = await res.json();
+    allEvents = data.events || [];
+    displayRecentBlocks();
+    displayRecentTransfers();
+}
 
-                    const recipient = recipientTag[1];
-                    const amount = parseFloat(amountTag[1]);
+function displayRecentBlocks() {
+    const blocks = allEvents.filter(e => e.kind === 30333).slice(-10).reverse();
+    const container = document.getElementById('recentBlocks');
 
-                    const senderNpub = pubkeyToNpub(event.pubkey);
-                    const recipientNpub = pubkeyToNpub(recipient);
-                    const displayAmount = amount && !isNaN(amount) ? amount.toFixed(8) : '0.00000000';
+    if (!blocks.length) {
+        container.innerHTML = '<div class="no-data">No blocks yet</div>';
+        return;
+    }
 
-                    return `
-                        <div class="event-item">
-                            <div class="event-header">
-                                <span class="event-type transfer">💸 Transfer</span>
-                                <span class="event-time">${date}</span>
-                            </div>
-                            <div class="event-details">
-                                From: <span class="pubkey">${senderNpub.substring(0, 20)}...</span><br>
-                                To: <span class="pubkey">${recipientNpub.substring(0, 20)}...</span><br>
-                                Amount: <span class="amount">${displayAmount} NSTC</span>
-                            </div>
-                            <div class="event-hash">TX ID: ${event.id}</div>
-                        </div>
-                    `;
-                }
-                return '';
-            }).join('');
-        }
+    container.innerHTML = blocks.map(b => `
+        <div class="event-item">
+            <div class="event-header">
+                <span class="event-type mining">⛏️ Block</span>
+                <span class="event-time">${new Date(b.created_at * 1000).toLocaleString()}</span>
+            </div>
+            <div class="event-hash">${b.id}</div>
+        </div>
+    `).join('');
+}
 
-        async function refreshData() {
-            await fetchEvents();
-            await fetchStats();
-            updateIndexerStatusDisplay();
-        }
+function displayRecentTransfers() {
+    const txs = allEvents.filter(e => e.kind === 30334).slice(-10).reverse();
+    const container = document.getElementById('recentTransfers');
 
-        function updateIndexerStatusDisplay() {
-            const statusDiv = document.getElementById('indexerStatus');
-            const statuses = Object.entries(indexerStatus).map(([url, status]) => {
-                const icon = status === 'online' ? '✓' : '✗';
-                const color = status === 'online' ? '#32CD32' : '#ff6b6b';
-                const shortUrl = url.replace('https://', '').replace('http://', '').split('/')[0];
-                return `<span style="color:${color}">${icon} ${shortUrl}</span>`;
-            });
+    if (!txs.length) {
+        container.innerHTML = '<div class="no-data">No transfers yet</div>';
+        return;
+    }
 
-            if (statuses.length > 0) {
-                statusDiv.innerHTML = `Indexers: ${statuses.join(' • ')}`;
-            } else {
-                statusDiv.innerHTML = 'No indexers configured';
-            }
-        }
+    container.innerHTML = txs.map(t => `
+        <div class="event-item">
+            <div class="event-header">
+                <span class="event-type transfer">💸 Transfer</span>
+                <span class="event-time">${new Date(t.created_at * 1000).toLocaleString()}</span>
+            </div>
+            <div class="event-hash">${t.id}</div>
+        </div>
+    `).join('');
+}
 
-        // Modal functions unchanged
-        function toggleMenuModal(show) { /* ... */ }
-        function toggleJoinNostrModal(show) { /* ... */ }
-        function toggleAboutModal(show) { /* ... */ }
-        function toggleEpochModal(show) { /* ... */ }
+async function refreshData() {
+    await fetchEvents();
+    await fetchStats();
+}
 
-        // Bech32 helpers unchanged
-        const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
-        function hexToBytes(hex) { /* ... */ }
-        function convertBits(data, fromBits, toBits, pad = true) { /* ... */ }
-        function bech32Encode(hrp, data) { /* ... */ }
-        function createChecksum(hrp, data) { /* ... */ }
-        function polymod(values) { /* ... */ }
-        function hrpExpand(hrp) { /* ... */ }
-        function pubkeyToNpub(hexPubkey) {
-            const bytes = hexToBytes(hexPubkey);
-            const converted = convertBits(bytes, 8, 5);
-            if (!converted) return 'npub1invalid';
-            return bech32Encode('npub', converted);
-        }
-
-        // Initial load
-        document.addEventListener('DOMContentLoaded', () => {
-            refreshData();
-            setInterval(refreshData, 30000);
-        });
-    </script>
+document.addEventListener('DOMContentLoaded', refreshData);
+</script>
 </body>
 </html>
