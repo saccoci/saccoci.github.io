@@ -162,7 +162,7 @@
             <div id="mine" class="tab-content">
                 <div class="section">
                     <div class="section-title">⛏️ Mining</div>
-                    <p style="text-align:center;font-size:13px;color:#aaa;margin-bottom:20px;">Difficulty 4 • Reward 50 NSTC</p>
+                    <p style="text-align:center;font-size:13px;color:#aaa;margin-bottom:20px;">Difficulty 5 • Reward 50 NSTC</p>
                     <div class="mining-stats">
                         <div class="stat-box">
                             <div class="stat-label">Hash Rate</div>
@@ -291,7 +291,7 @@
 
         const CONFIG = {
             protocolTag: 'nostrcoin',
-            difficulty: 4,
+            difficulty: 5,
             eventKinds: {
                 mining: 30333,
                 transfer: 30334
@@ -562,7 +562,13 @@
                     try {
                         const signed = await window.nostr.signEvent(event);
                         await publishToRelays(signed);
-                        showStatus('⛏️ Block mined! Reward: 50 NSTC', 'success');
+                        showStatus('⛏️ Valid proof-of-work found! Broadcasting to network... (Must be validated by indexers)', 'info');
+
+                        // Show secondary message after 2 seconds
+                        setTimeout(() => {
+                            showStatus('⏳ Waiting for indexer validation... Check your balance in ~10 seconds', 'info');
+                        }, 2000);
+
                     } catch (e) {
                         showStatus('Mining event failed: ' + e.message, 'error');
                     }
