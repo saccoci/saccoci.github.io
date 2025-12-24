@@ -466,12 +466,12 @@
             .holder-balance {
                 font-size: 14px;
             }
-            
+
             .rank {
                 font-size: 16px;
                 min-width: 30px;
             }
-            
+
             .holder-pubkey {
                 font-size: 11px;
             }
@@ -508,7 +508,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-label">
-                    Current Epoch 
+                    Current Epoch
                     <span onclick="toggleEpochModal(true)" style="cursor:pointer;font-size:14px;margin-left:4px;" title="What is an epoch?">ℹ️</span>
                 </div>
                 <div class="stat-value" id="currentEpoch">-</div>
@@ -630,7 +630,7 @@
         // ============================================
         const INDEXER_CONFIG = {
             indexers: [
-				'http://localhost:3000',  // Your local indexer    
+				'http://localhost:3000',  // Your local indexer
 				'https://vm-182.lnvps.cloud',  // VPS indexer
                 // Add more indexers below (one per line):
                 // 'https://another-indexer.com',
@@ -756,11 +756,11 @@
 
                 // Use the first valid result (or implement consensus logic)
                 const data = validResults[0].data;
-                
+
                 document.getElementById('totalSupply').textContent = data.totalSupply.toLocaleString();
                 document.getElementById('totalEvents').textContent = data.totalEvents;
                 document.getElementById('currentEpoch').textContent = data.currentEpoch.toLocaleString();
-                
+
                 // Update block height display (calculated from events)
                 const totalBlocks = allEvents.filter(e => e.kind === 30333).length;
                 const blockHeight = totalBlocks > 0 ? totalBlocks - 1 : 0;
@@ -801,12 +801,12 @@
                 }
 
                 // Use the result with the most events (or implement merge logic)
-                const mostEvents = validResults.reduce((max, r) => 
+                const mostEvents = validResults.reduce((max, r) =>
                     r.events.length > max.events.length ? r : max
                 );
-                
+
                 allEvents = mostEvents.events;
-                
+
                 displayRecentBlocks();
                 displayRecentTransfers();
 
@@ -855,7 +855,7 @@
                     // Use majority consensus or average
                     const balances = validResults.map(r => r.balance);
                     const allAgree = balances.every(b => b === balances[0]);
-                    
+
                     if (!allAgree) {
                         console.warn(`Indexers disagree on balance for ${pubkey}:`, validResults);
                     }
@@ -880,7 +880,7 @@
         function displayLeaderboard(balances) {
             const sorted = balances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance);
             const container = document.getElementById('leaderboard');
-            
+
             if (sorted.length === 0) {
                 container.innerHTML = '<div class="no-data">No holders yet</div>';
                 return;
@@ -925,7 +925,7 @@
             const allBlocks = allEvents.filter(e => e.kind === 30333);
             const blocks = allBlocks.slice(-10).reverse();
             const container = document.getElementById('recentBlocks');
-            
+
             if (blocks.length === 0) {
                 container.innerHTML = '<div class="no-data">No blocks mined yet</div>';
                 return;
@@ -939,7 +939,7 @@
                 const npub = pubkeyToNpub(block.pubkey);
                 const epochNumber = block.epoch !== undefined ? block.epoch : 'N/A';
                 const blockNumber = totalBlocks - index - 1; // Sequential block number starting from 0
-                
+
                 return `
                     <div class="event-item">
                         <div class="event-header">
@@ -960,7 +960,7 @@
         function displayRecentTransfers() {
             const transfers = allEvents.filter(e => e.kind === 30334).slice(-10).reverse();
             const container = document.getElementById('recentTransfers');
-            
+
             if (transfers.length === 0) {
                 container.innerHTML = '<div class="no-data">No transfers yet</div>';
                 return;
@@ -969,15 +969,15 @@
             container.innerHTML = transfers.map(tx => {
                 const date = new Date(tx.created_at * 1000).toLocaleString();
                 const senderNpub = pubkeyToNpub(tx.pubkey);
-                
+
                 // Parse recipient and amount from tags (since indexer doesn't expand them)
                 let recipientHex = null;
                 let amount = null;
-                
+
                 if (tx.tags && Array.isArray(tx.tags)) {
                     const recipientTag = tx.tags.find(t => Array.isArray(t) && t[0] === 'p');
                     const amountTag = tx.tags.find(t => Array.isArray(t) && t[0] === 'amount');
-                    
+
                     if (recipientTag && recipientTag[1]) {
                         recipientHex = recipientTag[1];
                     }
@@ -985,7 +985,7 @@
                         amount = parseFloat(amountTag[1]);
                     }
                 }
-                
+
                 let recipientNpub = 'Unknown';
                 if (recipientHex && recipientHex.length === 64) {
                     try {
@@ -994,9 +994,9 @@
                         recipientNpub = recipientHex.substring(0, 16) + '...';
                     }
                 }
-                
+
                 const displayAmount = amount && !isNaN(amount) ? amount.toFixed(8) : '0.00000000';
-                
+
                 return `
                     <div class="event-item">
                         <div class="event-header">
@@ -1090,7 +1090,7 @@
                 const shortUrl = url.replace('https://', '').replace('http://', '').split('/')[0];
                 return `<span style="color:${color}">${icon} ${shortUrl}</span>`;
             });
-            
+
             if (statuses.length > 0) {
                 statusDiv.innerHTML = `Indexers: ${statuses.join(' • ')}`;
             } else {

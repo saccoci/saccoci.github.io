@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Nostrcoin Block Explorer v0.0.5 -->
+    <!-- Nostrcoin Block Explorer v0.0.6 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin Block Explorer</title>
@@ -282,70 +282,6 @@
             color: #888;
         }
 
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid #3a3a3a;
-            gap: 8px;
-        }
-
-        .leaderboard-item:last-child {
-            border-bottom: none;
-        }
-
-        .rank {
-            font-size: 18px;
-            font-weight: 700;
-            color: #f28500;
-            min-width: 35px;
-            flex-shrink: 0;
-        }
-
-        .holder-info {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-        }
-
-        .holder-pubkey {
-            font-family: monospace;
-            font-size: 12px;
-            color: #aaa;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .holder-balance {
-            font-size: 16px;
-            font-weight: 700;
-            color: #32CD32;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .show-more-btn {
-            width: 100%;
-            background: #2a2a2a;
-            color: #f28500;
-            border: 1px solid #f28500;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.2s;
-            margin-top: 12px;
-        }
-
-        .show-more-btn:hover {
-            background: #f28500;
-            color: #1a1a1a;
-        }
-
         .version-footer {
             text-align: center;
             font-size: 11px;
@@ -461,21 +397,6 @@
             background: #f28500;
             color: #1a1a1a;
         }
-
-        @media (max-width: 600px) {
-            .holder-balance {
-                font-size: 14px;
-            }
-            
-            .rank {
-                font-size: 16px;
-                min-width: 30px;
-            }
-            
-            .holder-pubkey {
-                font-size: 11px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -486,7 +407,7 @@
                 <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
             </div>
             <div class="logo">⚡ Nostrcoin Explorer</div>
-            <div class="subtitle">Live Nostrcoin Network Statistics & Blockchain Data • v0.0.5</div>
+            <div class="subtitle">Live Nostrcoin Network Statistics & Blockchain Data • v0.0.6</div>
         </div>
 
         <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
@@ -508,16 +429,16 @@
             </div>
             <div class="stat-card">
                 <div class="stat-label">
-                    Current Epoch 
+                    Current Epoch
                     <span onclick="toggleEpochModal(true)" style="cursor:pointer;font-size:14px;margin-left:4px;" title="What is an epoch?">ℹ️</span>
                 </div>
                 <div class="stat-value" id="currentEpoch">-</div>
                 <div class="stat-subtext">10-Minute Intervals</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Total Events</div>
-                <div class="stat-value" id="totalEvents">-</div>
-                <div class="stat-subtext">Blocks + Transfers</div>
+                <div class="stat-label">Current Difficulty</div>
+                <div class="stat-value" id="currentDifficulty">-</div>
+                <div class="stat-subtext">Leading Zeros Required</div>
             </div>
         </div>
 
@@ -535,15 +456,8 @@
             </div>
         </div>
 
-        <div class="section">
-            <div class="section-title">📊 Top Holders</div>
-            <div id="leaderboard">
-                <div class="loading">Loading leaderboard...</div>
-            </div>
-        </div>
-
         <div class="version-footer">
-            Nostrcoin Block Explorer v0.0.5
+            Nostrcoin Block Explorer v0.0.6
         </div>
 
         <div class="about-link">
@@ -590,9 +504,9 @@
         <div class="modal">
             <button class="modal-close" onclick="toggleAboutModal(false)" aria-label="Close">×</button>
             <h3>About Nostrcoin Block Explorer</h3>
-            <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.0.5</p>
+            <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.0.6</p>
             <p style="margin-top:12px;">
-                The Nostrcoin Block Explorer provides real-time network statistics, transaction history, and blockchain data for the Nostrcoin (NSTC) network. View recent blocks, transfers, top holders, and network metrics.
+                The Nostrcoin Block Explorer provides real-time network statistics, transaction history, and blockchain data for the Nostrcoin (NSTC) network. View recent blocks, transfers, and network metrics.
             </p>
             <p style="margin-top:10px;font-size:12px;color:#ff6b6b;">
                 <strong>Disclaimer:</strong> This is for education and fun only. Expect bugs, potential loss of coins, and no monetary value. Do not invest real money.
@@ -630,20 +544,19 @@
         // ============================================
         const INDEXER_CONFIG = {
             indexers: [
-				'http://localhost:3000',  // Your local indexer    
+				'http://localhost:3000',  // Your local indexer
 				'https://vm-182.lnvps.cloud',  // VPS indexer
                 // Add more indexers below (one per line):
                 // 'https://another-indexer.com',
                 // 'https://third-indexer.org',
-            ]
+            ],
+            difficulty: 5  // Expected difficulty (leading zeros)
         };
         // ============================================
         // DO NOT EDIT BELOW THIS LINE
         // ============================================
 
-        let allBalances = {};
         let allEvents = [];
-        let showAllHolders = false;
         let indexerStatus = {}; // Track which indexers are responding
 
         // Bech32 encoding for npub conversion
@@ -756,11 +669,11 @@
 
                 // Use the first valid result (or implement consensus logic)
                 const data = validResults[0].data;
-                
+
                 document.getElementById('totalSupply').textContent = data.totalSupply.toLocaleString();
-                document.getElementById('totalEvents').textContent = data.totalEvents;
                 document.getElementById('currentEpoch').textContent = data.currentEpoch.toLocaleString();
-                
+                document.getElementById('currentDifficulty').textContent = INDEXER_CONFIG.difficulty;
+
                 // Update block height display (calculated from events)
                 const totalBlocks = allEvents.filter(e => e.kind === 30333).length;
                 const blockHeight = totalBlocks > 0 ? totalBlocks - 1 : 0;
@@ -801,12 +714,12 @@
                 }
 
                 // Use the result with the most events (or implement merge logic)
-                const mostEvents = validResults.reduce((max, r) => 
+                const mostEvents = validResults.reduce((max, r) =>
                     r.events.length > max.events.length ? r : max
                 );
-                
+
                 allEvents = mostEvents.events;
-                
+
                 displayRecentBlocks();
                 displayRecentTransfers();
 
@@ -826,106 +739,11 @@
             }
         }
 
-        async function fetchLeaderboard() {
-            try {
-                const pubkeys = new Set();
-                allEvents.forEach(event => {
-                    pubkeys.add(event.pubkey);
-                });
-
-                const balancePromises = Array.from(pubkeys).map(async pubkey => {
-                    // Query all indexers for this pubkey
-                    const indexerPromises = INDEXER_CONFIG.indexers.map(async (indexerUrl) => {
-                        try {
-                            const response = await fetch(`${indexerUrl}/balance/${pubkey}`, { timeout: 5000 });
-                            const data = await response.json();
-                            return { indexerUrl, balance: data.balance, error: null };
-                        } catch (error) {
-                            return { indexerUrl, balance: 0, error: error.message };
-                        }
-                    });
-
-                    const indexerResults = await Promise.all(indexerPromises);
-                    const validResults = indexerResults.filter(r => r.error === null);
-
-                    if (validResults.length === 0) {
-                        return { pubkey, balance: 0 };
-                    }
-
-                    // Use majority consensus or average
-                    const balances = validResults.map(r => r.balance);
-                    const allAgree = balances.every(b => b === balances[0]);
-                    
-                    if (!allAgree) {
-                        console.warn(`Indexers disagree on balance for ${pubkey}:`, validResults);
-                    }
-
-                    // Use the most common balance (majority)
-                    const balance = balances[0];
-                    return { pubkey, balance };
-                });
-
-                const balances = await Promise.all(balancePromises);
-                allBalances = balances.reduce((acc, item) => {
-                    acc[item.pubkey] = item.balance;
-                    return acc;
-                }, {});
-
-                displayLeaderboard(balances);
-            } catch (error) {
-                console.error('Failed to fetch leaderboard:', error);
-            }
-        }
-
-        function displayLeaderboard(balances) {
-            const sorted = balances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance);
-            const container = document.getElementById('leaderboard');
-            
-            if (sorted.length === 0) {
-                container.innerHTML = '<div class="no-data">No holders yet</div>';
-                return;
-            }
-
-            const displayCount = showAllHolders ? Math.min(sorted.length, 25) : Math.min(sorted.length, 3);
-            const hasMore = sorted.length > 3;
-
-            container.innerHTML = sorted.slice(0, displayCount).map((item, index) => {
-                const npub = pubkeyToNpub(item.pubkey);
-                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
-                return `
-                <div class="leaderboard-item">
-                    <div class="rank">${medal || '#' + (index + 1)}</div>
-                    <div class="holder-info">
-                        <div class="holder-pubkey">${npub}</div>
-                    </div>
-                    <div class="holder-balance">${item.balance.toFixed(8)} NSTC</div>
-                </div>
-            `}).join('');
-
-            if (hasMore) {
-                const buttonText = showAllHolders ? 'Show Less' : `Show All Holders (${sorted.length})`;
-                container.innerHTML += `
-                    <button class="show-more-btn" onclick="toggleHolders()">
-                        ${buttonText}
-                    </button>
-                `;
-            }
-        }
-
-        function toggleHolders() {
-            showAllHolders = !showAllHolders;
-            const balances = Object.keys(allBalances).map(pubkey => ({
-                pubkey,
-                balance: allBalances[pubkey]
-            }));
-            displayLeaderboard(balances);
-        }
-
         function displayRecentBlocks() {
             const allBlocks = allEvents.filter(e => e.kind === 30333);
             const blocks = allBlocks.slice(-10).reverse();
             const container = document.getElementById('recentBlocks');
-            
+
             if (blocks.length === 0) {
                 container.innerHTML = '<div class="no-data">No blocks mined yet</div>';
                 return;
@@ -939,7 +757,7 @@
                 const npub = pubkeyToNpub(block.pubkey);
                 const epochNumber = block.epoch !== undefined ? block.epoch : 'N/A';
                 const blockNumber = totalBlocks - index - 1; // Sequential block number starting from 0
-                
+
                 return `
                     <div class="event-item">
                         <div class="event-header">
@@ -960,7 +778,7 @@
         function displayRecentTransfers() {
             const transfers = allEvents.filter(e => e.kind === 30334).slice(-10).reverse();
             const container = document.getElementById('recentTransfers');
-            
+
             if (transfers.length === 0) {
                 container.innerHTML = '<div class="no-data">No transfers yet</div>';
                 return;
@@ -969,141 +787,6 @@
             container.innerHTML = transfers.map(tx => {
                 const date = new Date(tx.created_at * 1000).toLocaleString();
                 const senderNpub = pubkeyToNpub(tx.pubkey);
-                
+
                 // Parse recipient and amount from tags (since indexer doesn't expand them)
-                let recipientHex = null;
-                let amount = null;
-                
-                if (tx.tags && Array.isArray(tx.tags)) {
-                    const recipientTag = tx.tags.find(t => Array.isArray(t) && t[0] === 'p');
-                    const amountTag = tx.tags.find(t => Array.isArray(t) && t[0] === 'amount');
-                    
-                    if (recipientTag && recipientTag[1]) {
-                        recipientHex = recipientTag[1];
-                    }
-                    if (amountTag && amountTag[1]) {
-                        amount = parseFloat(amountTag[1]);
-                    }
-                }
-                
-                let recipientNpub = 'Unknown';
-                if (recipientHex && recipientHex.length === 64) {
-                    try {
-                        recipientNpub = pubkeyToNpub(recipientHex);
-                    } catch (e) {
-                        recipientNpub = recipientHex.substring(0, 16) + '...';
-                    }
-                }
-                
-                const displayAmount = amount && !isNaN(amount) ? amount.toFixed(8) : '0.00000000';
-                
-                return `
-                    <div class="event-item">
-                        <div class="event-header">
-                            <span class="event-type transfer">💸 Transfer</span>
-                            <span class="event-time">${date}</span>
-                        </div>
-                        <div class="event-details">
-                            From: <span class="pubkey">${senderNpub.substring(0, 20)}...</span><br>
-                            To: <span class="pubkey">${recipientNpub.substring(0, 20)}...</span><br>
-                            Amount: <span class="amount">${displayAmount} NSTC</span>
-                        </div>
-                        <div class="event-hash">TX ID: ${tx.id}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function refreshData() {
-            // Fetch events FIRST so we have the data for block height calculation
-            await fetchEvents();
-            await fetchStats();
-            await fetchLeaderboard();
-            updateIndexerStatusDisplay();
-        }
-
-        function toggleMenuModal(show) {
-            const modal = document.getElementById('menuModal');
-            if (show) {
-                modal.classList.add('active');
-                modal.setAttribute('aria-hidden', 'false');
-            } else {
-                modal.classList.remove('active');
-                modal.setAttribute('aria-hidden', 'true');
-            }
-        }
-
-        function toggleJoinNostrModal(show) {
-            const modal = document.getElementById('joinNostrModal');
-            if (show) {
-                modal.classList.add('active');
-                modal.setAttribute('aria-hidden', 'false');
-            } else {
-                modal.classList.remove('active');
-                modal.setAttribute('aria-hidden', 'true');
-            }
-        }
-
-        function toggleAboutModal(show) {
-            const modal = document.getElementById('aboutModal');
-            if (show) {
-                modal.classList.add('active');
-                modal.setAttribute('aria-hidden', 'false');
-            } else {
-                modal.classList.remove('active');
-                modal.setAttribute('aria-hidden', 'true');
-            }
-        }
-
-        function toggleEpochModal(show) {
-            const modal = document.getElementById('epochModal');
-            if (show) {
-                modal.classList.add('active');
-                modal.setAttribute('aria-hidden', 'false');
-            } else {
-                modal.classList.remove('active');
-                modal.setAttribute('aria-hidden', 'true');
-            }
-        }
-
-        window.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                toggleMenuModal(false);
-                toggleJoinNostrModal(false);
-                toggleAboutModal(false);
-                toggleEpochModal(false);
-            }
-        });
-
-        window.addEventListener('click', (event) => {
-            if (event.target === document.getElementById('menuModal')) toggleMenuModal(false);
-            if (event.target === document.getElementById('joinNostrModal')) toggleJoinNostrModal(false);
-            if (event.target === document.getElementById('aboutModal')) toggleAboutModal(false);
-            if (event.target === document.getElementById('epochModal')) toggleEpochModal(false);
-        });
-
-        function updateIndexerStatusDisplay() {
-            const statusDiv = document.getElementById('indexerStatus');
-            const statuses = Object.entries(indexerStatus).map(([url, status]) => {
-                const icon = status === 'online' ? '✓' : '✗';
-                const color = status === 'online' ? '#32CD32' : '#ff6b6b';
-                const shortUrl = url.replace('https://', '').replace('http://', '').split('/')[0];
-                return `<span style="color:${color}">${icon} ${shortUrl}</span>`;
-            });
-            
-            if (statuses.length > 0) {
-                statusDiv.innerHTML = `Indexers: ${statuses.join(' • ')}`;
-            } else {
-                statusDiv.innerHTML = 'No indexers configured';
-            }
-        }
-
-        // Initial load
-        document.addEventListener('DOMContentLoaded', () => {
-            refreshData();
-            // Auto-refresh every 30 seconds
-            setInterval(refreshData, 30000);
-        });
-    </script>
-</body>
-</html>
+                let
