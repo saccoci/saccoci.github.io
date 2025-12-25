@@ -1,12 +1,11 @@
+<!-- nostrcoin wallet v0.1.0 -->
 <!DOCTYPE html>
 <html lang="en">
     <head>
-    <!-- Nostrcoin Wallet v0.1.0 login with nsec, shows correct balance, cannot send NSTC-->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostrcoin (NSTC) Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
-    <!-- Nostr / secp256k1 helper (provides signing + key utils) -->
     <script src="https://unpkg.com/nostr-tools@2.7.0/lib/nostr.bundle.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
@@ -96,7 +95,7 @@
                 <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
             </div>
             <div class="logo">⚡ Nostrcoin Wallet</div>
-            <div class="subtitle">NSTC Wallet • Nostr-native PoW • v0.1.0</div>
+            <div class="subtitle">NSCT Wallet • v0.1.0</div>
         </div>
 
         <button class="refresh-btn" onclick="refreshWallet()" id="refreshBtn" style="display:none;">🔄 Refresh Balance</button>
@@ -217,7 +216,7 @@
             <a href="https://saccoci.github.io/explorer.html" target="_blank" class="modal-link">Explorer</a>
             <a href="https://saccoci.github.io/wallet.html" target="_blank" class="modal-link">Wallet</a>
             <a href="https://nostrcoin.boards.net" target="_blank" class="modal-link">Forum</a>
-            <a href="https://github.com/saccoci" target="_blank" class="modal-link">GitHub Repo</a>
+            <a href="https://github.com/saccoci" target="_blank" class="modal-link">GitHub</a>
             <button class="button button-secondary" style="margin-top:8px;" onclick="toggleMenuModal(false)">Close</button>
         </div>
     </div>
@@ -562,12 +561,8 @@
                     try {
                         const signed = await window.nostr.signEvent(event);
                         await publishToRelays(signed);
-                        showStatus('⛏️ Valid proof-of-work found! Broadcasting to network... (Must be validated by indexers)', 'info');
-
-                        // Show secondary message after 2 seconds
-                        setTimeout(() => {
-                            showStatus('⏳ Waiting for indexer validation... Check your balance in ~10 seconds', 'info');
-                        }, 2000);
+                        // COMBINED AND LENGTHENED STATUS MESSAGE
+                        showStatus('⛏️ Valid proof-of-work found! Broadcasting... (Must be validated by indexers. Check your balance in ~10 seconds)', 'info', 30000);
 
                     } catch (e) {
                         showStatus('Mining event failed: ' + e.message, 'error');
@@ -662,10 +657,11 @@
             }).join('');
         }
 
-        function showStatus(message, type) {
+        // UPDATED showStatus TO SUPPORT CUSTOM TIMEOUT
+        function showStatus(message, type, duration = 5000) {
             const statusDiv = document.getElementById('status');
             statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
-            setTimeout(() => statusDiv.innerHTML = '', 5000);
+            setTimeout(() => statusDiv.innerHTML = '', duration);
         }
 
         async function fetchBalance() {
@@ -1075,4 +1071,3 @@
 </body>
 </html>
 
-<!-- Nostrcoin Wallet v0.1.0 login with nsec, shows correct balance, cannot send NSTC-->
