@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nostrcoin (NSTC) Wallet</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
+    <script src="https://unpkg.com/nostr-tools@2.7.0/lib/nostr.bundle.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a1a;color:#f5f5f5;min-height:100vh;padding:20px}
+        .container{max-width:1200px;margin:0 auto}
+        .header{text-align:center;margin-bottom:40px;padding:30px 0;border-bottom:2px solid #3a3a3a}
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:20px}
+        .header-top-left{display:flex;align-items:center;gap:12px}
+        .hamburger-btn{background:#2a2a2a;border:1px solid #444;color:#f5f5f5;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:20px;line-height:1;transition:all .2s;display:flex;align-items:center;justify-content:center}
+        .hamburger-btn:hover{background:#333;border-color:#32CD32}
+        .menu-modal .modal-link{display:block;padding:12px 16px;color:#f5f5f5;text-decoration:none;border-radius:8px;margin-bottom:8px;transition:all .2s;border:1px solid transparent}
+        .menu-modal .modal-link:hover{background:#333;border-color:#32CD32;color:#32CD32}
+        .menu-modal .modal-link.about-link{color:#f28500}
+        .menu-modal .modal-link.about-link:hover{color:#ff9500;border-color:#f28500}
+        .logo{font-size:42px;font-weight:700;color:#32CD32;margin-bottom:8px}
+        .subtitle{color:#bbb;font-size:16px}
+        .card{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
+        .section{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
+        .section-title{font-size:20px;font-weight:600;color:#f28500;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #444}
+        .balance-amount{font-size:42px;font-weight:700;color:#32CD32;margin:12px 0}
+        .npub-display{font-size:11px;color:#888;font-family:monospace;word-break:break-all;margin-top:8px}
+        .button{width:100%;padding:13px;border-radius:8px;font-size:14px;font-weight:600;border:1px solid transparent;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-bottom:12px}
+        .button-primary{background:#32CD32;color:#1a1a1a;border-color:#32CD32}
+        .button-primary:hover{background:#28b428;border-color:#28b428;transform:translateY(-2px)}
+        #connectExtensionBtn.button-primary:hover{background:#f28500;border-color:#f28500}
+        .button-secondary{background:#2a2a2a;color:#f28500;border:1px solid #f28500}
+        .button-secondary:hover{background:#f28500;color:#1a1a1a}
+        .refresh-btn{background:#32CD32;color:#1a1a1a;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;margin-bottom:20px}
+        .refresh-btn:hover{background:#28b428;transform:translateY(-2px)}
+        .button-refresh{margin-top:10px;padding:8px 16px;background:#32CD32;color:#1a1a1a;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;width:auto;display:inline-block;text-transform:uppercase;letter-spacing:.5px;transition:all .2s}
+        .button-refresh:hover{background:#28b428;transform:translateY(-2px)}
+        .tab-buttons{display:flex;gap:10px;margin-bottom:30px}
+        .tab-btn{flex:1;padding:12px;border-radius:8px;border:1px solid #444;background:#2a2a2a;color:#f5f5f5;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+        .tab-btn.active{background:#f28500;color:#1a1a1a;border-color:#f28500}
+        .tab-btn:hover:not(.active){border-color:#32CD32}
+        .tab-content{display:none}
+        .tab-content.active{display:block}
+        .form-group{margin-bottom:20px}
+        .form-label{font-size:12px;font-weight:600;color:#e0e0e0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+        .form-input{width:100%;padding:12px;border-radius:8px;border:1px solid #444;background:#1a1a1a;color:#f5f5f5;font-family:monospace;font-size:14px}
+        .form-input:focus{outline:none;border-color:#32CD32;box-shadow:0 0 0 2px rgba(50,205,50,.3)}
+        .status{padding:12px;border-radius:8px;border:1px solid #444;background:#2a2a2a;font-size:14px;margin-bottom:20px}
+        .status.success{color:#32CD32;border-color:#32CD32}
+        .status.error{color:#ff6b6b;border-color:#ff6b6b}
+        .status.info{color:#66c2ff;border-color:#66c2ff}
+        .tx-item{background:#333;border:1px solid #444;border-radius:8px;padding:16px;margin-bottom:12px;transition:all .2s;font-size:14px}
+        .tx-item:hover{border-color:#32CD32;transform:translateX(4px)}
+        .tx-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+        .tx-type{font-weight:600;padding:6px 12px;border-radius:6px;font-size:12px;text-transform:uppercase}
+        .tx-type.received{background:#d4edda;color:#155724}
+        .tx-type.sent{background:#f8d7da;color:#721c24}
+        .tx-type.mined{background:#d1ecf1;color:#0c5460}
+        .tx-amount{font-weight:700;color:#32CD32;font-size:16px}
+        .tx-hash{color:#999;font-family:monospace;font-size:12px;line-height:1.6}
+        .mining-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+        .stat-box{background:#333;border:1px solid #444;border-radius:8px;padding:16px;text-align:center}
+        .stat-label{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+        .stat-value{font-size:24px;font-weight:700;color:#f28500}
+        .progress-bar{width:100%;height:10px;border-radius:5px;background:#1a1a1a;border:1px solid #444;overflow:hidden;margin-bottom:16px}
+        .progress-fill{height:100%;background:#f28500;transition:width .1s}
+        .qr-container{background:#1a1a1a;border-radius:8px;border:1px solid #444;padding:24px;text-align:center}
+        #qrcode{margin:0 auto}
+        .version-footer{text-align:center;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-top:30px;padding-top:20px;border-top:1px solid #3a3a3a}
+        .about-link{text-align:center;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-top:6px}
+        .about-link button{background:none;border:none;color:inherit;cursor:pointer;opacity:.7;transition:opacity .2s}
+        .about-link button:hover{opacity:1}
+        .join-nostr-btn{background:#f28500;color:#1a1a1a;border:1px solid #f28500;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;text-decoration:none;display:inline-block;transition:all .2s}
+        .join-nostr-btn:hover{background:#ff9500;border-color:#ff9500;transform:translateY(-2px)}
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:20px;border-bottom:2px solid #3a3a3a}
+        .modal .join-nostr-btn{color:#1a1a1a!important}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;padding:20px;z-index:50}
+        .modal-overlay.active{display:flex}
+        .modal{background:#2a2a2a;border:1px solid #444;border-radius:16px;padding:26px;max-width:380px;width:100%;position:relative}
+        .modal h3{margin-bottom:6px;color:#f5f5f5}
+        .modal p{color:#c0c0c0;font-size:14px;line-height:1.4}
+        .modal a{color:#f28500;text-decoration:none}
+        .modal a:hover{text-decoration:underline}
+        .modal-close{position:absolute;top:10px;right:14px;background:none;border:none;color:#999;font-size:20px;cursor:pointer}
+        .modal-close:hover{color:#fff}
+    </style>
+</head>
+<body>
+        <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <button class="hamburger-btn" onclick="toggleMenuModal(true)" aria-label="Menu">☰</button>
+                <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
+            </div>
+            <div class="logo">⚡ Nostrcoin Wallet</div>
+            <div class="subtitle">NSCT Wallet • v0.1.0</div>
+        </div>
+
+        <button class="refresh-btn" onclick="refreshWallet()" id="refreshBtn" style="display:none;">🔄 Refresh Balance</button>
+
+        <div id="status"></div>
+
+        <div id="indexerStatus" style="font-size:11px;color:#888;margin-bottom:20px;text-align:center;display:none;">
+            Checking indexers...
+        </div>
+
+        <div id="notConnected">
+            <div class="section">
+                <div class="section-title">Connect Wallet</div>
+                <p style="text-align:center;color:#aaa;margin-bottom:12px;">Connect your Nostr wallet to get started</p>
+                <p style="text-align:center;color:#888;font-size:13px;margin-bottom:20px;">Don't have a Nostr account? <button onclick="toggleJoinNostrModal(true)" style="background:none;border:none;color:#f28500;cursor:pointer;text-decoration:underline;font-size:13px;">Learn more about Nostr</button></p>
+                <button class="button button-primary" id="connectExtensionBtn" onclick="connectWallet()">Connect Extension</button>
+                <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Login with nsec</button>
+                <div id="nsecLoginForm" style="display:none;margin-top:20px;">
+                    <div class="form-group">
+                        <label class="form-label">Your nsec (private key)</label>
+                        <input type="password" class="form-input" id="nsecInput" placeholder="nsec1...">
+                        <p style="font-size:12px;color:#ff6b6b;margin-top:8px;">
+                            Your nsec is used locally in this browser to derive your key and sign events. It is never sent to the server.
+                            Only paste an nsec if you fully understand the risks.
+                        </p>
+                    </div>
+                    <button class="button button-primary" onclick="loginWithNsec()">Login with nsec</button>
+                    <button class="button button-secondary" onclick="toggleNsecLogin()" style="margin-top:12px;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="connected" style="display:none;">
+            <div class="balance-card" style="background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:32px;margin-bottom:30px;text-align:center;">
+                <div style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Balance</div>
+                <div class="balance-amount" id="balanceAmount">0.00000000</div>
+                <div style="font-size:13px;color:#aaa;margin-bottom:12px;" id="balanceSubtext">Connected</div>
+                <div class="npub-display" id="npubDisplay">npub...</div>
+            </div>
+
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('send')">💸 Send</button>
+                <button class="tab-btn" onclick="switchTab('mine')">⛏️ Mine</button>
+                <button class="tab-btn" onclick="switchTab('history')">📜 History</button>
+                <button class="tab-btn" onclick="switchTab('qr')">📱 Receive</button>
+            </div>
+
+            <div id="send" class="tab-content active">
+                <div class="section">
+                    <div class="section-title">💸 Send NSTC</div>
+                    <div class="form-group">
+                        <label class="form-label">Recipient npub</label>
+                        <input type="text" class="form-input" id="recipientNpub" placeholder="npub1...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Amount (NSTC)</label>
+                        <input type="number" class="form-input" id="sendAmount" placeholder="0.00000000" step="0.00000001">
+                    </div>
+                    <button class="button button-primary" onclick="sendTransaction()">Send NSTC</button>
+                </div>
+            </div>
+
+            <div id="mine" class="tab-content">
+                <div class="section">
+                    <div class="section-title">⛏️ Mining</div>
+                    <p style="text-align:center;font-size:13px;color:#aaa;margin-bottom:20px;">Difficulty 4 • Reward 50 NSTC</p>
+                    <div class="mining-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Hash Rate</div>
+                            <div class="stat-value" id="hashRate">0 H/s</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Attempts</div>
+                            <div class="stat-value" id="attempts">0</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+                    <button class="button button-primary" id="mineBtn" onclick="startMining()">Start Mining</button>
+                </div>
+            </div>
+
+            <div id="history" class="tab-content">
+                <div class="section">
+                    <div class="section-title">📜 Transaction History</div>
+                    <div id="historyList">
+                        <div style="text-align:center;color:#888;padding:30px;">No transactions yet</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="qr" class="tab-content">
+                <div class="section">
+                    <div class="section-title">📱 Receive NSTC</div>
+                    <div class="qr-container">
+                        <div id="qrcode"></div>
+                        <p style="margin-top:16px;font-size:13px;color:#aaa;">Share to receive NSTC</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="button button-secondary" onclick="disconnectWallet()" style="margin-top:30px;">Disconnect Wallet</button>
+        </div>
+
+        <div class="version-footer">
+            Nostrcoin Wallet v0.1.0
+        </div>
+
+        <div class="about-link">
+            <button type="button" onclick="toggleAboutModal(true)">About</button>
+        </div>
+    </div>
+
+    <div id="menuModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal menu-modal">
+            <button class="modal-close" onclick="toggleMenuModal(false)" aria-label="Close">×</button>
+            <h3>Menu</h3>
+            <a href="https://saccoci.github.io/explorer.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
+            <a href="https://saccoci.github.io/wallet.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
+            <a href="https://nostrcoin.boards.net" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
+            <a href="https://github.com/saccoci" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+            <button class="button button-secondary" style="margin-top:8px;" onclick="toggleMenuModal(false)">Close</button>
+        </div>
+    </div>
+
+    <div id="joinNostrModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal">
+            <button class="modal-close" onclick="toggleJoinNostrModal(false)" aria-label="Close">×</button>
+            <h3>What is Nostr?</h3>
+            <p style="margin-top:12px;">
+                <strong>Nostr</strong> (Notes and Other Stuff Transmitted by Relays) is a decentralized social protocol that enables global, decentralized, and censorship-resistant social networking.
+            </p>
+            <p style="margin-top:12px;">
+                <strong>Why do I need Nostr for Nostrcoin?</strong> Nostrcoin is built on top of Nostr's event system. Since Nostrcoin uses Nostr events for its blockchain (mining events and transfer events), you need a Nostr account to use the wallet and interact with the network.
+            </p>
+            <p style="margin-top:12px;">
+                To get started with Nostrcoin, you'll need to:
+            </p>
+            <ul style="margin-top:8px;margin-left:20px;line-height:1.8;">
+                <li>Create a Nostr account</li>
+                <li>Install a Nostr signing extension to your web browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others)</li>
+            </ul>
+            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Join Nostr</a>
+            <button class="button button-secondary" style="margin-top:16px;" onclick="toggleJoinNostrModal(false)">Close</button>
+        </div>
+    </div>
+
+    <div id="aboutModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal">
+            <button class="modal-close" onclick="toggleAboutModal(false)" aria-label="Close">×</button>
+            <h3>About Nostrcoin</h3>
+            <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.1.0</p>
+            <p style="margin-top:12px;">
+                Nostrcoin is an experimental, Nostr-native proof-of-work cryptocurrency. It is for education and fun only. This wallet allows you to send, receive, and mine NSTC.
+            </p>
+            <p style="margin-top:12px;">
+                <strong>About Nostr:</strong> Nostrcoin is built on <strong>Nostr</strong> (Notes and Other Stuff Transmitted by Relays), a decentralized social protocol. Nostr is an open protocol that enables global, decentralized, and censorship-resistant social networking. Since Nostrcoin uses Nostr events for its blockchain, you need a Nostr account to use the wallet and interact with the network.
+            </p>
+            <p style="margin-top:12px;">
+                To get started, you'll need two things: (1) a Nostr account. (2) A Nostr signing extension for your browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others).
+            </p>
+            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:12px;text-align:center;display:block;">Join Nostr</a>
+            <p style="margin-top:12px;font-size:12px;color:#ff6b6b;">
+                <strong>Disclaimer:</strong> This is for education and fun only. Expect bugs, potential loss of coins, and no monetary value. Do not invest real money.
+            </p>
+            <button class="button button-secondary" style="margin-top:16px;" onclick="toggleAboutModal(false)">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION - SAFE TO EDIT
+        // ============================================
+        const INDEXER_CONFIG = {
+            indexers: [
+                'http://localhost:3000',  // Your local indexer
+				'https://vm-182.lnvps.cloud',  // VPS indexer
+                // Add more indexers below (one per line):
+                // 'https://another-indexer.com',
+                // 'https://third-indexer.org',
+            ],
+            relays: [
+                'wss://relay.damus.io',
+                'wss://nos.lol',
+                'wss://relay.nostr.band',
+                'wss://nostr.mom'
+            ]
+        };
+        // ============================================
+        // DO NOT EDIT BELOW THIS LINE
+        // ============================================
+
+        const CONFIG = {
+            protocolTag: 'nostrcoin',
+            difficulty: 4,
+            eventKinds: {
+                mining: 30333,
+                transfer: 30334
+            }
+        };
+
+        const state = {
+            pubkeyHex: null,
+            npub: null,
+            balance: 0,
+            transactions: [],
+            mining: false,
+            hashesPerSecond: 0,
+            indexerStatus: {} // Track which indexers are responding
+        };
+
+        // Keep track of whether we're using an in-page nsec signer
+        let originalNostr = null;
+        let usingNsecLogin = false;
+        let nsecPrivKeyHex = null;
+
+        function toggleMenuModal(show) {
+            const modal = document.getElementById('menuModal');
+            if (show) {
+                modal.classList.add('active');
+                modal.setAttribute('aria-hidden', 'false');
+            } else {
+                modal.classList.remove('active');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        }
+
+        function toggleJoinNostrModal(show) {
+            const modal = document.getElementById('joinNostrModal');
+            if (show) {
+                modal.classList.add('active');
+                modal.setAttribute('aria-hidden', 'false');
+            } else {
+                modal.classList.remove('active');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        }
+
+        function toggleAboutModal(show) {
+            const modal = document.getElementById('aboutModal');
+            if (show) {
+                modal.classList.add('active');
+                modal.setAttribute('aria-hidden', 'false');
+            } else {
+                modal.classList.remove('active');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        }
+
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                toggleMenuModal(false);
+                toggleJoinNostrModal(false);
+                toggleAboutModal(false);
+            }
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === document.getElementById('menuModal')) toggleMenuModal(false);
+            if (event.target === document.getElementById('joinNostrModal')) toggleJoinNostrModal(false);
+            if (event.target === document.getElementById('aboutModal')) toggleAboutModal(false);
+        });
+
+        async function connectWallet() {
+            if (!window.nostr) {
+                showStatus('No Nostr extension found', 'error');
+                return;
+            }
+
+            try {
+                const pubkeyHex = await window.nostr.getPublicKey();
+                state.pubkeyHex = pubkeyHex;
+                state.npub = pubkeyToNpub(pubkeyHex);
+
+                await onWalletConnected();
+            } catch (error) {
+                showStatus('Failed to connect: ' + error.message, 'error');
+            }
+        }
+
+        async function onWalletConnected() {
+            if (!state.pubkeyHex) {
+                throw new Error('No pubkey set on state');
+            }
+
+            state.npub = state.npub || pubkeyToNpub(state.pubkeyHex);
+
+            document.getElementById('npubDisplay').textContent = state.npub;
+            document.getElementById('balanceSubtext').textContent = 'Connected to Nostr';
+
+            document.getElementById('notConnected').style.display = 'none';
+            document.getElementById('connected').style.display = 'block';
+            document.getElementById('refreshBtn').style.display = 'block';
+            document.getElementById('indexerStatus').style.display = 'block';
+
+            await fetchBalance();
+            await fetchHistory();
+            updateUI();
+
+            try {
+                if (typeof QRCode !== 'undefined') {
+                    document.getElementById('qrcode').innerHTML = '';
+                    new QRCode(document.getElementById('qrcode'), {
+                        text: 'nostr:' + state.npub,
+                        width: 200,
+                        height: 200,
+                        colorDark: "#f5f5f5",
+                        colorLight: "#1a1a1a"
+                    });
+                }
+            } catch (e) {
+                console.error('QR code generation failed:', e);
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function refreshWallet() {
+            showStatus('🔄 Refreshing...', 'info');
+            await fetchBalance();
+            await fetchHistory();
+            updateUI();
+            showStatus('✓ Updated', 'success');
+        }
+
+        async function sendTransaction() {
+            const recipientInput = document.getElementById('recipientNpub').value.trim();
+            const amount = parseFloat(document.getElementById('sendAmount').value);
+
+            if (!recipientInput) return showStatus('Please enter recipient npub', 'error');
+            if (isNaN(amount) || amount <= 0) return showStatus('Enter a valid amount', 'error');
+            if (amount > state.balance) return showStatus('Insufficient balance', 'error');
+
+            if (!window.nostr) {
+                showStatus('Extension required to send transactions', 'error');
+                return;
+            }
+
+            try {
+                let recipientHex;
+                if (recipientInput.startsWith('npub1')) {
+                    recipientHex = npubToHex(recipientInput);
+                    if (!recipientHex) {
+                        return showStatus('Invalid npub format', 'error');
+                    }
+                } else if (recipientInput.length === 64) {
+                    recipientHex = recipientInput;
+                } else {
+                    return showStatus('Invalid recipient format. Use npub or hex pubkey', 'error');
+                }
+
+                const event = {
+                    kind: CONFIG.eventKinds.transfer,
+                    created_at: Math.floor(Date.now() / 1000),
+                    tags: [
+                        ['protocol', CONFIG.protocolTag],
+                        ['p', recipientHex],
+                        ['amount', amount.toFixed(8)]
+                    ],
+                    content: `Sending ${amount} NSTC`
+                };
+
+                console.log('Signing event:', event);
+                let signedEvent;
+                try {
+                    signedEvent = await window.nostr.signEvent(event);
+                    console.log('Signed event:', signedEvent);
+                    if (!signedEvent || !signedEvent.id || !signedEvent.sig) {
+                        throw new Error('Event signing failed: missing id or sig');
+                    }
+                } catch (signError) {
+                    console.error('Error signing event:', signError);
+                    throw new Error('Failed to sign transaction: ' + (signError.message || signError));
+                }
+
+                console.log('Publishing to relays...');
+                await publishToRelays(signedEvent);
+                console.log('Published to relays');
+
+                document.getElementById('recipientNpub').value = '';
+                document.getElementById('sendAmount').value = '';
+                showStatus(`💸 Transfer broadcast! ${amount} NSTC sent`, 'success');
+
+                // AUTO-REFRESH balance after 3 seconds
+                setTimeout(async () => {
+                    await fetchBalance();
+                    updateUI();
+                    showStatus('✔ Balance updated', 'info');
+                }, 3000);
+
+                // AUTO-REFRESH history after 5 seconds (gives indexers more time)
+                setTimeout(async () => {
+                    await fetchHistory();
+                    updateHistoryDisplay();
+                }, 5000);
+            } catch (error) {
+                showStatus('Transaction failed: ' + error.message, 'error');
+            }
+        }
+
+        async function publishToRelays(event) {
+            const promises = INDEXER_CONFIG.relays.map(relay => new Promise((resolve) => {
+                const ws = new WebSocket(relay);
+                ws.onopen = () => {
+                    ws.send(JSON.stringify(['EVENT', event]));
+                    ws.close();
+                    resolve();
+                };
+                ws.onerror = () => resolve();
+                setTimeout(() => {
+                    ws.close();
+                    resolve();
+                }, 5000);
+            }));
+            await Promise.allSettled(promises);
+        }
+
+        async function startMining() {
+            if (!window.nostr) {
+                showStatus('Extension required for mining', 'error');
+                return;
+            }
+
+            if (state.mining) {
+                state.mining = false;
+                document.getElementById('mineBtn').textContent = 'Start Mining';
+                return;
+            }
+
+            state.mining = true;
+            document.getElementById('mineBtn').textContent = 'Mining...';
+            showStatus('Mining started... Looking for valid proof-of-work', 'info');
+
+            const difficulty = CONFIG.difficulty;
+            const target = '0'.repeat(difficulty);
+            let attempts = 0;
+            const startTime = Date.now();
+
+            while (state.mining) {
+                const nonce = Math.random().toString(36).substring(2);
+                const event = {
+                    kind: CONFIG.eventKinds.mining,
+                    created_at: Math.floor(Date.now() / 1000),
+                    tags: [
+                        ['protocol', CONFIG.protocolTag],
+                        ['difficulty', difficulty.toString()],
+                        ['nonce', nonce]
+                    ],
+                    content: 'Mining NSTC',
+                    pubkey: state.pubkeyHex
+                };
+
+                const eventId = await calculateEventId(event);
+                event.id = eventId;
+                attempts++;
+
+                if (eventId.startsWith(target)) {
+                    try {
+                        const signed = await window.nostr.signEvent(event);
+                        await publishToRelays(signed);
+                        // COMBINED AND LENGTHENED STATUS MESSAGE
+                        showStatus('⛏️ Valid proof-of-work found! Broadcasting... (Must be validated by indexers. Check your balance in ~10 seconds)', 'info', 30000);
+
+                    } catch (e) {
+                        showStatus('Mining event failed: ' + e.message, 'error');
+                    }
+                    state.mining = false;
+                    document.getElementById('mineBtn').textContent = 'Start Mining';
+                    document.getElementById('progressFill').style.width = '100%';
+                    setTimeout(async () => {
+                        document.getElementById('progressFill').style.width = '0%';
+                        document.getElementById('hashRate').textContent = '0 H/s';
+                        document.getElementById('attempts').textContent = '0';
+                        await fetchBalance();
+                        await fetchHistory();
+                        updateUI();
+                    }, 3000);
+                    break;
+                }
+
+                if (attempts % 1000 === 0) {
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    state.hashesPerSecond = Math.round(attempts / elapsed);
+                    document.getElementById('hashRate').textContent = state.hashesPerSecond + ' H/s';
+                    document.getElementById('attempts').textContent = attempts.toLocaleString();
+                    document.getElementById('progressFill').style.width = Math.min(100, (attempts % 10000) / 100) + '%';
+                }
+
+                await new Promise(r => setTimeout(r, 0));
+            }
+        }
+
+        async function calculateEventId(event) {
+            const serialized = JSON.stringify([
+                0,
+                event.pubkey,
+                event.created_at,
+                event.kind,
+                event.tags,
+                event.content
+            ]);
+            return hashSha(serialized);
+        }
+
+        async function hashSha(data) {
+            const encoded = new TextEncoder().encode(data);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function updateHistoryDisplay() {
+            const list = document.getElementById('historyList');
+            if (!state.transactions.length) {
+                list.innerHTML = '<div style="text-align:center;color:#888;padding:30px;">No transactions yet</div>';
+                return;
+            }
+            const sortedTx = [...state.transactions].reverse();
+            list.innerHTML = sortedTx.map(tx => {
+                const date = new Date(tx.timestamp * 1000).toLocaleString();
+                const sign = tx.type === 'sent' ? '-' : '+';
+
+                let recipientStr = '';
+                if (tx.recipient) {
+                    try {
+                        const npub = pubkeyToNpub(tx.recipient);
+                        recipientStr = npub.substring(0, 10) + '...' + npub.substring(npub.length - 8);
+                    } catch(e) {
+                        recipientStr = tx.recipient.substring(0, 16) + '...';
+                    }
+                }
+
+                let senderStr = '';
+                if (tx.sender) {
+                    try {
+                        const npub = pubkeyToNpub(tx.sender);
+                        senderStr = npub.substring(0, 10) + '...' + npub.substring(npub.length - 8);
+                    } catch(e) {
+                        senderStr = tx.sender.substring(0, 16) + '...';
+                    }
+                }
+
+                return `
+                    <div class="tx-item">
+                        <div class="tx-header">
+                            <span class="tx-type ${tx.type}">${tx.type.toUpperCase()}</span>
+                            <span class="tx-amount">${sign}${tx.amount.toFixed(8)} NSTC</span>
+                        </div>
+                        <div class="tx-hash" style="margin-bottom:4px;">${date}</div>
+                        ${tx.recipient ? `<div class="tx-hash">To: ${recipientStr}</div>` : ''}
+                        ${tx.sender ? `<div class="tx-hash">From: ${senderStr}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // UPDATED showStatus TO SUPPORT CUSTOM TIMEOUT
+        function showStatus(message, type, duration = 5000) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => statusDiv.innerHTML = '', duration);
+        }
+
+        async function fetchBalance() {
+            try {
+                // Query all indexers in parallel
+                const promises = INDEXER_CONFIG.indexers.map(async (indexerUrl) => {
+                    try {
+                        const response = await fetch(`${indexerUrl}/balance/${state.pubkeyHex}`, { timeout: 5000 });
+                        const data = await response.json();
+                        state.indexerStatus[indexerUrl] = 'online';
+                        return { indexerUrl, balance: data.balance || 0, error: null };
+                    } catch (error) {
+                        state.indexerStatus[indexerUrl] = 'offline';
+                        return { indexerUrl, balance: 0, error: error.message };
+                    }
+                });
+
+                const results = await Promise.all(promises);
+                const validResults = results.filter(r => r.error === null);
+
+                if (validResults.length === 0) {
+                    console.error('All indexers failed to respond');
+                    state.balance = 0;
+                    document.getElementById('balanceAmount').textContent = '0.00000000';
+                    return;
+                }
+
+                // Check for disagreements
+                const balances = validResults.map(r => r.balance);
+                const allAgree = balances.every(b => Math.abs(b - balances[0]) < 0.00000001);
+
+                if (!allAgree) {
+                    console.warn('Indexers disagree on balance:', validResults);
+                    showStatus('⚠️ Indexers showing different balances', 'info');
+                }
+
+                // Use the most common balance (or first valid one)
+                state.balance = balances[0];
+                document.getElementById('balanceAmount').textContent = state.balance.toFixed(8);
+
+                updateIndexerStatusDisplay();
+            } catch (error) {
+                console.error('Failed to fetch balance', error);
+            }
+        }
+
+        async function fetchHistory() {
+            try {
+                // Query all indexers in parallel
+                const promises = INDEXER_CONFIG.indexers.map(async (indexerUrl) => {
+                    try {
+                        const response = await fetch(`${indexerUrl}/history/${state.pubkeyHex}`, { timeout: 5000 });
+                        const data = await response.json();
+                        return { indexerUrl, history: data.history || [], error: null };
+                    } catch (error) {
+                        return { indexerUrl, history: [], error: error.message };
+                    }
+                });
+
+                const results = await Promise.all(promises);
+                const validResults = results.filter(r => r.error === null);
+
+                if (validResults.length === 0) {
+                    console.error('All indexers failed to return history');
+                    state.transactions = [];
+                    return;
+                }
+
+                // Use the result with the most transactions
+                const mostTxs = validResults.reduce((max, r) =>
+                    r.history.length > max.history.length ? r : max
+                );
+
+                state.transactions = mostTxs.history;
+
+                // Check for disagreements
+                if (validResults.length > 1) {
+                    const txCounts = validResults.map(r => r.history.length);
+                    const allAgree = txCounts.every(c => c === txCounts[0]);
+                    if (!allAgree) {
+                        console.warn('Indexers have different transaction counts:', validResults.map(r => ({
+                            indexer: r.indexerUrl,
+                            count: r.history.length
+                        })));
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch history', error);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('balanceAmount').textContent = state.balance.toFixed(8);
+            updateHistoryDisplay();
+            updateIndexerStatusDisplay();
+        }
+
+        function updateIndexerStatusDisplay() {
+            const statusDiv = document.getElementById('indexerStatus');
+            if (!statusDiv) return;
+
+            const statuses = Object.entries(state.indexerStatus).map(([url, status]) => {
+                const icon = status === 'online' ? '✓' : '✗';
+                const color = status === 'online' ? '#32CD32' : '#ff6b6b';
+                const shortUrl = url.replace('https://', '').replace('http://', '').split('/')[0];
+                return `<span style="color:${color}">${icon} ${shortUrl}</span>`;
+            });
+
+            if (statuses.length > 0) {
+                statusDiv.innerHTML = `Indexers: ${statuses.join(' • ')}`;
+            } else {
+                statusDiv.innerHTML = 'No indexers configured';
+            }
+        }
+
+        function toggleNsecLogin() {
+            const form = document.getElementById('nsecLoginForm');
+            const input = document.getElementById('nsecInput');
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+                if (input) input.value = '';
+            } else {
+                form.style.display = 'none';
+                if (input) input.value = '';
+            }
+        }
+
+        function bytesToHex(bytes) {
+            return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function createNsecSigner(privKeyHex) {
+            if (typeof NostrTools === 'undefined') {
+                throw new Error('nostr-tools library not loaded; cannot use nsec login');
+            }
+
+            const pubkey = NostrTools.getPublicKey(privKeyHex);
+            console.log('Created nsec signer with pubkey:', pubkey);
+
+            return {
+                getPublicKey: async () => pubkey,
+                signEvent: async (event) => {
+                    try {
+                        const ev = { ...event };
+                        // Ensure pubkey is present
+                        ev.pubkey = ev.pubkey || pubkey;
+
+                        console.log('Signing event with nsec signer:', ev);
+
+                        // Method 1: Try finalizeEvent (nostr-tools v2+)
+                        if (typeof NostrTools.finalizeEvent === 'function') {
+                            try {
+                                const signed = NostrTools.finalizeEvent(ev, privKeyHex);
+                                console.log('finalizeEvent succeeded:', signed);
+                                if (signed && signed.id && signed.sig) {
+                                    return signed;
+                                }
+                            } catch (e) {
+                                console.warn('finalizeEvent failed, trying alternatives:', e);
+                            }
+                        }
+
+                        // Method 2: Use getEventHash + getSignature (most reliable)
+                        if (typeof NostrTools.getEventHash === 'function' && typeof NostrTools.getSignature === 'function') {
+                            if (!ev.id) {
+                                ev.id = NostrTools.getEventHash(ev);
+                            }
+                            ev.sig = NostrTools.getSignature(ev, privKeyHex);
+                            console.log('getEventHash + getSignature succeeded:', ev);
+                            if (ev.id && ev.sig) {
+                                return ev;
+                            }
+                        }
+
+                        // Method 3: Use getEventHash + signEvent (legacy)
+                        if (typeof NostrTools.getEventHash === 'function') {
+                            if (!ev.id) {
+                                ev.id = NostrTools.getEventHash(ev);
+                            }
+                        }
+
+                        if (typeof NostrTools.signEvent === 'function') {
+                            ev.sig = NostrTools.signEvent(ev, privKeyHex);
+                            console.log('getEventHash + signEvent succeeded:', ev);
+                            if (ev.id && ev.sig) {
+                                return ev;
+                            }
+                        }
+
+                        // If we get here, nothing worked
+                        const available = [];
+                        if (typeof NostrTools.finalizeEvent === 'function') available.push('finalizeEvent');
+                        if (typeof NostrTools.getEventHash === 'function') available.push('getEventHash');
+                        if (typeof NostrTools.getSignature === 'function') available.push('getSignature');
+                        if (typeof NostrTools.signEvent === 'function') available.push('signEvent');
+
+                        throw new Error(`Cannot sign event. Available functions: ${available.join(', ')}. Event: ${JSON.stringify(ev)}`);
+                    } catch (error) {
+                        console.error('Error in nsec signEvent:', error);
+                        throw error;
+                    }
+                }
+            };
+        }
+
+        async function loginWithNsec() {
+            try {
+                const input = document.getElementById('nsecInput');
+                const nsec = (input.value || '').trim();
+
+                if (!nsec) {
+                    showStatus('Please paste your nsec', 'error');
+                    return;
+                }
+
+                if (!nsec.startsWith('nsec1')) {
+                    showStatus('Invalid nsec format (must start with nsec1)', 'error');
+                    return;
+                }
+
+                if (typeof NostrTools === 'undefined' || !NostrTools.nip19) {
+                    showStatus('nostr-tools not available; cannot use nsec login.', 'error');
+                    return;
+                }
+
+                let decoded;
+                try {
+                    decoded = NostrTools.nip19.decode(nsec);
+                } catch (e) {
+                    console.error('Failed to decode nsec:', e);
+                    showStatus('Failed to decode nsec. Please check it and try again.', 'error');
+                    return;
+                }
+
+                if (!decoded || decoded.type !== 'nsec' || !decoded.data) {
+                    showStatus('Provided key is not a valid nsec.', 'error');
+                    return;
+                }
+
+                let privKeyHex;
+                if (typeof decoded.data === 'string') {
+                    privKeyHex = decoded.data;
+                } else if (decoded.data instanceof Uint8Array || Array.isArray(decoded.data)) {
+                    privKeyHex = bytesToHex(decoded.data);
+                } else {
+                    showStatus('Unsupported nsec format.', 'error');
+                    return;
+                }
+
+                if (!/^[0-9a-fA-F]{64}$/.test(privKeyHex)) {
+                    showStatus('Decoded nsec did not produce a valid 32-byte private key.', 'error');
+                    return;
+                }
+
+                // Prepare signer and state
+                nsecPrivKeyHex = privKeyHex;
+                const pubkeyHex = NostrTools.getPublicKey(privKeyHex);
+                state.pubkeyHex = pubkeyHex;
+
+                // Preserve any existing extension so we can restore on disconnect
+                if (!originalNostr && typeof window.nostr !== 'undefined') {
+                    originalNostr = window.nostr;
+                }
+
+                window.nostr = createNsecSigner(privKeyHex);
+                usingNsecLogin = true;
+
+                await onWalletConnected();
+                toggleNsecLogin(); // hide form
+
+                showStatus('Logged in with nsec. Signing is done locally in your browser.', 'success');
+            } catch (error) {
+                console.error('nsec login failed:', error);
+                showStatus('nsec login failed: ' + (error.message || error), 'error');
+            }
+        }
+
+        function disconnectWallet() {
+            state.pubkeyHex = null;
+            state.npub = null;
+            state.balance = 0;
+            state.transactions = [];
+            state.mining = false;
+
+            // Restore original nostr provider (if any) when disconnecting nsec login
+            if (usingNsecLogin) {
+                if (originalNostr) {
+                    window.nostr = originalNostr;
+                } else {
+                    // If there was no original extension, remove our shim
+                    try {
+                        delete window.nostr;
+                    } catch (e) {
+                        window.nostr = undefined;
+                    }
+                }
+                usingNsecLogin = false;
+                nsecPrivKeyHex = null;
+            }
+
+            document.getElementById('connected').style.display = 'none';
+            document.getElementById('notConnected').style.display = 'block';
+            document.getElementById('refreshBtn').style.display = 'none';
+            document.getElementById('indexerStatus').style.display = 'none';
+
+            showStatus('Wallet disconnected', 'info');
+        }
+
+        function pubkeyToNpub(hexPubkey) {
+            const bytes = hexToBytes(hexPubkey);
+            const converted = convertBits(bytes, 8, 5);
+            if (!converted) throw new Error('Failed to encode npub');
+            return bech32Encode('npub', converted);
+        }
+
+        function npubToHex(npub) {
+            try {
+                if (!npub.startsWith('npub1')) return null;
+                const data = npub.substring(5);
+                const decoded = [];
+                for (let i = 0; i < data.length - 6; i++) {
+                    const idx = CHARSET.indexOf(data[i]);
+                    if (idx === -1) return null;
+                    decoded.push(idx);
+                }
+                const converted = convertBits(decoded, 5, 8, false);
+                if (!converted) return null;
+                return converted.map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch (e) {
+                console.error('Failed to decode npub:', e);
+                return null;
+            }
+        }
+
+        const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+
+        function hexToBytes(hex) {
+            const bytes = [];
+            for (let i = 0; i < hex.length; i += 2) {
+                bytes.push(parseInt(hex.substr(i, 2), 16));
+            }
+            return bytes;
+        }
+
+        function convertBits(data, fromBits, toBits, pad = true) {
+            let acc = 0;
+            let bits = 0;
+            const result = [];
+            const maxv = (1 << toBits) - 1;
+            const max_acc = (1 << (fromBits + toBits - 1)) - 1;
+            for (let value of data) {
+                if (value < 0 || (value >> fromBits)) return null;
+                acc = ((acc << fromBits) | value) & max_acc;
+                bits += fromBits;
+                while (bits >= toBits) {
+                    bits -= toBits;
+                    result.push((acc >> bits) & maxv);
+                }
+            }
+            if (pad) {
+                if (bits) result.push((acc << (toBits - bits)) & maxv);
+            } else if (bits >= fromBits || ((acc << (toBits - bits)) & maxv)) {
+                return null;
+            }
+            return result;
+        }
+
+        function bech32Encode(hrp, data) {
+            const checksum = createChecksum(hrp, data);
+            const values = data.concat(checksum);
+            return hrp + '1' + values.map(v => CHARSET[v]).join('');
+        }
+
+        function createChecksum(hrp, data) {
+            const values = hrpExpand(hrp).concat(data);
+            const polymodResult = polymod(values.concat([0, 0, 0, 0, 0, 0])) ^ 1;
+            const checksum = [];
+            for (let p = 0; p < 6; ++p) {
+                checksum.push((polymodResult >> 5 * (5 - p)) & 31);
+            }
+            return checksum;
+        }
+
+        function polymod(values) {
+            const GENERATORS = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
+            let chk = 1;
+            for (let p = 0; p < values.length; ++p) {
+                const top = chk >> 25;
+                chk = (chk & 0x1ffffff) << 5 ^ values[p];
+                for (let i = 0; i < 5; i++) {
+                    if ((top >> i) & 1) {
+                        chk ^= GENERATORS[i];
+                    }
+                }
+            }
+            return chk;
+        }
+
+        function hrpExpand(hrp) {
+            const ret = [];
+            for (let i = 0; i < hrp.length; i++) ret.push(hrp.charCodeAt(i) >> 5);
+            ret.push(0);
+            for (let i = 0; i < hrp.length; i++) ret.push(hrp.charCodeAt(i) & 31);
+            return ret;
+        }
+    </script>
+</body>
+</html>
