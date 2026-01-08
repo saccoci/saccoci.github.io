@@ -80,15 +80,15 @@
         </div>
 
         <div class="section">
-            <div class="section-title">🔍 Search Block History</div>
+            <div class="section-title">🔍 Search</div>
             <div class="search-container">
-                <input type="number" id="blockSearchInput" class="search-input" placeholder="Enter block number, such as 0 for the Genesis Block...">
-                <button class="search-btn" onclick="searchBlock()">Search</button>
+                <input type="text" id="searchInput" class="search-input" placeholder="Enter block number (e.g., 0) or npub (e.g., npub1...)" onkeypress="if(event.key==='Enter') unifiedSearch()">
+                <button class="search-btn" onclick="unifiedSearch()">Search</button>
             </div>
             <div id="searchResult"></div>
 
-            <div style="margin-top:20px;">
-                <h4 style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase;">Last 10 Blocks</h4>
+            <div style="margin-top:30px;">
+                <div class="section-title">⛏️ Last 10 Blocks</div>
                 <div id="fullBlockHistory"></div>
             </div>
         </div>
@@ -175,7 +175,27 @@
         });
 
         function hexToBytes(hex) { const bytes = []; for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substr(i, 2), 16)); return bytes; }
-        function convertBits(data, fromBits, toBits, pad = true) { let acc = 0, bits = 0; const result = []; const maxv = (1 << toBits) - 1; for (let v of data) { acc = (acc << fromBits) | v; bits += fromBits; while (bits >= toBits) { bits -= toBits; result.push((acc >> bits) & maxv); } } if (pad && bits) result.push((acc << (toBits - bits)) & maxv); return result; }
+        function convertBits(data, fromBits, toBits, pad = true) {
+            let acc = 0, bits = 0;
+            const result = [];
+            const maxv = (1 << toBits) - 1;
+            const max_acc = (1 << (fromBits + toBits - 1)) - 1;
+            for (let v of data) {
+                if (v < 0 || (v >> fromBits)) return null;
+                acc = ((acc << fromBits) | v) & max_acc;
+                bits += fromBits;
+                while (bits >= toBits) {
+                    bits -= toBits;
+                    result.push((acc >> bits) & maxv);
+                }
+            }
+            if (pad) {
+                if (bits) result.push((acc << (toBits - bits)) & maxv);
+            } else if (bits >= fromBits || ((acc << (toBits - bits)) & maxv)) {
+                return null;
+            }
+            return result;
+        }
         function polymod(v) { const G = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3]; let chk = 1; for (let p=0; p<v.length; ++p) { let top = chk >> 25; chk = (chk & 0x1ffffff) << 5 ^ v[p]; for (let i=0; i<5; i++) if ((top >> i) & 1) chk ^= G[i]; } return chk; }
         function hrpExpand(h) { let r = []; for (let i=0; i<h.length; i++) r.push(h.charCodeAt(i) >> 5); r.push(0); for (let i=0; i<h.length; i++) r.push(h.charCodeAt(i) & 31); return r; }
 
@@ -189,6 +209,25 @@
 
         function toNpub(hex) { return bech32Encode("npub", convertBits(hexToBytes(hex), 8, 5)); }
         function toNevent(hexId) { return bech32Encode("nevent", convertBits([0, 32, ...hexToBytes(hexId)], 8, 5)); }
+
+        function npubToHex(npub) {
+            try {
+                if (!npub.startsWith('npub1')) return null;
+                const data = npub.substring(5);
+                const decoded = [];
+                for (let i = 0; i < data.length - 6; i++) {
+                    const idx = CHARSET.indexOf(data[i]);
+                    if (idx === -1) return null;
+                    decoded.push(idx);
+                }
+                const converted = convertBits(decoded, 5, 8, false);
+                if (!converted) return null;
+                return converted.map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch (e) {
+                console.error('Failed to decode npub:', e);
+                return null;
+            }
+        }
 
         async function refreshData() {
             let dataFetched = false;
@@ -265,8 +304,32 @@
             }).join('');
         }
 
+        function toggleSection(id) {
+            const section = document.getElementById(id);
+            if (section) {
+                section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function unifiedSearch() {
+            const input = document.getElementById('searchInput').value.trim();
+            if (!input) {
+                document.getElementById('searchResult').innerHTML = '<p style="color:#ff6b6b">Please enter a block number or npub.</p>';
+                return;
+            }
+
+            // Check if input is a number (block search) or starts with npub1 (npub search)
+            if (input.startsWith('npub1')) {
+                searchNpub();
+            } else if (!isNaN(input) && input !== '') {
+                searchBlock();
+            } else {
+                document.getElementById('searchResult').innerHTML = '<p style="color:#ff6b6b">Invalid input. Please enter a block number or npub starting with "npub1".</p>';
+            }
+        }
+
         function searchBlock() {
-            const num = parseInt(document.getElementById('blockSearchInput').value);
+            const num = parseInt(document.getElementById('searchInput').value);
             const blocks = allEvents.filter(e => e.kind === 30333);
             const res = document.getElementById('searchResult');
             if (!isNaN(num) && blocks[num]) {
@@ -274,6 +337,234 @@
             } else {
                 res.innerHTML = '<p style="color:#ff6b6b">Block not found.</p>';
             }
+        }
+
+        function searchNpub() {
+            const npubInput = document.getElementById('searchInput').value.trim();
+            const res = document.getElementById('searchResult');
+            
+            if (!npubInput) {
+                res.innerHTML = '<p style="color:#ff6b6b">Please enter an npub.</p>';
+                return;
+            }
+
+            const pubkeyHex = npubToHex(npubInput);
+            if (!pubkeyHex) {
+                res.innerHTML = '<p style="color:#ff6b6b">Invalid npub format. Please enter a valid npub starting with "npub1".</p>';
+                return;
+            }
+
+            // Find all mining events (kind 30333) for this pubkey
+            const blocks = allEvents.filter(e => e.kind === 30333);
+            const miningEvents = blocks.filter(b => b.pubkey === pubkeyHex);
+            const miningReward = miningEvents.length * 50;
+
+            // Find all transfer events (kind 30334)
+            const transfers = allEvents.filter(e => e.kind === 30334);
+            
+            // Transfers sent (where pubkey is the sender)
+            const sentTransfers = transfers.filter(tx => tx.pubkey === pubkeyHex);
+            const totalSent = sentTransfers.reduce((sum, tx) => {
+                const amount = parseInt(tx.tags.find(t => t[0] === 'amount')?.[1] || '0');
+                return sum + amount;
+            }, 0);
+
+            // Transfers received (where pubkey is in the 'p' tag)
+            const receivedTransfers = transfers.filter(tx => {
+                const pTag = tx.tags.find(t => t[0] === 'p');
+                return pTag && pTag[1] === pubkeyHex;
+            });
+            const totalReceived = receivedTransfers.reduce((sum, tx) => {
+                const amount = parseInt(tx.tags.find(t => t[0] === 'amount')?.[1] || '0');
+                return sum + amount;
+            }, 0);
+
+            const balance = miningReward + totalReceived - totalSent;
+            const npubDisplay = npubInput.length > 30 ? `${npubInput.substring(0, 20)}...${npubInput.slice(-10)}` : npubInput;
+
+            let html = `
+                <div style="margin-top:20px;">
+                    <div style="background:#333;border:1px solid #444;border-radius:8px;padding:20px;margin-bottom:20px;">
+                        <h3 style="color:#f28500;margin-bottom:15px;">Account: <span class="pubkey"><a href="https://njump.me/${npubInput}" target="_blank">${npubDisplay}</a></span></h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;">
+                            <div>
+                                <div style="font-size:12px;color:#888;margin-bottom:5px;">Balance</div>
+                                <div style="font-size:24px;font-weight:700;color:#32CD32;">${balance.toLocaleString()} NSTC</div>
+                            </div>
+                            <div>
+                                <div style="font-size:12px;color:#888;margin-bottom:5px;">Mined Blocks</div>
+                                <div style="font-size:24px;font-weight:700;color:#32CD32;">${miningEvents.length}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:12px;color:#888;margin-bottom:5px;">Total Mined</div>
+                                <div style="font-size:24px;font-weight:700;color:#32CD32;">${miningReward.toLocaleString()} NSTC</div>
+                            </div>
+                            <div>
+                                <div style="font-size:12px;color:#888;margin-bottom:5px;">Sent</div>
+                                <div style="font-size:24px;font-weight:700;color:#ff6b6b;">-${totalSent.toLocaleString()} NSTC</div>
+                            </div>
+                            <div>
+                                <div style="font-size:12px;color:#888;margin-bottom:5px;">Received</div>
+                                <div style="font-size:24px;font-weight:700;color:#32CD32;">+${totalReceived.toLocaleString()} NSTC</div>
+                            </div>
+                        </div>
+                    </div>
+            `;
+
+            // Mining history - show last 5
+            if (miningEvents.length > 0) {
+                // Sort by block number (most recent first)
+                const sortedMining = miningEvents.slice().sort((a, b) => {
+                    const aIdx = blocks.indexOf(a);
+                    const bIdx = blocks.indexOf(b);
+                    return bIdx - aIdx; // Most recent first (higher block number = more recent)
+                });
+                const recentMining = sortedMining.slice(0, 5);
+                const remainingMining = sortedMining.slice(5);
+                const miningId = 'mining_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+                html += `
+                    <h4 style="font-size:14px;color:#888;margin-bottom:10px;text-transform:uppercase;">
+                        Mining History (${miningEvents.length})
+                        ${remainingMining.length > 0 ? `<a href="#" onclick="toggleSection('${miningId}'); return false;" style="color:#f28500;margin-left:10px;text-decoration:none;">see all</a>` : ''}
+                    </h4>
+                    ${recentMining.map((block) => {
+                        const blockNum = blocks.indexOf(block);
+                        return createBlockHTML(block, blockNum);
+                    }).join('')}
+                    ${remainingMining.length > 0 ? `
+                        <div id="${miningId}" style="display:none;">
+                            ${remainingMining.map((block) => {
+                                const blockNum = blocks.indexOf(block);
+                                return createBlockHTML(block, blockNum);
+                            }).join('')}
+                        </div>
+                    ` : ''}
+                `;
+            }
+
+            // Sent transactions - show last 5
+            if (sentTransfers.length > 0) {
+                const sortedSent = sentTransfers.slice().reverse(); // Already sorted by time (most recent last)
+                const recentSent = sortedSent.slice(0, 5);
+                const remainingSent = sortedSent.slice(5);
+                const sentId = 'sent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+                html += `
+                    <h4 style="font-size:14px;color:#888;margin-top:20px;margin-bottom:10px;text-transform:uppercase;">
+                        Sent Transactions (${sentTransfers.length})
+                        ${remainingSent.length > 0 ? `<a href="#" onclick="toggleSection('${sentId}'); return false;" style="color:#f28500;margin-left:10px;text-decoration:none;">see all</a>` : ''}
+                    </h4>
+                    ${recentSent.map(tx => {
+                        const amount = tx.tags.find(t => t[0] === 'amount')?.[1] || '0';
+                        const pTag = tx.tags.find(t => t[0] === 'p');
+                        const toNpubFull = pTag ? toNpub(pTag[1]) : null;
+                        const toNpubStr = toNpubFull ? `${toNpubFull.substring(0,10)}...` : 'Unknown';
+                        const date = new Date(tx.created_at * 1000).toLocaleString();
+
+                        return `
+                        <div class="event-item">
+                            <div class="event-header">
+                                <span class="event-type transfer">💸 Sent</span>
+                                <span style="font-size:12px;color:#888;">${date}</span>
+                            </div>
+                            <div class="event-details">
+                                To: <span class="pubkey">${toNpubFull ? `<a href="https://njump.me/${toNpubFull}" target="_blank">${toNpubStr}</a>` : toNpubStr}</span><br>
+                                Amount: <span class="amount">${amount} NSTC</span>
+                            </div>
+                            <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}" target="_blank">${tx.id}</a></div>
+                        </div>`;
+                    }).join('')}
+                    ${remainingSent.length > 0 ? `
+                        <div id="${sentId}" style="display:none;">
+                            ${remainingSent.map(tx => {
+                                const amount = tx.tags.find(t => t[0] === 'amount')?.[1] || '0';
+                                const pTag = tx.tags.find(t => t[0] === 'p');
+                                const toNpubFull = pTag ? toNpub(pTag[1]) : null;
+                                const toNpubStr = toNpubFull ? `${toNpubFull.substring(0,10)}...` : 'Unknown';
+                                const date = new Date(tx.created_at * 1000).toLocaleString();
+
+                                return `
+                                <div class="event-item">
+                                    <div class="event-header">
+                                        <span class="event-type transfer">💸 Sent</span>
+                                        <span style="font-size:12px;color:#888;">${date}</span>
+                                    </div>
+                                    <div class="event-details">
+                                        To: <span class="pubkey">${toNpubFull ? `<a href="https://njump.me/${toNpubFull}" target="_blank">${toNpubStr}</a>` : toNpubStr}</span><br>
+                                        Amount: <span class="amount">${amount} NSTC</span>
+                                    </div>
+                                    <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}" target="_blank">${tx.id}</a></div>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    ` : ''}
+                `;
+            }
+
+            // Received transactions - show last 5
+            if (receivedTransfers.length > 0) {
+                const sortedReceived = receivedTransfers.slice().reverse(); // Already sorted by time (most recent last)
+                const recentReceived = sortedReceived.slice(0, 5);
+                const remainingReceived = sortedReceived.slice(5);
+                const receivedId = 'received_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+                html += `
+                    <h4 style="font-size:14px;color:#888;margin-top:20px;margin-bottom:10px;text-transform:uppercase;">
+                        Received Transactions (${receivedTransfers.length})
+                        ${remainingReceived.length > 0 ? `<a href="#" onclick="toggleSection('${receivedId}'); return false;" style="color:#f28500;margin-left:10px;text-decoration:none;">see all</a>` : ''}
+                    </h4>
+                    ${recentReceived.map(tx => {
+                        const amount = tx.tags.find(t => t[0] === 'amount')?.[1] || '0';
+                        const fromNpubFull = toNpub(tx.pubkey);
+                        const fromNpubStr = `${fromNpubFull.substring(0,10)}...`;
+                        const date = new Date(tx.created_at * 1000).toLocaleString();
+
+                        return `
+                        <div class="event-item">
+                            <div class="event-header">
+                                <span class="event-type transfer">💸 Received</span>
+                                <span style="font-size:12px;color:#888;">${date}</span>
+                            </div>
+                            <div class="event-details">
+                                From: <span class="pubkey"><a href="https://njump.me/${fromNpubFull}" target="_blank">${fromNpubStr}</a></span><br>
+                                Amount: <span class="amount">${amount} NSTC</span>
+                            </div>
+                            <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}" target="_blank">${tx.id}</a></div>
+                        </div>`;
+                    }).join('')}
+                    ${remainingReceived.length > 0 ? `
+                        <div id="${receivedId}" style="display:none;">
+                            ${remainingReceived.map(tx => {
+                                const amount = tx.tags.find(t => t[0] === 'amount')?.[1] || '0';
+                                const fromNpubFull = toNpub(tx.pubkey);
+                                const fromNpubStr = `${fromNpubFull.substring(0,10)}...`;
+                                const date = new Date(tx.created_at * 1000).toLocaleString();
+
+                                return `
+                                <div class="event-item">
+                                    <div class="event-header">
+                                        <span class="event-type transfer">💸 Received</span>
+                                        <span style="font-size:12px;color:#888;">${date}</span>
+                                    </div>
+                                    <div class="event-details">
+                                        From: <span class="pubkey"><a href="https://njump.me/${fromNpubFull}" target="_blank">${fromNpubStr}</a></span><br>
+                                        Amount: <span class="amount">${amount} NSTC</span>
+                                    </div>
+                                    <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}" target="_blank">${tx.id}</a></div>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    ` : ''}
+                `;
+            }
+
+            if (miningEvents.length === 0 && sentTransfers.length === 0 && receivedTransfers.length === 0) {
+                html += '<p style="color:#888;margin-top:20px;">No activity found for this npub.</p>';
+            }
+
+            html += '</div>';
+            res.innerHTML = html;
         }
 
         document.addEventListener('DOMContentLoaded', () => { refreshData(); setInterval(refreshData, 30000); });
