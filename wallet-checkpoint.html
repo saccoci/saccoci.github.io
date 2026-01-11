@@ -624,38 +624,53 @@
                 const sign = tx.type === 'sent' ? '-' : '+';
 
                 let recipientStr = '';
+                let recipientNpub = '';
                 if (tx.recipient) {
                     try {
-                        const npub = pubkeyToNpub(tx.recipient);
-                        recipientStr = npub.substring(0, 10) + '...' + npub.substring(npub.length - 8);
+                        recipientNpub = pubkeyToNpub(tx.recipient);
+                        recipientStr = recipientNpub.substring(0, 10) + '...' + recipientNpub.substring(recipientNpub.length - 8);
                     } catch(e) {
                         recipientStr = tx.recipient.substring(0, 16) + '...';
                     }
                 }
 
                 let senderStr = '';
+                let senderNpub = '';
                 if (tx.sender) {
                     try {
-                        const npub = pubkeyToNpub(tx.sender);
-                        senderStr = npub.substring(0, 10) + '...' + npub.substring(npub.length - 8);
+                        senderNpub = pubkeyToNpub(tx.sender);
+                        senderStr = senderNpub.substring(0, 10) + '...' + senderNpub.substring(senderNpub.length - 8);
                     } catch(e) {
                         senderStr = tx.sender.substring(0, 16) + '...';
                     }
                 }
 
-                return `
-                    <div class="tx-item">
-                        <div class="tx-header">
-                            <span class="tx-type ${tx.type}">${tx.type.toUpperCase()}</span>
-                            <span class="tx-amount">${sign}${tx.amount.toFixed(8)} NSTC</span>
-                        </div>
-                        <div class="tx-hash" style="margin-bottom:4px;">${date}</div>
-                        ${tx.recipient ? `<div class="tx-hash">To: ${recipientStr}</div>` : ''}
-                        ${tx.sender ? `<div class="tx-hash">From: ${senderStr}</div>` : ''}
-                    </div>
-                `;
-            }).join('');
-        }
+                // Create nevent from event ID (similar to explorer)
+                const eventId = tx.id || tx.eventId;
+                let neventStr = '';
+                if (eventId) {
+                    try {
+                        const nevent = bech32Encode("nevent", convertBits([0, 32, ...hexToBytes(eventId)], 8, 5));
+                        neventStr = `<div class="tx-hash">Proof: <a href="https://njump.me/${nevent}" target="_blank" style="color:#32CD32;text-decoration:none;font-weight:bold;">${eventId}</a></div>`;
+                    } catch(e) {
+                        neventStr = `<div class="tx-hash">Proof: ${eventId}</div>`;
+                    }
+                }
+
+        return `
+            <div class="tx-item">
+                <div class="tx-header">
+                    <span class="tx-type ${tx.type}">${tx.type.toUpperCase()}</span>
+                    <span class="tx-amount">${sign}${tx.amount.toFixed(8)} NSTC</span>
+                </div>
+                <div class="tx-hash" style="margin-bottom:4px;">${date}</div>
+                ${tx.recipient && recipientNpub ? `<div class="tx-hash">To: <a href="https://njump.me/${recipientNpub}" target="_blank" style="color:#f28500;text-decoration:none;">${recipientStr}</a></div>` : (tx.recipient ? `<div class="tx-hash">To: ${recipientStr}</div>` : '')}
+                ${tx.sender && senderNpub ? `<div class="tx-hash">From: <a href="https://njump.me/${senderNpub}" target="_blank" style="color:#f28500;text-decoration:none;">${senderStr}</a></div>` : (tx.sender ? `<div class="tx-hash">From: ${senderStr}</div>` : '')}
+                ${neventStr}
+            </div>
+        `;
+    }).join('');
+}
 
         // UPDATED showStatus TO SUPPORT CUSTOM TIMEOUT
         function showStatus(message, type, duration = 5000) {
