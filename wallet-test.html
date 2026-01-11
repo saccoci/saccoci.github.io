@@ -652,6 +652,7 @@
                         <div class="tx-hash" style="margin-bottom:4px;">${date}</div>
                         ${tx.recipient ? `<div class="tx-hash">To: ${recipientStr}</div>` : ''}
                         ${tx.sender ? `<div class="tx-hash">From: ${senderStr}</div>` : ''}
+                        ${tx.id ? `<div class="tx-hash">Proof: <a href="https://njump.me/${toNevent(tx.id)}" target="_blank" style="color:#32CD32;text-decoration:none;">${tx.id}</a></div>` : ''}
                     </div>
                 `;
             }).join('');
@@ -975,6 +976,10 @@
             const converted = convertBits(bytes, 8, 5);
             if (!converted) throw new Error('Failed to encode npub');
             return bech32Encode('npub', converted);
+        }
+
+        function toNevent(hexId) {
+            return bech32Encode('nevent', convertBits([0, 32, ...hexToBytes(hexId)], 8, 5));
         }
 
         function npubToHex(npub) {
