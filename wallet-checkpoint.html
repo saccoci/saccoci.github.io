@@ -94,7 +94,7 @@
                 <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
             </div>
             <div class="logo">⚡ Nostrcoin Wallet</div>
-            <div class="subtitle">NSCT Wallet • v0.1.0</div>
+            <div class="subtitle">NSCT Wallet • v0.1.1</div>
         </div>
 
         <button class="refresh-btn" onclick="refreshWallet()" id="refreshBtn" style="display:none;">🔄 Refresh Balance</button>
@@ -161,6 +161,18 @@
                 <div class="section">
                     <div class="section-title">⛏️ Mining</div>
                     <p style="text-align:center;font-size:13px;color:#aaa;margin-bottom:20px;">Difficulty 4 • Reward 50 NSTC</p>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Block Message (Optional)</label>
+                        <input type="text" class="form-input" id="miningMessage" placeholder="Mining NSTC" maxlength="280" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+                        <p style="font-size:11px;color:#888;margin-top:6px;">
+                            Custom message for your mined block (max 280 characters)
+                        </p>
+                        <p style="font-size:11px;color:#ff6b6b;margin-top:4px;">
+                            ⚠️ This message will be permanently visible on the Nostr network. Do not include private information.
+                        </p>
+                    </div>
+                    
                     <div class="mining-stats">
                         <div class="stat-box">
                             <div class="stat-label">Hash Rate</div>
@@ -199,7 +211,7 @@
         </div>
 
         <div class="version-footer">
-            Nostrcoin Wallet v0.1.0
+            Nostrcoin Wallet v0.1.1
         </div>
 
         <div class="about-link">
@@ -247,7 +259,7 @@
         <div class="modal">
             <button class="modal-close" onclick="toggleAboutModal(false)" aria-label="Close">×</button>
             <h3>About Nostrcoin</h3>
-            <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.1.0</p>
+            <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.1.1</p>
             <p style="margin-top:12px;">
                 Nostrcoin is an experimental, Nostr-native proof-of-work cryptocurrency. It is for education and fun only. This wallet allows you to send, receive, and mine NSTC.
             </p>
@@ -534,6 +546,10 @@
             document.getElementById('mineBtn').textContent = 'Mining...';
             showStatus('Mining started... Looking for valid proof-of-work', 'info');
 
+            // Get custom message or use default
+            const messageInput = document.getElementById('miningMessage');
+            const customMessage = messageInput?.value.trim() || 'Mining NSTC';
+
             const difficulty = CONFIG.difficulty;
             const target = '0'.repeat(difficulty);
             let attempts = 0;
@@ -549,7 +565,7 @@
                         ['difficulty', difficulty.toString()],
                         ['nonce', nonce]
                     ],
-                    content: 'Mining NSTC',
+                    content: customMessage,  // Use custom message
                     pubkey: state.pubkeyHex
                 };
 
@@ -657,20 +673,20 @@
                     }
                 }
 
-        return `
-            <div class="tx-item">
-                <div class="tx-header">
-                    <span class="tx-type ${tx.type}">${tx.type.toUpperCase()}</span>
-                    <span class="tx-amount">${sign}${tx.amount.toFixed(8)} NSTC</span>
-                </div>
-                <div class="tx-hash" style="margin-bottom:4px;">${date}</div>
-                ${tx.recipient && recipientNpub ? `<div class="tx-hash">To: <a href="https://njump.me/${recipientNpub}" target="_blank" style="color:#f28500;text-decoration:none;">${recipientStr}</a></div>` : (tx.recipient ? `<div class="tx-hash">To: ${recipientStr}</div>` : '')}
-                ${tx.sender && senderNpub ? `<div class="tx-hash">From: <a href="https://njump.me/${senderNpub}" target="_blank" style="color:#f28500;text-decoration:none;">${senderStr}</a></div>` : (tx.sender ? `<div class="tx-hash">From: ${senderStr}</div>` : '')}
-                ${neventStr}
-            </div>
-        `;
-    }).join('');
-}
+                return `
+                    <div class="tx-item">
+                        <div class="tx-header">
+                            <span class="tx-type ${tx.type}">${tx.type.toUpperCase()}</span>
+                            <span class="tx-amount">${sign}${tx.amount.toFixed(8)} NSTC</span>
+                        </div>
+                        <div class="tx-hash" style="margin-bottom:4px;">${date}</div>
+                        ${tx.recipient && recipientNpub ? `<div class="tx-hash">To: <a href="https://njump.me/${recipientNpub}" target="_blank" style="color:#f28500;text-decoration:none;">${recipientStr}</a></div>` : (tx.recipient ? `<div class="tx-hash">To: ${recipientStr}</div>` : '')}
+                        ${tx.sender && senderNpub ? `<div class="tx-hash">From: <a href="https://njump.me/${senderNpub}" target="_blank" style="color:#f28500;text-decoration:none;">${senderStr}</a></div>` : (tx.sender ? `<div class="tx-hash">From: ${senderStr}</div>` : '')}
+                        ${neventStr}
+                    </div>
+                `;
+            }).join('');
+        }
 
         // UPDATED showStatus TO SUPPORT CUSTOM TIMEOUT
         function showStatus(message, type, duration = 5000) {

@@ -494,20 +494,27 @@
 
                 document.getElementById('recipientNpub').value = '';
                 document.getElementById('sendAmount').value = '';
-                showStatus(`💸 Transfer broadcast! ${amount} NSTC sent`, 'success');
+                showStatus(`💸 Transfer broadcast! ${amount} NSTC sent. Indexers may take up to ~30 seconds to reflect this change.`, 'success');
 
-                // AUTO-REFRESH balance after 3 seconds
+                // Initial quick refresh after 3 seconds
                 setTimeout(async () => {
                     await fetchBalance();
                     updateUI();
-                    showStatus('✔ Balance updated', 'info');
+                    showStatus('✔ Balance updated (initial check)', 'info');
                 }, 3000);
 
-                // AUTO-REFRESH history after 5 seconds (gives indexers more time)
+                // Initial history refresh after 5 seconds
                 setTimeout(async () => {
                     await fetchHistory();
                     updateHistoryDisplay();
                 }, 5000);
+
+                // Follow-up refresh ~20 seconds later to catch slower indexers
+                setTimeout(async () => {
+                    await fetchBalance();
+                    await fetchHistory();
+                    updateUI();
+                }, 20000);
             } catch (error) {
                 showStatus('Transaction failed: ' + error.message, 'error');
             }
@@ -577,8 +584,8 @@
                     try {
                         const signed = await window.nostr.signEvent(event);
                         await publishToRelays(signed);
-                        // COMBINED AND LENGTHENED STATUS MESSAGE
-                        showStatus('⛏️ Valid proof-of-work found! Broadcasting... (Must be validated by indexers. Check your balance in ~10 seconds)', 'info', 30000);
+                        // Status message with clearer expectation about indexer timing
+                        showStatus('⛏️ Valid proof-of-work found! Broadcasting... (Must be validated by indexers. This can take up to ~20 seconds)', 'info', 30000);
 
                     } catch (e) {
                         showStatus('Mining event failed: ' + e.message, 'error');
@@ -586,6 +593,8 @@
                     state.mining = false;
                     document.getElementById('mineBtn').textContent = 'Start Mining';
                     document.getElementById('progressFill').style.width = '100%';
+
+                    // Initial quick refresh after 3 seconds
                     setTimeout(async () => {
                         document.getElementById('progressFill').style.width = '0%';
                         document.getElementById('hashRate').textContent = '0 H/s';
@@ -594,6 +603,13 @@
                         await fetchHistory();
                         updateUI();
                     }, 3000);
+
+                    // Follow-up refresh ~20 seconds later to catch slower indexers
+                    setTimeout(async () => {
+                        await fetchBalance();
+                        await fetchHistory();
+                        updateUI();
+                    }, 20000);
                     break;
                 }
 

@@ -290,10 +290,14 @@
                 const toNpubStr = toNpubFull ? `${toNpubFull.substring(0,10)}...` : 'Unknown';
                 const fromNpubFull = toNpub(tx.pubkey);
                 const fromNpubStr = `${fromNpubFull.substring(0,10)}...`;
+                const date = new Date(tx.created_at * 1000).toLocaleString();
 
                 return `
                 <div class="event-item">
-                    <div class="event-header"><span class="event-type transfer">💸 Transfer</span></div>
+                    <div class="event-header">
+                        <span class="event-type transfer">💸 Transfer</span>
+                        <span style="font-size:12px;color:#888;">${date}</span>
+                    </div>
                     <div class="event-details">
                         From: <span class="pubkey"><a href="https://njump.me/${fromNpubFull}" target="_blank">${fromNpubStr}</a></span>
                         To: <span class="pubkey">${toNpubFull ? `<a href="https://njump.me/${toNpubFull}" target="_blank">${toNpubStr}</a>` : toNpubStr}</span><br>
