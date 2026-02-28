@@ -94,7 +94,7 @@
                 <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
             </div>
             <div class="logo">⚡ Nostrcoin Wallet</div>
-            <div class="subtitle">NSCT Wallet • v0.1.1</div>
+            <div class="subtitle">NSCT Wallet • v0.1.0</div>
         </div>
 
         <button class="refresh-btn" onclick="refreshWallet()" id="refreshBtn" style="display:none;">🔄 Refresh Balance</button>
@@ -211,7 +211,7 @@
         </div>
 
         <div class="version-footer">
-            Nostrcoin Wallet v0.1.1
+            Nostrcoin Wallet v0.1.0
         </div>
 
         <div class="about-link">
@@ -259,7 +259,7 @@
         <div class="modal">
             <button class="modal-close" onclick="toggleAboutModal(false)" aria-label="Close">×</button>
             <h3>About Nostrcoin</h3>
-            <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.1.1</p>
+            <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:4px;">Version 0.1.0</p>
             <p style="margin-top:12px;">
                 Nostrcoin is an experimental, Nostr-native proof-of-work cryptocurrency. It is for education and fun only. This wallet allows you to send, receive, and mine NSTC.
             </p>
@@ -291,12 +291,9 @@
             ],
             relays: [
                 'wss://relay.damus.io',
-                'wss://relay.nostr.band',
-                'wss://nostr.mom',
-                'wss://relay.primal.net',
                 'wss://nos.lol',
-                'wss://relay.snort.social',
-                'wss://offchain.pub'
+                'wss://relay.nostr.band',
+                'wss://nostr.mom'
             ]
         };
         // ============================================
@@ -497,27 +494,20 @@
 
                 document.getElementById('recipientNpub').value = '';
                 document.getElementById('sendAmount').value = '';
-                showStatus(`💸 Transfer broadcast! ${amount} NSTC sent. Indexers may take up to ~30 seconds to reflect this change.`, 'success');
+                showStatus(`💸 Transfer broadcast! ${amount} NSTC sent`, 'success');
 
-                // Initial quick refresh after 3 seconds
+                // AUTO-REFRESH balance after 3 seconds
                 setTimeout(async () => {
                     await fetchBalance();
                     updateUI();
-                    showStatus('✔ Balance updated (initial check)', 'info');
+                    showStatus('✔ Balance updated', 'info');
                 }, 3000);
 
-                // Initial history refresh after 5 seconds
+                // AUTO-REFRESH history after 5 seconds (gives indexers more time)
                 setTimeout(async () => {
                     await fetchHistory();
                     updateHistoryDisplay();
                 }, 5000);
-
-                // Follow-up refresh ~20 seconds later to catch slower indexers
-                setTimeout(async () => {
-                    await fetchBalance();
-                    await fetchHistory();
-                    updateUI();
-                }, 20000);
             } catch (error) {
                 showStatus('Transaction failed: ' + error.message, 'error');
             }
@@ -526,27 +516,16 @@
         async function publishToRelays(event) {
             const promises = INDEXER_CONFIG.relays.map(relay => new Promise((resolve) => {
                 const ws = new WebSocket(relay);
-                let resolved = false;
-                const done = () => {
-                    if (resolved) return;
-                    resolved = true;
-                    try { ws.close(); } catch (e) {}
-                    resolve();
-                };
                 ws.onopen = () => {
                     ws.send(JSON.stringify(['EVENT', event]));
+                    ws.close();
+                    resolve();
                 };
-                ws.onmessage = (msg) => {
-                    try {
-                        const data = JSON.parse(msg.data);
-                        if (Array.isArray(data) && data[0] === 'OK' && data[1] === event.id) {
-                            done();
-                        }
-                    } catch (e) {}
-                };
-                ws.onerror = () => done();
-                ws.onclose = () => done();
-                setTimeout(done, 4000);
+                ws.onerror = () => resolve();
+                setTimeout(() => {
+                    ws.close();
+                    resolve();
+                }, 5000);
             }));
             await Promise.allSettled(promises);
         }
@@ -598,8 +577,8 @@
                     try {
                         const signed = await window.nostr.signEvent(event);
                         await publishToRelays(signed);
-                        // Status message with clearer expectation about indexer timing
-                        showStatus('⛏️ Valid proof-of-work found! Broadcasting... (Must be validated by indexers. This can take up to ~20 seconds)', 'info', 30000);
+                        // COMBINED AND LENGTHENED STATUS MESSAGE
+                        showStatus('⛏️ Valid proof-of-work found! Broadcasting... (Must be validated by indexers. Check your balance in ~10 seconds)', 'info', 30000);
 
                     } catch (e) {
                         showStatus('Mining event failed: ' + e.message, 'error');
@@ -607,8 +586,6 @@
                     state.mining = false;
                     document.getElementById('mineBtn').textContent = 'Start Mining';
                     document.getElementById('progressFill').style.width = '100%';
-
-                    // Initial quick refresh after 3 seconds
                     setTimeout(async () => {
                         document.getElementById('progressFill').style.width = '0%';
                         document.getElementById('hashRate').textContent = '0 H/s';
@@ -617,13 +594,6 @@
                         await fetchHistory();
                         updateUI();
                     }, 3000);
-
-                    // Follow-up refresh ~20 seconds later to catch slower indexers
-                    setTimeout(async () => {
-                        await fetchBalance();
-                        await fetchHistory();
-                        updateUI();
-                    }, 20000);
                     break;
                 }
 
