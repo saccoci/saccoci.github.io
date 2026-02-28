@@ -291,9 +291,12 @@
             ],
             relays: [
                 'wss://relay.damus.io',
-                'wss://nos.lol',
                 'wss://relay.nostr.band',
-                'wss://nostr.mom'
+                'wss://nostr.mom',
+                'wss://relay.primal.net',
+                'wss://nos.lol',
+                'wss://relay.snort.social',
+                'wss://offchain.pub'
             ]
         };
         // ============================================
@@ -523,16 +526,27 @@
         async function publishToRelays(event) {
             const promises = INDEXER_CONFIG.relays.map(relay => new Promise((resolve) => {
                 const ws = new WebSocket(relay);
-                ws.onopen = () => {
-                    ws.send(JSON.stringify(['EVENT', event]));
-                    ws.close();
+                let resolved = false;
+                const done = () => {
+                    if (resolved) return;
+                    resolved = true;
+                    try { ws.close(); } catch (e) {}
                     resolve();
                 };
-                ws.onerror = () => resolve();
-                setTimeout(() => {
-                    ws.close();
-                    resolve();
-                }, 5000);
+                ws.onopen = () => {
+                    ws.send(JSON.stringify(['EVENT', event]));
+                };
+                ws.onmessage = (msg) => {
+                    try {
+                        const data = JSON.parse(msg.data);
+                        if (Array.isArray(data) && data[0] === 'OK' && data[1] === event.id) {
+                            done();
+                        }
+                    } catch (e) {}
+                };
+                ws.onerror = () => done();
+                ws.onclose = () => done();
+                setTimeout(done, 4000);
             }));
             await Promise.allSettled(promises);
         }
