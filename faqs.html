@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nostrcoin (NSTC) - FAQs</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #2a2a2a;
+            --text-color: #f5f5f5;
+            --text-muted: #cdcdcd;
+            --accent-green: #32CD32;
+            --accent-orange: #f28500;
+            --border-color: #444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--accent-green);
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--accent-orange);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .nav-back:hover {
+            text-decoration: underline;
+        }
+
+        .faq-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: var(--accent-orange);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .faq-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .faq-answer {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding-top: 40px;
+            padding-bottom: 20px;
+        }
+
+        a.text-link {
+            color: var(--accent-orange);
+            text-decoration: none;
+        }
+
+        a.text-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <a href="https://nostrcoin.netlify.app" class="nav-back">← Back to Launchpad</a>
+            <h1>⚡ Frequently Asked Questions</h1>
+            <p style="color: var(--text-muted)">Everything you need to know about Nostrcoin (NSTC)</p>
+        </header>
+
+        <section class="faq-section">
+            <h2 class="section-title">General Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">What is Nostrcoin?</div>
+                <div class="faq-answer">Nostrcoin is a fully decentralized, experimental cryptocurrency built natively on the Nostr protocol. Instead of using a traditional blockchain, it uses Nostr events as its ledger, allowing anyone to validate the entire transaction history independently.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Does Nostrcoin have any monetary value?</div>
+                <div class="faq-answer">No. Nostrcoin has zero monetary value and is intended strictly for fun and educational purposes. It is a demonstration of how decentralized systems can be built on existing protocols.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">How is it different from a traditional blockchain?</div>
+                <div class="faq-answer">Traditional blockchains require specialized infrastructure and often require users to download massive datasets. Nostrcoin leverages existing Nostr relays for data distribution, meaning it doesn't need its own separate network of nodes to spread messages.</div>
+            </div>
+        </section>
+
+        <section class="faq-section">
+            <h2 class="section-title">Mining and Rewards</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">How does mining work?</div>
+                <div class="faq-answer">Mining is a Proof-of-Work (PoW) process where your computer attempts to solve a mathematical puzzle. You must create a Nostr event with an ID (a SHA-256 hash) that starts with four leading zeros.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What is an "epoch"?</div>
+                <div class="faq-answer">An epoch is a 10-minute time window. In each epoch, only the first valid mining event found wins the block reward. If multiple valid events are found, the one with the earliest timestamp wins.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What are the block rewards?</div>
+                <div class="faq-answer">The initial reward is 50 NSTC per block. Following the Bitcoin model, this reward halves every 210,000 blocks (approximately every four years).</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can I spam the network with mining attempts?</div>
+                <div class="faq-answer">No. To prevent spam, the protocol enforces a limit of one mining attempt per user per epoch.</div>
+            </div>
+        </section>
+
+        <section class="faq-section">
+            <h2 class="section-title">Economics and Supply</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">What is the maximum supply of NSTC?</div>
+                <div class="faq-answer">The total supply is capped at 21,000,000 NSTC.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What is a "nok"?</div>
+                <div class="faq-answer">A nok is the smallest unit of Nostrcoin, similar to a "satoshi" in Bitcoin. 1 NSTC equals 100,000,000 noks.</div>
+            </div>
+        </section>
+
+        <section class="faq-section">
+            <h2 class="section-title">Privacy and Security</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">Is my activity private?</div>
+                <div class="faq-answer">No. All activity is permanently public. Because Nostr is an open protocol, every block you mine and every transaction you send is recorded on public relays and linked to your Nostr public key (npub). Anyone can calculate your exact balance and view your full transaction history at any time.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Is Nostrcoin secure?</div>
+                <div class="faq-answer">As an experimental project, users should expect chaos. The documentation warns that the system will likely experience bugs, crashes, data corruption, forks, and potential exploits.</div>
+            </div>
+        </section>
+
+        <section class="faq-section">
+            <h2 class="section-title">Technical Participation</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">What is an "Indexer"?</div>
+                <div class="faq-answer">An indexer is a node that listens to Nostr relays, validates events according to the protocol rules, and maintains a database of user balances. They provide the APIs that wallets and explorers use to display data.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">How can I help the network?</div>
+                <div class="faq-answer">The most valuable way to contribute is by running an always-on indexer node on a VPS to help keep the network resilient and decentralized. The more geographically distributed nodes there are, the harder the network is to censor or attack.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Where can I find the tools to use Nostrcoin?</div>
+                <div class="faq-answer">The project provides a web-based wallet and explorer hosted at <a href="https://saccoci.github.io" target="_blank" class="text-link">https://saccoci.github.io</a>. For more technical users, the source code for the indexer, miner, and validator is available on GitHub.</div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Created by Saccoci Nachiamelli</p>
+            <p>Find me on Nostr: <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" target="_blank" class="text-link">npub1sac...jnpw</a></p>
+        </footer>
+    </div>
+
+</body>
+</html>

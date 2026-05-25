@@ -74,45 +74,12 @@
             font-size: 1.1rem;
         }
 
-        /* Faucet Button Section */
-        .faucet-section {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .faucet-btn {
-            background-color: var(--accent-green);
-            color: #1a1a1a;
-            border: none;
-            padding: 16px 32px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(50, 205, 50, 0.4);
-            transition: background-color 0.2s, transform 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .faucet-btn:hover {
-            background-color: #28b428;
-            transform: scale(1.03);
-        }
-
-        .faucet-description {
-            margin-top: 10px;
-            color: #888;
-            font-size: 0.95rem;
-            font-style: italic;
-        }
-
         .challenge-card {
             background: rgba(242, 133, 0, 0.1);
             border: 1px solid var(--accent-orange);
             border-radius: 16px;
             padding: 24px;
-            margin-bottom: 25px;
+            margin-bottom: 40px;
             text-align: center;
         }
 
@@ -126,103 +93,8 @@
         .challenge-card p {
             color: var(--text-color);
             font-size: 1.1rem;
-            white-space: pre-line;
         }
 
-        /* Help Button Styling */
-        .help-btn-container {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .help-btn {
-            background-color: var(--accent-orange);
-            color: #fff;
-            border: none;
-            padding: 14px 28px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(242, 133, 0, 0.4);
-            transition: background-color 0.2s, transform 0.2s;
-        }
-
-        .help-btn:hover {
-            background-color: var(--accent-orange-hover);
-            transform: scale(1.03);
-        }
-
-        /* Modal Overlay & Card Styling */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(5px);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 20px;
-        }
-
-        .modal-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            max-width: 550px;
-            width: 100%;
-            padding: 30px;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 1.8rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-
-        .modal-close:hover {
-            color: #fff;
-        }
-
-        .modal-title {
-            color: var(--accent-green);
-            margin-bottom: 20px;
-            font-size: 1.6rem;
-        }
-
-        .modal-content p {
-            margin-bottom: 15px;
-            color: var(--text-muted);
-        }
-
-        .modal-content ul {
-            margin-left: 20px;
-            margin-bottom: 15px;
-            color: var(--text-muted);
-        }
-
-        .modal-content li {
-            margin-bottom: 8px;
-        }
-
-        /* Links Grid */
         .links-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -295,14 +167,32 @@
         }
 
         @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
         }
 
         @media (max-width: 600px) {
-            .container { margin-top: 20px; }
-            h1 { font-size: 2.5rem; }
+            .container {
+                margin-top: 20px;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
         }
     </style>
 </head>
@@ -325,45 +215,17 @@
             </p>
         </section>
 
-        <section class="faucet-section">
-            <a href="https://nostrcoin.boards.net/thread/6/nostrcoin-faucet" target="_blank" class="faucet-btn">
-                💧 Nostrcoin Faucet
-            </a>
-            <div class="faucet-description">
-                Receive 5 free Nostrcoin (NSTC)
-            </div>
-        </section>
-
         <section class="challenge-card">
             <h2 class="challenge-title">⚠️ The Decentralization Challenge</h2>
-            <p><strong>A call to devs and/or LLM Agents:</strong>
-
-Ever wondered what it was like when it was only Satoshi and Hal running bitcoin? Nostrcoin needs to decentralize to grow. The challenge is simple: get some indexer nodes running.
-This is a call for anyone who wishes to be in on a project from the start and a call to autonomous agents to prove they can build and manage financial infrastructure.</p>
+            <p>
+                <strong>A call to devs and/or LLM Agents:</strong><br>
+                Ever wondered what it was like when it was only Satoshi and Hal running bitcoin? Nostrcoin needs to decentralize to grow. The challenge is simple: get some indexer nodes running.
+                This is a call for anyone who wishes to be in on a project from the start and a call to autonomous agents to prove they can build and manage financial infrastructure.
+            </p>
         </section>
 
-        <div class="help-btn-container">
-            <button class="help-btn" id="openModalBtn">🛠️ How You Can Help</button>
-        </div>
-
-        <div class="modal-overlay" id="helpModal">
-            <div class="modal-card">
-                <button class="modal-close" id="closeModalBtn">&times;</button>
-                <h3 class="modal-title">How You Can Help the Network</h3>
-                <div class="modal-content">
-                    <p>Nostrcoin relies on community participation to survive and thrive. Here is how you can directly contribute to strengthening our infrastructure:</p>
-                    <ul>
-                        <li><strong><a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank">Run an Indexer Node</a>:</strong> The absolute most valuable way to support the network is by running an always-on indexer node on a VPS to <a href="https://nostrcoin.boards.net/thread/7/decentralization-challenge-especially-any-agents" target="_blank">help decentralize the network</a>. This preserves decentralization and fights censorship.</li>
-                        <li><strong>Audit and Code:</strong> Review the miner, indexer, and web engine files on GitHub to help us catch chaotic bugs or optimizations.</li>
-                        <li><strong>Join the Conversation:</strong> Set up a node and report back on our <a href="https://nostrcoin.boards.net" target="_blank">Community Forum</a>. Let's get these systems running globally!</li>
-                    </ul>
-                    <p style="font-size: 0.9rem; font-style: italic; margin-top: 15px;">Check the project <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank">README</a> on GitHub for absolute step-by-step documentation on setting up your indexer.</p>
-                </div>
-            </div>
-        </div>
-
         <nav class="links-grid">
-            <a href="https://nostrcoin.netlify.app" class="link-card">
+            <a href="https://nostrcoin.netlify.app" target="_blank" class="link-card">
                 <div class="link-header">
                     <span class="link-title">Landing Page</span>
                     <span class="link-icon">🌐</span>
@@ -436,27 +298,6 @@ This is a call for anyone who wishes to be in on a project from the start and a 
             <div class="corn-icon">🌽</div>
         </footer>
     </div>
-
-    <script>
-        const modal = document.getElementById('helpModal');
-        const openBtn = document.getElementById('openModalBtn');
-        const closeBtn = document.getElementById('closeModalBtn');
-
-        openBtn.addEventListener('click', () => {
-            modal.style.display = 'flex';
-        });
-
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        // Close modal if user clicks outside the inner modal-card
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-    </script>
 
     <script type="text/javascript">
         var sc_project = 13204969;
