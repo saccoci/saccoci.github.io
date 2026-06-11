@@ -242,8 +242,8 @@
                 const elapsed = now - lastBlockTimestamp;
                 const secondsLeft = EPOCH_SECONDS - (elapsed % EPOCH_SECONDS);
 
-                if (secondsLeft <= 0) {
-                    document.getElementById('epochCountdown').textContent = 'Now!';
+                if (secondsLeft >= EPOCH_SECONDS) {
+                    document.getElementById('epochCountdown').textContent = '0m 00s';
                     clearInterval(epochCountdownInterval);
                     setTimeout(() => location.reload(), 2000);
                     return;
