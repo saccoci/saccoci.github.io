@@ -94,6 +94,7 @@
                 <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
             </div>
             <div class="logo">⚡ Nostrcoin Wallet</div>
+            <div class="subtitle">NSCT Wallet • v0.1.0</div>
         </div>
 
         <button class="refresh-btn" onclick="refreshWallet()" id="refreshBtn" style="display:none;">🔄 Refresh Balance</button>
@@ -101,7 +102,7 @@
         <div id="status"></div>
 
         <div id="indexerStatus" style="font-size:11px;color:#888;margin-bottom:20px;text-align:center;display:none;">
-            Checking indexers...
+            <span id="indexerStatusText">Checking indexers...</span>
         </div>
 
         <div id="notConnected">
@@ -402,6 +403,7 @@
             document.getElementById('connected').style.display = 'block';
             document.getElementById('refreshBtn').style.display = 'block';
             document.getElementById('indexerStatus').style.display = 'block';
+            startIndexerCheckAnim();
 
             await fetchBalance();
             await fetchHistory();
@@ -516,19 +518,24 @@
         async function publishToRelays(event) {
             const promises = INDEXER_CONFIG.relays.map(relay => new Promise((resolve) => {
                 const ws = new WebSocket(relay);
-                ws.onopen = () => {
-                    ws.send(JSON.stringify(['EVENT', event]));
-                    ws.close();
-                    resolve();
+                let settled = false;
+                const finish = () => { if (!settled) { settled = true; ws.close(); resolve(); } };
+
+                ws.onopen = () => ws.send(JSON.stringify(['EVENT', event]));
+                ws.onmessage = (msg) => {
+                    try {
+                        const data = JSON.parse(msg.data);
+                        if (data[0] === 'OK') finish();
+                    } catch (e) {}
                 };
-                ws.onerror = () => resolve();
-                setTimeout(() => {
-                    ws.close();
-                    resolve();
-                }, 5000);
+                ws.onerror = () => finish();
+                // Fallback timeout — don't hang forever
+                setTimeout(finish, 5000);
             }));
             await Promise.allSettled(promises);
         }
+
+        const EPOCH_ORIGIN_MS = 1764968400000; // Must match miner.js and indexer
 
         async function startMining() {
             if (!window.nostr) {
@@ -543,10 +550,9 @@
             }
 
             state.mining = true;
-            document.getElementById('mineBtn').textContent = 'Mining...';
+            document.getElementById('mineBtn').textContent = 'Stop Mining';
             showStatus('Mining started... Looking for valid proof-of-work', 'info');
 
-            // Get custom message or use default
             const messageInput = document.getElementById('miningMessage');
             const customMessage = messageInput?.value.trim() || 'Mining NSTC';
 
@@ -555,8 +561,28 @@
             let attempts = 0;
             const startTime = Date.now();
 
+            // Mine only within the current epoch; restart on rollover
+            const getCurrentEpoch = () => Math.floor((Date.now() - EPOCH_ORIGIN_MS) / 600000);
+            let targetEpoch = getCurrentEpoch();
+
             while (state.mining) {
-                const nonce = Math.random().toString(36).substring(2);
+                // Epoch rolled over — stop and let user restart fresh
+                const nowEpoch = getCurrentEpoch();
+                if (nowEpoch !== targetEpoch) {
+                    showStatus(`⏸️ Epoch changed to ${nowEpoch}. Press Start Mining to mine the new epoch.`, 'info', 15000);
+                    state.mining = false;
+                    document.getElementById('mineBtn').textContent = 'Start Mining';
+                    document.getElementById('progressFill').style.width = '0%';
+                    document.getElementById('hashRate').textContent = '0 H/s';
+                    document.getElementById('attempts').textContent = '0';
+                    break;
+                }
+
+                // Generate a random 16-char hex nonce
+                const nonceBytes = new Uint8Array(8);
+                crypto.getRandomValues(nonceBytes);
+                const nonce = Array.from(nonceBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
                 const event = {
                     kind: CONFIG.eventKinds.mining,
                     created_at: Math.floor(Date.now() / 1000),
@@ -565,7 +591,7 @@
                         ['difficulty', difficulty.toString()],
                         ['nonce', nonce]
                     ],
-                    content: customMessage,  // Use custom message
+                    content: customMessage,
                     pubkey: state.pubkeyHex
                 };
 
@@ -577,9 +603,7 @@
                     try {
                         const signed = await window.nostr.signEvent(event);
                         await publishToRelays(signed);
-                        // COMBINED AND LENGTHENED STATUS MESSAGE
                         showStatus('⛏️ Valid proof-of-work found! Broadcasting... (Must be validated by indexers. Balance updates at the next epoch — check back in ~10 minutes)', 'info', 30000);
-
                     } catch (e) {
                         showStatus('Mining event failed: ' + e.message, 'error');
                     }
@@ -790,9 +814,26 @@
             updateIndexerStatusDisplay();
         }
 
+        let indexerCheckAnimInterval = null;
+        function startIndexerCheckAnim() {
+            const el = document.getElementById('indexerStatusText');
+            if (!el) return;
+            const frames = ['⏳ Checking indexers', '⏳ Checking indexers.', '⏳ Checking indexers..', '⏳ Checking indexers...'];
+            let i = 0;
+            if (indexerCheckAnimInterval) clearInterval(indexerCheckAnimInterval);
+            indexerCheckAnimInterval = setInterval(() => {
+                el.textContent = frames[i++ % frames.length];
+            }, 400);
+        }
+        function stopIndexerCheckAnim() {
+            if (indexerCheckAnimInterval) { clearInterval(indexerCheckAnimInterval); indexerCheckAnimInterval = null; }
+        }
+
         function updateIndexerStatusDisplay() {
+            stopIndexerCheckAnim();
             const statusDiv = document.getElementById('indexerStatus');
-            if (!statusDiv) return;
+            const statusText = document.getElementById('indexerStatusText');
+            if (!statusDiv || !statusText) return;
 
             const statuses = Object.entries(state.indexerStatus).map(([url, status]) => {
                 const icon = status === 'online' ? '✓' : '✗';
@@ -802,9 +843,9 @@
             });
 
             if (statuses.length > 0) {
-                statusDiv.innerHTML = `Indexers: ${statuses.join(' • ')}`;
+                statusText.innerHTML = `Indexers: ${statuses.join(' • ')}`;
             } else {
-                statusDiv.innerHTML = 'No indexers configured';
+                statusText.textContent = 'No indexers configured';
             }
         }
 
