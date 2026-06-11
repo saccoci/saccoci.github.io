@@ -77,6 +77,7 @@
             <div class="stat-card"><div class="stat-label">Block Height</div><div class="stat-value" id="blockHeight">-</div></div>
             <div class="stat-card"><div class="stat-label">Current Epoch</div><div class="stat-value" id="currentEpoch">-</div></div>
             <div class="stat-card"><div class="stat-label">Difficulty</div><div class="stat-value">4</div></div>
+            <div class="stat-card"><div class="stat-label">Next Epoch In</div><div class="stat-value" id="epochCountdown">-</div></div>
         </div>
 
         <div class="section">
@@ -103,6 +104,7 @@
         <div class="modal menu-modal">
             <button class="modal-close" onclick="toggleMenuModal(false)" aria-label="Close">×</button>
             <h3>Menu</h3>
+            <a href="https://saccoci.github.io/index.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
             <a href="https://saccoci.github.io/explorer.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
             <a href="https://saccoci.github.io/wallet.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
             <a href="https://nostrcoin.boards.net" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
@@ -229,6 +231,45 @@
             }
         }
 
+        const BLOCKS_PER_EPOCH = 100; // adjust if different
+        let epochCountdownInterval = null;
+
+        function startEpochCountdown(blockHeight, currentEpoch) {
+            // blocks into current epoch
+            const blocksIntoEpoch = blockHeight % BLOCKS_PER_EPOCH;
+            const blocksLeft = BLOCKS_PER_EPOCH - blocksIntoEpoch;
+
+            // approximate: ~10 min per block (600s) — adjust as needed
+            const SECONDS_PER_BLOCK = 600;
+            let secondsLeft = blocksLeft * SECONDS_PER_BLOCK;
+
+            if (epochCountdownInterval) clearInterval(epochCountdownInterval);
+
+            function updateCountdown() {
+                if (secondsLeft <= 0) {
+                    document.getElementById('epochCountdown').textContent = 'Now!';
+                    clearInterval(epochCountdownInterval);
+                    // auto-reload the page
+                    setTimeout(() => location.reload(), 2000);
+                    return;
+                }
+                const h = Math.floor(secondsLeft / 3600);
+                const m = Math.floor((secondsLeft % 3600) / 60);
+                const s = secondsLeft % 60;
+                const parts = [];
+                if (h > 0) parts.push(`${h}h`);
+                if (m > 0 || h > 0) parts.push(`${m}m`);
+                parts.push(`${s}s`);
+                document.getElementById('epochCountdown').textContent = `~${parts.join(' ')}`;
+                document.getElementById('epochCountdown').title = `${blocksLeft} block${blocksLeft !== 1 ? 's' : ''} remaining in epoch`;
+                secondsLeft--;
+            }
+
+            updateCountdown();
+            epochCountdownInterval = setInterval(updateCountdown, 1000);
+        }
+
+
         async function refreshData() {
             let dataFetched = false;
             let statusHTML = '';
@@ -247,6 +288,9 @@
                         document.getElementById('currentEpoch').textContent = stats.currentEpoch.toLocaleString();
                         allEvents = evs.events || [];
                         updateDisplay();
+                        // start epoch countdown after block height is rendered
+                        const bh = allEvents.filter(e => e.kind === 30333).length - 1;
+                        if (bh >= 0) startEpochCountdown(bh, stats.currentEpoch);
                         dataFetched = true;
                     }
                 } catch (e) {
@@ -346,7 +390,7 @@
         function searchNpub() {
             const npubInput = document.getElementById('searchInput').value.trim();
             const res = document.getElementById('searchResult');
-            
+
             if (!npubInput) {
                 res.innerHTML = '<p style="color:#ff6b6b">Please enter an npub.</p>';
                 return;
@@ -365,7 +409,7 @@
 
             // Find all transfer events (kind 30334)
             const transfers = allEvents.filter(e => e.kind === 30334);
-            
+
             // Transfers sent (where pubkey is the sender)
             const sentTransfers = transfers.filter(tx => tx.pubkey === pubkeyHex);
             const totalSent = sentTransfers.reduce((sum, tx) => {
