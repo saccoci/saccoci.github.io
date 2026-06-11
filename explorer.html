@@ -243,10 +243,7 @@
                 const secondsLeft = EPOCH_SECONDS - (elapsed % EPOCH_SECONDS);
 
                 if (secondsLeft >= EPOCH_SECONDS) {
-                    document.getElementById('epochCountdown').textContent = '0m 00s';
-                    clearInterval(epochCountdownInterval);
-                    setTimeout(() => location.reload(), 2000);
-                    return;
+                    secondsLeft = 0;
                 }
                 const m = Math.floor(secondsLeft / 60);
                 const s = secondsLeft % 60;
