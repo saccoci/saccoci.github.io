@@ -67,7 +67,6 @@
                 <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
             </div>
             <div class="logo">⚡ Nostrcoin Explorer</div>
-            <div class="subtitle">Nostrcoin Proof of Work Explorer • v0.1.1</div>
         </div>
 
         <div id="indexerStatus" style="margin-bottom:20px; text-align:center;"></div>
@@ -76,8 +75,8 @@
             <div class="stat-card"><div class="stat-label">Total Supply</div><div class="stat-value" id="totalSupply">-</div></div>
             <div class="stat-card"><div class="stat-label">Block Height</div><div class="stat-value" id="blockHeight">-</div></div>
             <div class="stat-card"><div class="stat-label">Current Epoch</div><div class="stat-value" id="currentEpoch">-</div></div>
-            <div class="stat-card"><div class="stat-label">Difficulty</div><div class="stat-value">4</div></div>
             <div class="stat-card"><div class="stat-label">Next Epoch In</div><div class="stat-value" id="epochCountdown">-</div></div>
+            <div class="stat-card"><div class="stat-label">Difficulty</div><div class="stat-value">4</div></div>
         </div>
 
         <div class="section">
@@ -231,38 +230,24 @@
             }
         }
 
-        const BLOCKS_PER_EPOCH = 100; // adjust if different
+        const EPOCH_SECONDS = 600; // 10 minutes per epoch
         let epochCountdownInterval = null;
 
-        function startEpochCountdown(blockHeight, currentEpoch) {
-            // blocks into current epoch
-            const blocksIntoEpoch = blockHeight % BLOCKS_PER_EPOCH;
-            const blocksLeft = BLOCKS_PER_EPOCH - blocksIntoEpoch;
-
-            // approximate: ~10 min per block (600s) — adjust as needed
-            const SECONDS_PER_BLOCK = 600;
-            let secondsLeft = blocksLeft * SECONDS_PER_BLOCK;
-
+        function startEpochCountdown(lastBlockTimestamp) {
             if (epochCountdownInterval) clearInterval(epochCountdownInterval);
 
             function updateCountdown() {
+                const now = Math.floor(Date.now() / 1000);
+                const elapsed = now - lastBlockTimestamp;
+                const secondsLeft = EPOCH_SECONDS - (elapsed % EPOCH_SECONDS);
+
                 if (secondsLeft <= 0) {
                     document.getElementById('epochCountdown').textContent = 'Now!';
-                    clearInterval(epochCountdownInterval);
-                    // auto-reload the page
-                    setTimeout(() => location.reload(), 2000);
                     return;
                 }
-                const h = Math.floor(secondsLeft / 3600);
-                const m = Math.floor((secondsLeft % 3600) / 60);
+                const m = Math.floor(secondsLeft / 60);
                 const s = secondsLeft % 60;
-                const parts = [];
-                if (h > 0) parts.push(`${h}h`);
-                if (m > 0 || h > 0) parts.push(`${m}m`);
-                parts.push(`${s}s`);
-                document.getElementById('epochCountdown').textContent = `~${parts.join(' ')}`;
-                document.getElementById('epochCountdown').title = `${blocksLeft} block${blocksLeft !== 1 ? 's' : ''} remaining in epoch`;
-                secondsLeft--;
+                document.getElementById('epochCountdown').textContent = `${m}m ${s.toString().padStart(2,'0')}s`;
             }
 
             updateCountdown();
@@ -288,9 +273,12 @@
                         document.getElementById('currentEpoch').textContent = stats.currentEpoch.toLocaleString();
                         allEvents = evs.events || [];
                         updateDisplay();
-                        // start epoch countdown after block height is rendered
-                        const bh = allEvents.filter(e => e.kind === 30333).length - 1;
-                        if (bh >= 0) startEpochCountdown(bh, stats.currentEpoch);
+                        // start epoch countdown from the last block's timestamp
+                        const blocks = allEvents.filter(e => e.kind === 30333);
+                        if (blocks.length > 0) {
+                            const lastBlock = blocks[blocks.length - 1];
+                            startEpochCountdown(lastBlock.created_at);
+                        }
                         dataFetched = true;
                     }
                 } catch (e) {
