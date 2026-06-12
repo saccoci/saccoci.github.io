@@ -70,7 +70,9 @@
 
         </div>
 
-        <div id="indexerStatus" style="margin-bottom:20px; text-align:center;"></div>
+        <div id="indexerStatus" style="margin-bottom:20px; text-align:center;">
+            <span id="indexerStatusText" style="font-size:12px;color:#888;">⏳ Connecting to indexers...</span>
+        </div>
 
         <div class="stats-grid">
             <div class="stat-card"><div class="stat-label">Total Supply</div><div class="stat-value" id="totalSupply">-</div></div>
@@ -255,9 +257,30 @@
         }
 
 
+        let explorerConnectAnimInterval = null;
+        function startConnectAnim() {
+            const el = document.getElementById('indexerStatusText');
+            if (!el) return;
+            const frames = [
+                '⏳ Connecting to indexers',
+                '⏳ Connecting to indexers.',
+                '⏳ Connecting to indexers..',
+                '⏳ Connecting to indexers...'
+            ];
+            let i = 0;
+            if (explorerConnectAnimInterval) clearInterval(explorerConnectAnimInterval);
+            explorerConnectAnimInterval = setInterval(() => {
+                el.textContent = frames[i++ % frames.length];
+            }, 400);
+        }
+        function stopConnectAnim() {
+            if (explorerConnectAnimInterval) { clearInterval(explorerConnectAnimInterval); explorerConnectAnimInterval = null; }
+        }
+
         async function refreshData() {
+            startConnectAnim();
             let dataFetched = false;
-            let statusHTML = '';
+            let statusParts = [];
 
             for (let url of INDEXERS) {
                 try {
@@ -266,14 +289,13 @@
                         fetch(`${url}/events`).then(r => r.json())
                     ]);
 
-                    statusHTML += `<span class="status-badge" style="color:#32CD32">✓ Online: ${url}</span>`;
+                    statusParts.push(`<span class="status-badge" style="color:#32CD32">✓ ${url.replace('https://','').replace('http://','')}</span>`);
 
                     if (!dataFetched) {
                         document.getElementById('totalSupply').textContent = stats.totalSupply.toLocaleString();
                         document.getElementById('currentEpoch').textContent = stats.currentEpoch.toLocaleString();
                         allEvents = evs.events || [];
                         updateDisplay();
-                        // start epoch countdown from the last block's timestamp
                         const blocks = allEvents.filter(e => e.kind === 30333);
                         if (blocks.length > 0) {
                             const lastBlock = blocks[blocks.length - 1];
@@ -282,10 +304,12 @@
                         dataFetched = true;
                     }
                 } catch (e) {
-                    statusHTML += `<span class="status-badge" style="color:#ff6b6b">✗ Offline: ${url}</span>`;
+                    statusParts.push(`<span class="status-badge" style="color:#ff6b6b">✗ ${url.replace('https://','').replace('http://','')}</span>`);
                 }
             }
-            document.getElementById('indexerStatus').innerHTML = statusHTML;
+            stopConnectAnim();
+            const el = document.getElementById('indexerStatusText');
+            if (el) el.innerHTML = statusParts.join('');
         }
 
         function createBlockHTML(block, num) {
@@ -603,7 +627,7 @@
             res.innerHTML = html;
         }
 
-        document.addEventListener('DOMContentLoaded', () => { refreshData(); setInterval(refreshData, 30000); });
+        document.addEventListener('DOMContentLoaded', () => { startConnectAnim(); refreshData(); setInterval(refreshData, 30000); });
     </script>
 </body>
 </html>

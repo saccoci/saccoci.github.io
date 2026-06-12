@@ -94,7 +94,7 @@
                 <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
             </div>
             <div class="logo">⚡ Nostrcoin Wallet</div>
-            <div class="subtitle">NSCT Wallet • v0.1.0</div>
+
         </div>
 
         <button class="refresh-btn" onclick="refreshWallet()" id="refreshBtn" style="display:none;">🔄 Refresh Balance</button>
@@ -374,18 +374,23 @@
 
         async function connectWallet() {
             if (!window.nostr) {
-                showStatus('No Nostr extension found', 'error');
+                showStatus('⚠️ No Nostr extension detected. Make sure your extension is enabled for this page.', 'error', 8000);
                 return;
             }
 
             try {
+                showStatus('🔑 Requesting public key from extension...', 'info', 10000);
                 const pubkeyHex = await window.nostr.getPublicKey();
+                if (!pubkeyHex) {
+                    showStatus('Extension returned no key. Try again or check extension permissions.', 'error', 8000);
+                    return;
+                }
                 state.pubkeyHex = pubkeyHex;
                 state.npub = pubkeyToNpub(pubkeyHex);
 
                 await onWalletConnected();
             } catch (error) {
-                showStatus('Failed to connect: ' + error.message, 'error');
+                showStatus('Failed to connect: ' + (error.message || String(error)), 'error', 8000);
             }
         }
 
@@ -818,7 +823,12 @@
         function startIndexerCheckAnim() {
             const el = document.getElementById('indexerStatusText');
             if (!el) return;
-            const frames = ['⏳ Checking indexers', '⏳ Checking indexers.', '⏳ Checking indexers..', '⏳ Checking indexers...'];
+            const frames = [
+                '⏳ Checking indexers, connecting wallet',
+                '⏳ Checking indexers, connecting wallet.',
+                '⏳ Checking indexers, connecting wallet..',
+                '⏳ Checking indexers, connecting wallet...'
+            ];
             let i = 0;
             if (indexerCheckAnimInterval) clearInterval(indexerCheckAnimInterval);
             indexerCheckAnimInterval = setInterval(() => {
