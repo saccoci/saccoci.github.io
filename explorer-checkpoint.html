@@ -67,15 +67,18 @@
                 <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
             </div>
             <div class="logo">⚡ Nostrcoin Explorer</div>
-            <div class="subtitle">Nostrcoin Proof of Work Explorer • v0.1.1</div>
+
         </div>
 
-        <div id="indexerStatus" style="margin-bottom:20px; text-align:center;"></div>
+        <div id="indexerStatus" style="margin-bottom:20px; text-align:center;">
+            <span id="indexerStatusText" style="font-size:12px;color:#888;">⏳ Connecting to indexers...</span>
+        </div>
 
         <div class="stats-grid">
             <div class="stat-card"><div class="stat-label">Total Supply</div><div class="stat-value" id="totalSupply">-</div></div>
             <div class="stat-card"><div class="stat-label">Block Height</div><div class="stat-value" id="blockHeight">-</div></div>
             <div class="stat-card"><div class="stat-label">Current Epoch</div><div class="stat-value" id="currentEpoch">-</div></div>
+            <div class="stat-card"><div class="stat-label">Next Epoch In</div><div class="stat-value" id="epochCountdown">-</div></div>
             <div class="stat-card"><div class="stat-label">Difficulty</div><div class="stat-value">4</div></div>
         </div>
 
@@ -103,8 +106,10 @@
         <div class="modal menu-modal">
             <button class="modal-close" onclick="toggleMenuModal(false)" aria-label="Close">×</button>
             <h3>Menu</h3>
+            <a href="https://saccoci.github.io/index.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
             <a href="https://saccoci.github.io/explorer.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
             <a href="https://saccoci.github.io/wallet.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
+            <a href="https://saccoci.github.io/holders.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Holders</a>
             <a href="https://nostrcoin.boards.net" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
             <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
             <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
@@ -229,9 +234,51 @@
             }
         }
 
+        const EPOCH_SECONDS = 600; // 10 minutes per epoch
+        let epochCountdownInterval = null;
+
+        function startEpochCountdown(lastBlockTimestamp) {
+            if (epochCountdownInterval) clearInterval(epochCountdownInterval);
+
+            function updateCountdown() {
+                const now = Math.floor(Date.now() / 1000);
+                const elapsed = now - lastBlockTimestamp;
+                const secondsLeft = EPOCH_SECONDS - (elapsed % EPOCH_SECONDS);
+
+                if (secondsLeft >= EPOCH_SECONDS) {
+                    secondsLeft = 0;
+                }
+                const m = Math.floor(secondsLeft / 60);
+                const s = secondsLeft % 60;
+                document.getElementById('epochCountdown').textContent = `${m}m ${s.toString().padStart(2,'0')}s`;
+            }
+
+            updateCountdown();
+            epochCountdownInterval = setInterval(updateCountdown, 1000);
+        }
+
+
+        let explorerConnectAnimInterval = null;
+        let explorerFirstLoad = true;
+        function startConnectAnim(isRefresh) {
+            const el = document.getElementById('indexerStatusText');
+            if (!el) return;
+            const base = isRefresh ? '⏳ Checking indexers, updating' : '⏳ Checking indexers';
+            const frames = [base, base + '.', base + '..', base + '...'];
+            let i = 0;
+            if (explorerConnectAnimInterval) clearInterval(explorerConnectAnimInterval);
+            explorerConnectAnimInterval = setInterval(() => {
+                el.textContent = frames[i++ % frames.length];
+            }, 400);
+        }
+        function stopConnectAnim() {
+            if (explorerConnectAnimInterval) { clearInterval(explorerConnectAnimInterval); explorerConnectAnimInterval = null; }
+        }
+
         async function refreshData() {
+            startConnectAnim(!explorerFirstLoad);
             let dataFetched = false;
-            let statusHTML = '';
+            let statusParts = [];
 
             for (let url of INDEXERS) {
                 try {
@@ -240,20 +287,28 @@
                         fetch(`${url}/events`).then(r => r.json())
                     ]);
 
-                    statusHTML += `<span class="status-badge" style="color:#32CD32">✓ Online: ${url}</span>`;
+                    statusParts.push(`<span class="status-badge" style="color:#32CD32">✓ ${url.replace('https://','').replace('http://','')}</span>`);
 
                     if (!dataFetched) {
                         document.getElementById('totalSupply').textContent = stats.totalSupply.toLocaleString();
                         document.getElementById('currentEpoch').textContent = stats.currentEpoch.toLocaleString();
                         allEvents = evs.events || [];
                         updateDisplay();
+                        const blocks = allEvents.filter(e => e.kind === 30333);
+                        if (blocks.length > 0) {
+                            const lastBlock = blocks[blocks.length - 1];
+                            startEpochCountdown(lastBlock.created_at);
+                        }
                         dataFetched = true;
+                        explorerFirstLoad = false;
                     }
                 } catch (e) {
-                    statusHTML += `<span class="status-badge" style="color:#ff6b6b">✗ Offline: ${url}</span>`;
+                    statusParts.push(`<span class="status-badge" style="color:#ff6b6b">✗ ${url.replace('https://','').replace('http://','')}</span>`);
                 }
             }
-            document.getElementById('indexerStatus').innerHTML = statusHTML;
+            stopConnectAnim();
+            const el = document.getElementById('indexerStatusText');
+            if (el) el.innerHTML = statusParts.join('');
         }
 
         function createBlockHTML(block, num) {
