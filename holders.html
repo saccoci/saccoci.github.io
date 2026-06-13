@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<!-- Nostrcoin Holders v0.1.0 -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nostrcoin Holders</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #2a2a2a;
+            --text-color: #f5f5f5;
+            --text-muted: #cdcdcd;
+            --accent-green: #32CD32;
+            --accent-orange: #f28500;
+            --accent-orange-hover: #ff9500;
+            --border-color: #444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container { max-width: 800px; width: 100%; margin-top: 40px; }
+
+        header { text-align: center; margin-bottom: 40px; }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--accent-green);
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Hamburger / nav */
+        .header-top {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 16px;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-size: 1.4rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .hamburger-btn:hover { border-color: var(--accent-orange); color: var(--accent-orange); }
+
+        /* Modal overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            max-width: 400px;
+            width: 100%;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px; right: 18px;
+            font-size: 1.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        .modal-close:hover { color: #fff; }
+
+        .modal-title { color: var(--accent-orange); font-size: 1.3rem; font-weight: 700; margin-bottom: 16px; }
+
+        .modal-link {
+            display: block;
+            padding: 10px 0;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .modal-link:last-child { border-bottom: none; }
+        .modal-link:hover { color: var(--accent-orange); }
+
+        /* Status */
+        #indexerStatus {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Stat summary row */
+        .stat-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+        .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--accent-green); }
+
+        /* Section headers */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-orange);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Chart card */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        #holdersChart {
+            width: 100%;
+            height: 220px;
+            display: block;
+        }
+
+        .chart-empty {
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Richlist table */
+        .richlist-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+        }
+
+        .richlist-table thead th {
+            text-align: left;
+            padding: 8px 10px;
+            color: #888;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .richlist-table thead th:last-child { text-align: right; }
+
+        .richlist-table tbody tr {
+            border-bottom: 1px solid #333;
+            transition: background 0.15s;
+        }
+        .richlist-table tbody tr:last-child { border-bottom: none; }
+        .richlist-table tbody tr:hover { background: #333; }
+
+        .richlist-table td { padding: 10px 10px; vertical-align: middle; }
+
+        .rank-cell { width: 36px; font-weight: 700; color: #666; font-size: 0.85rem; }
+        .rank-cell.top1 { color: #FFD700; font-size: 1.1rem; }
+        .rank-cell.top2 { color: #C0C0C0; font-size: 1.1rem; }
+        .rank-cell.top3 { color: #CD7F32; font-size: 1.1rem; }
+
+        .pubkey-cell {
+            font-family: monospace;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
+
+        .pubkey-cell .npub-short { color: var(--text-color); }
+        .pubkey-cell .you-badge {
+            display: inline-block;
+            margin-left: 6px;
+            background: var(--accent-orange);
+            color: #1a1a1a;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: sans-serif;
+            vertical-align: middle;
+        }
+
+        .balance-cell {
+            text-align: right;
+            font-weight: 600;
+            color: var(--accent-green);
+            white-space: nowrap;
+        }
+
+        .pct-cell {
+            text-align: right;
+            color: #888;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+
+        .pct-bar-wrap {
+            width: 60px;
+            height: 4px;
+            background: #3a3a3a;
+            border-radius: 2px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+        .pct-bar { height: 4px; border-radius: 2px; background: var(--accent-green); }
+
+        /* You row highlight */
+        tr.you-row { background: rgba(242,133,0,0.07); }
+        tr.you-row:hover { background: rgba(242,133,0,0.13); }
+
+        /* Loading / error */
+        .loading { text-align: center; color: #888; padding: 40px 0; }
+        .error-msg { color: #ff6b6b; text-align: center; padding: 20px 0; font-size: 0.9rem; }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding-top: 40px;
+            padding-bottom: 20px;
+        }
+
+        a.text-link { color: var(--accent-orange); text-decoration: none; }
+        a.text-link:hover { text-decoration: underline; }
+
+        @media (max-width: 600px) {
+            .container { margin-top: 20px; }
+            .pct-bar-wrap { display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header-top">
+        <button class="hamburger-btn" onclick="toggleMenu(true)" aria-label="Menu">☰</button>
+    </div>
+
+    <!-- Nav menu modal -->
+    <div class="modal-overlay" id="menuModal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="toggleMenu(false)">&times;</button>
+            <div class="modal-title">Navigation</div>
+            <a href="https://saccoci.github.io/index.html" class="modal-link" onclick="toggleMenu(false)">🏠 Home</a>
+            <a href="https://saccoci.github.io/explorer.html" class="modal-link" onclick="toggleMenu(false)">🔍 Explorer</a>
+            <a href="https://saccoci.github.io/holders.html" class="modal-link" onclick="toggleMenu(false)">🏆 Holders</a>
+            <a href="https://saccoci.github.io/wallet.html" class="modal-link" onclick="toggleMenu(false)">💳 Wallet</a>
+        </div>
+    </div>
+
+    <header>
+        <h1>🏆 Holders</h1>
+        <p class="tagline">Nostrcoin (NSTC) richlist &amp; network growth</p>
+    </header>
+
+    <div id="indexerStatus">⏳ Checking indexers...</div>
+
+    <!-- Summary stats -->
+    <div class="stat-row">
+        <div class="stat-card">
+            <div class="stat-label">Total Supply</div>
+            <div class="stat-value" id="statSupply">—</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Unique Holders</div>
+            <div class="stat-value" id="statHolders">—</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Blocks Mined</div>
+            <div class="stat-value" id="statBlocks">—</div>
+        </div>
+    </div>
+
+    <!-- Holders over time chart -->
+    <div class="card">
+        <div class="section-title">Unique Holders Over Time</div>
+        <div id="chartArea"><div class="loading">Loading chart data...</div></div>
+    </div>
+
+    <!-- Richlist -->
+    <div class="card">
+        <div class="section-title">Richlist</div>
+        <div id="richlistArea"><div class="loading">Loading balances...</div></div>
+    </div>
+
+    <footer>
+        <p>Created by Saccoci Nachiamelli</p>
+        <p>Find me on Nostr: <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" target="_blank" class="text-link">npub1sac...jnpw</a></p>
+        <p>On X: <a href="https://x.com/@saccocin" target="_blank" class="text-link">@saccocin</a></p>
+        <p>Email: saccoci@proton.me</p>
+    </footer>
+
+</div>
+
+<script>
+    // ── Config ────────────────────────────────────────────────────────────────
+    const INDEXERS = ['http://localhost:3000', 'https://vm-182.lnvps.cloud'];
+    const KIND_MINING = 30333;
+    const KIND_TRANSFER = 30334;
+    const MINING_REWARD = 50;
+    const EPOCH_ORIGIN_MS = 1764968400000;
+
+    // ── Bech32 helpers (npub) ─────────────────────────────────────────────────
+    const BECH32_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+    function bech32Polymod(v) {
+        const GEN = [0x3b6a57b2,0x26508e6d,0x1ea119fa,0x3d4233dd,0x2a1462b3];
+        let c = 1;
+        for (let p of v) {
+            const b = c >> 25;
+            c = ((c & 0x1ffffff) << 5) ^ p;
+            for (let i = 0; i < 5; i++) if ((b >> i) & 1) c ^= GEN[i];
+        }
+        return c;
+    }
+    function bech32CreateChecksum(hrp, data) {
+        const values = hrp.split('').map(c => c.charCodeAt(0) >> 5)
+            .concat([0])
+            .concat(hrp.split('').map(c => c.charCodeAt(0) & 31))
+            .concat(data);
+        const poly = bech32Polymod(values.concat([0,0,0,0,0,0])) ^ 1;
+        return Array.from({length:6}, (_,i) => (poly >> (5*(5-i))) & 31);
+    }
+    function bech32Encode(hrp, data) {
+        const combined = data.concat(bech32CreateChecksum(hrp, data));
+        return hrp + '1' + combined.map(d => BECH32_CHARSET[d]).join('');
+    }
+    function convertBits(data, from, to, pad=true) {
+        let acc=0, bits=0;
+        const result=[];
+        const maxv=(1<<to)-1;
+        for (const val of data) {
+            acc = (acc<<from) | val;
+            bits += from;
+            while (bits >= to) { bits -= to; result.push((acc>>bits)&maxv); }
+        }
+        if (pad && bits > 0) result.push((acc << (to-bits)) & maxv);
+        return result;
+    }
+    function hexToNpub(hex) {
+        const bytes = hex.match(/.{2}/g).map(b => parseInt(b,16));
+        return bech32Encode('npub', convertBits(bytes, 8, 5));
+    }
+    function shortNpub(npub) {
+        return npub.slice(0,12) + '...' + npub.slice(-6);
+    }
+
+    // ── Balance computation (mirrors indexer logic) ───────────────────────────
+    function computeBalances(events) {
+        const balances = {};
+        // Sort by created_at ascending
+        const sorted = [...events].sort((a,b) => a.created_at - b.created_at);
+        for (const ev of sorted) {
+            if (ev.kind === KIND_MINING) {
+                balances[ev.pubkey] = (balances[ev.pubkey] || 0) + MINING_REWARD;
+            }
+            if (ev.kind === KIND_TRANSFER) {
+                const recipTag = ev.tags?.find(t => t[0] === 'p');
+                const amtTag   = ev.tags?.find(t => t[0] === 'amount');
+                if (!recipTag || !amtTag) continue;
+                const recipient = recipTag[1];
+                const amount = parseInt(amtTag[1], 10);
+                if (isNaN(amount) || amount <= 0) continue;
+                if ((balances[ev.pubkey] || 0) < amount) continue;
+                balances[ev.pubkey] -= amount;
+                balances[recipient] = (balances[recipient] || 0) + amount;
+            }
+        }
+        return balances;
+    }
+
+    // ── Holders over time (replay blocks in order) ───────────────────────────
+    function computeHoldersOverTime(events) {
+        const miningEvents = events
+            .filter(e => e.kind === KIND_MINING)
+            .sort((a,b) => a.created_at - b.created_at);
+
+        if (miningEvents.length === 0) return [];
+
+        const seen = new Set();
+        return miningEvents.map(ev => {
+            seen.add(ev.pubkey);
+            return {
+                ts: ev.created_at * 1000,
+                count: seen.size
+            };
+        });
+    }
+
+    // ── SVG Line chart ────────────────────────────────────────────────────────
+    function renderChart(points, container) {
+        if (points.length < 2) {
+            container.innerHTML = '<div class="chart-empty">Not enough data yet — check back as more blocks are mined.</div>';
+            return;
+        }
+
+        const W = 740, H = 180, PAD = { top: 16, right: 16, bottom: 36, left: 36 };
+        const gW = W - PAD.left - PAD.right;
+        const gH = H - PAD.top  - PAD.bottom;
+
+        const minT = points[0].ts;
+        const maxT = points[points.length-1].ts;
+        const minC = 0;
+        const maxC = Math.max(...points.map(p => p.count));
+
+        const xScale = t  => PAD.left + ((t - minT) / (maxT - minT || 1)) * gW;
+        const yScale = c  => PAD.top  + gH - (c / (maxC || 1)) * gH;
+
+        // Axis labels — up to 5 x-ticks
+        const xTicks = 5;
+        const xTicksArr = Array.from({length: xTicks}, (_,i) => {
+            const t = minT + (i/(xTicks-1)) * (maxT - minT);
+            const d = new Date(t);
+            return { x: xScale(t), label: d.toLocaleDateString(undefined, {month:'short', day:'numeric'}) };
+        });
+
+        // y-ticks: 0 and maxC and a midpoint
+        const yTicksArr = [0, Math.round(maxC/2), maxC].filter((v,i,a) => a.indexOf(v)===i);
+
+        // Polyline points
+        const pts = points.map(p => `${xScale(p.ts).toFixed(1)},${yScale(p.count).toFixed(1)}`).join(' ');
+
+        // Area fill path
+        const areaPath = `M${xScale(points[0].ts).toFixed(1)},${yScale(0).toFixed(1)} ` +
+            points.map(p => `L${xScale(p.ts).toFixed(1)},${yScale(p.count).toFixed(1)}`).join(' ') +
+            ` L${xScale(points[points.length-1].ts).toFixed(1)},${yScale(0).toFixed(1)} Z`;
+
+        // Last point dot
+        const lastPt = points[points.length-1];
+        const lx = xScale(lastPt.ts).toFixed(1);
+        const ly = yScale(lastPt.count).toFixed(1);
+
+        container.innerHTML = `
+        <svg id="holdersChart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" aria-label="Unique holders over time">
+            <defs>
+                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"   stop-color="#32CD32" stop-opacity="0.22"/>
+                    <stop offset="100%" stop-color="#32CD32" stop-opacity="0.02"/>
+                </linearGradient>
+            </defs>
+
+            <!-- Grid lines -->
+            ${yTicksArr.map(c => `
+                <line x1="${PAD.left}" y1="${yScale(c).toFixed(1)}" x2="${W - PAD.right}" y2="${yScale(c).toFixed(1)}"
+                      stroke="#333" stroke-width="1"/>
+                <text x="${PAD.left - 6}" y="${(yScale(c)+4).toFixed(1)}" fill="#666" font-size="11" text-anchor="end">${c}</text>
+            `).join('')}
+
+            <!-- Area fill -->
+            <path d="${areaPath}" fill="url(#areaGrad)"/>
+
+            <!-- Line -->
+            <polyline points="${pts}" fill="none" stroke="#32CD32" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+
+            <!-- Dots at each data point -->
+            ${points.map(p => `<circle cx="${xScale(p.ts).toFixed(1)}" cy="${yScale(p.count).toFixed(1)}" r="3" fill="#32CD32" opacity="0.7"/>`).join('')}
+
+            <!-- Last point highlight -->
+            <circle cx="${lx}" cy="${ly}" r="5" fill="#32CD32"/>
+            <text x="${lx}" y="${(parseFloat(ly)-10).toFixed(1)}" fill="#32CD32" font-size="12" font-weight="700" text-anchor="middle">${lastPt.count}</text>
+
+            <!-- X-axis labels -->
+            ${xTicksArr.map(t => `
+                <text x="${t.x.toFixed(1)}" y="${H - 6}" fill="#666" font-size="11" text-anchor="middle">${t.label}</text>
+            `).join('')}
+
+            <!-- Axes -->
+            <line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${H - PAD.bottom}" stroke="#444" stroke-width="1"/>
+            <line x1="${PAD.left}" y1="${H - PAD.bottom}" x2="${W - PAD.right}" y2="${H - PAD.bottom}" stroke="#444" stroke-width="1"/>
+        </svg>`;
+    }
+
+    // ── Richlist render ───────────────────────────────────────────────────────
+    function renderRichlist(balances, myPubkeyHex, totalSupply) {
+        const sorted = Object.entries(balances)
+            .filter(([,b]) => b > 0)
+            .sort(([,a],[,b]) => b - a);
+
+        if (sorted.length === 0) {
+            document.getElementById('richlistArea').innerHTML = '<div class="error-msg">No holders found.</div>';
+            return;
+        }
+
+        const rankSymbol = (i) => {
+            if (i === 0) return { label: '🥇', cls: 'top1' };
+            if (i === 1) return { label: '🥈', cls: 'top2' };
+            if (i === 2) return { label: '🥉', cls: 'top3' };
+            return { label: `#${i+1}`, cls: '' };
+        };
+
+        const rows = sorted.map(([pubkey, balance], i) => {
+            const { label, cls } = rankSymbol(i);
+            const npub = hexToNpub(pubkey);
+            const pct = totalSupply > 0 ? ((balance / totalSupply) * 100).toFixed(1) : '0.0';
+            const isYou = myPubkeyHex && pubkey === myPubkeyHex;
+            return `
+            <tr class="${isYou ? 'you-row' : ''}">
+                <td class="rank-cell ${cls}">${label}</td>
+                <td class="pubkey-cell">
+                    <span class="npub-short">${shortNpub(npub)}</span>
+                    ${isYou ? '<span class="you-badge">YOU</span>' : ''}
+                </td>
+                <td class="balance-cell">${balance.toLocaleString()} NSTC</td>
+                <td class="pct-cell">
+                    ${pct}%
+                    <span class="pct-bar-wrap"><span class="pct-bar" style="width:${Math.min(100,parseFloat(pct))}%"></span></span>
+                </td>
+            </tr>`;
+        }).join('');
+
+        document.getElementById('richlistArea').innerHTML = `
+        <table class="richlist-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Address</th>
+                    <th style="text-align:right">Balance</th>
+                    <th style="text-align:right">Share</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    // ── Animation ─────────────────────────────────────────────────────────────
+    let animInterval = null;
+    function startAnim() {
+        const el = document.getElementById('indexerStatus');
+        if (!el) return;
+        const base = '⏳ Checking indexers';
+        let i = 0;
+        if (animInterval) clearInterval(animInterval);
+        animInterval = setInterval(() => {
+            el.textContent = base + '.'.repeat(i % 4);
+            i++;
+        }, 400);
+    }
+    function stopAnim(msg) {
+        if (animInterval) { clearInterval(animInterval); animInterval = null; }
+        const el = document.getElementById('indexerStatus');
+        if (el) el.innerHTML = msg;
+    }
+
+    // ── Main fetch + render ───────────────────────────────────────────────────
+    let myPubkeyHex = null;
+
+    async function loadData() {
+        startAnim();
+        let events = null, stats = null, indexerLabel = '';
+
+        for (const url of INDEXERS) {
+            try {
+                const [s, e] = await Promise.all([
+                    fetch(`${url}/stats`).then(r => r.json()),
+                    fetch(`${url}/events`).then(r => r.json())
+                ]);
+                stats = s;
+                events = e.events || [];
+                const short = url.replace(/https?:\/\//, '').split('/')[0];
+                indexerLabel = `<span style="color:#32CD32">✓ ${short}</span>`;
+                break;
+            } catch {
+                const short = url.replace(/https?:\/\//, '').split('/')[0];
+                indexerLabel += `<span style="color:#ff6b6b">✗ ${short}</span> `;
+            }
+        }
+
+        stopAnim(indexerLabel || '<span style="color:#ff6b6b">All indexers offline</span>');
+
+        if (!events) {
+            document.getElementById('chartArea').innerHTML = '<div class="error-msg">Could not reach any indexer.</div>';
+            document.getElementById('richlistArea').innerHTML = '<div class="error-msg">Could not reach any indexer.</div>';
+            return;
+        }
+
+        // Stats row
+        const miningEvents = events.filter(e => e.kind === KIND_MINING);
+        const balances = computeBalances(events);
+        const totalSupply = Object.values(balances).reduce((a,b) => a+b, 0);
+        const uniqueHolders = Object.values(balances).filter(b => b > 0).length;
+
+        document.getElementById('statSupply').textContent  = totalSupply.toLocaleString();
+        document.getElementById('statHolders').textContent = uniqueHolders.toLocaleString();
+        document.getElementById('statBlocks').textContent  = miningEvents.length.toLocaleString();
+
+        // Chart
+        const holderPoints = computeHoldersOverTime(events);
+        renderChart(holderPoints, document.getElementById('chartArea'));
+
+        // Try to get current user's pubkey for YOU badge
+        if (window.nostr) {
+            try { myPubkeyHex = await window.nostr.getPublicKey(); } catch {}
+        }
+
+        renderRichlist(balances, myPubkeyHex, totalSupply);
+    }
+
+    // ── Menu ──────────────────────────────────────────────────────────────────
+    function toggleMenu(show) {
+        document.getElementById('menuModal').style.display = show ? 'flex' : 'none';
+    }
+    window.addEventListener('click', e => {
+        if (e.target === document.getElementById('menuModal')) toggleMenu(false);
+    });
+
+    // ── Boot ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        loadData();
+        setInterval(loadData, 60000); // refresh every minute
+    });
+</script>
+</body>
+</html>

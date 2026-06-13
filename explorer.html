@@ -108,6 +108,7 @@
             <h3>Menu</h3>
             <a href="https://saccoci.github.io/index.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
             <a href="https://saccoci.github.io/explorer.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
+            <a href="https://saccoci.github.io/holders.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏆 Holders</a>
             <a href="https://saccoci.github.io/wallet.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
             <a href="https://nostrcoin.boards.net" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
             <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
@@ -258,15 +259,12 @@
 
 
         let explorerConnectAnimInterval = null;
-        function startConnectAnim() {
+        let explorerFirstLoad = true;
+        function startConnectAnim(isRefresh) {
             const el = document.getElementById('indexerStatusText');
             if (!el) return;
-            const frames = [
-                '⏳ Connecting to indexers',
-                '⏳ Connecting to indexers.',
-                '⏳ Connecting to indexers..',
-                '⏳ Connecting to indexers...'
-            ];
+            const base = isRefresh ? '⏳ Checking indexers, updating' : '⏳ Checking indexers';
+            const frames = [base, base + '.', base + '..', base + '...'];
             let i = 0;
             if (explorerConnectAnimInterval) clearInterval(explorerConnectAnimInterval);
             explorerConnectAnimInterval = setInterval(() => {
@@ -278,7 +276,7 @@
         }
 
         async function refreshData() {
-            startConnectAnim();
+            startConnectAnim(!explorerFirstLoad);
             let dataFetched = false;
             let statusParts = [];
 
@@ -302,6 +300,7 @@
                             startEpochCountdown(lastBlock.created_at);
                         }
                         dataFetched = true;
+                        explorerFirstLoad = false;
                     }
                 } catch (e) {
                     statusParts.push(`<span class="status-badge" style="color:#ff6b6b">✗ ${url.replace('https://','').replace('http://','')}</span>`);
@@ -627,7 +626,7 @@
             res.innerHTML = html;
         }
 
-        document.addEventListener('DOMContentLoaded', () => { startConnectAnim(); refreshData(); setInterval(refreshData, 30000); });
+        document.addEventListener('DOMContentLoaded', () => { refreshData(); setInterval(refreshData, 30000); });
     </script>
 </body>
 </html>
