@@ -47,24 +47,12 @@
             font-size: 1.1rem;
         }
 
-        /* Hamburger / nav */
-        .header-top {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 16px;
-        }
-
-        .hamburger-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            font-size: 1.4rem;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .hamburger-btn:hover { border-color: var(--accent-orange); color: var(--accent-orange); }
+        /* Hamburger / nav — matches explorer/wallet */
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #3a3a3a; }
+        .hamburger-btn { background: #2a2a2a; border: 1px solid #444; color: #f5f5f5; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 20px; line-height: 1; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .hamburger-btn:hover { background: #333; border-color: #32CD32; }
+        .join-nostr-btn { background: #f28500; color: #1a1a1a; border: 1px solid #f28500; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; text-decoration: none; display: inline-block; transition: all 0.2s; }
+        .join-nostr-btn:hover { background: #ff9500; border-color: #ff9500; transform: translateY(-2px); }
 
         /* Modal overlay */
         .modal-overlay {
@@ -80,21 +68,15 @@
             padding: 20px;
         }
 
-        .modal-card {
+        .modal {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            max-width: 400px;
+            max-width: 420px;
             width: 100%;
             padding: 30px;
             position: relative;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: fadeIn 0.2s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-16px); }
-            to   { opacity: 1; transform: translateY(0); }
         }
 
         .modal-close {
@@ -108,18 +90,8 @@
         }
         .modal-close:hover { color: #fff; }
 
-        .modal-title { color: var(--accent-orange); font-size: 1.3rem; font-weight: 700; margin-bottom: 16px; }
-
-        .modal-link {
-            display: block;
-            padding: 10px 0;
-            color: var(--text-color);
-            text-decoration: none;
-            font-size: 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .modal-link:last-child { border-bottom: none; }
-        .modal-link:hover { color: var(--accent-orange); }
+        .menu-modal .modal-link { display: block; padding: 12px 16px; color: #f5f5f5; text-decoration: none; border-radius: 8px; margin-bottom: 8px; transition: all 0.2s; border: 1px solid transparent; }
+        .menu-modal .modal-link:hover { background: #333; border-color: #32CD32; color: #32CD32; }
 
         /* Status */
         #indexerStatus {
@@ -291,18 +263,42 @@
 <div class="container">
 
     <div class="header-top">
-        <button class="hamburger-btn" onclick="toggleMenu(true)" aria-label="Menu">☰</button>
+        <button class="hamburger-btn" onclick="toggleMenuModal(true)" aria-label="Menu">☰</button>
+        <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
     </div>
 
     <!-- Nav menu modal -->
-    <div class="modal-overlay" id="menuModal">
-        <div class="modal-card">
-            <button class="modal-close" onclick="toggleMenu(false)">&times;</button>
-            <div class="modal-title">Navigation</div>
-            <a href="https://saccoci.github.io/index.html" class="modal-link" onclick="toggleMenu(false)">🏠 Home</a>
-            <a href="https://saccoci.github.io/explorer.html" class="modal-link" onclick="toggleMenu(false)">🔍 Explorer</a>
-            <a href="https://saccoci.github.io/wallet.html" class="modal-link" onclick="toggleMenu(false)">💳 Wallet</a>
-            <a href="https://saccoci.github.io/holders.html" class="modal-link" onclick="toggleMenu(false)">🏆 Holders</a>
+    <div id="menuModal" class="modal-overlay menu-modal" aria-hidden="true">
+        <div class="modal">
+            <button class="modal-close" onclick="toggleMenuModal(false)" aria-label="Close">×</button>
+            <a href="https://saccoci.github.io/index.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
+            <a href="https://saccoci.github.io/explorer.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
+            <a href="https://saccoci.github.io/wallet.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
+            <a href="https://saccoci.github.io/holders.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Holders</a>
+            <a href="https://nostrcoin.boards.net" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
+            <a href="https://github.com/saccoci" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+        </div>
+    </div>
+
+    <!-- Join Nostr modal -->
+    <div id="joinNostrModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal">
+            <button class="modal-close" onclick="toggleJoinNostrModal(false)" aria-label="Close">×</button>
+            <h3>What is Nostr?</h3>
+            <p style="margin-top:12px;">
+                <strong>Nostr</strong> (Notes and Other Stuff Transmitted by Relays) is a decentralized social protocol that enables global, decentralized, and censorship-resistant social networking.
+            </p>
+            <p style="margin-top:12px;">
+                <strong>Why do I need Nostr for Nostrcoin?</strong> Nostrcoin is built on top of Nostr's event system. Since Nostrcoin uses Nostr events for its blockchain (mining events and transfer events), you need a Nostr account to use the wallet and interact with the network.
+            </p>
+            <p style="margin-top:12px;">To get started with Nostrcoin, you'll need to:</p>
+            <ul style="margin-top:8px;margin-left:20px;line-height:1.8;">
+                <li>Create a Nostr account</li>
+                <li>Install a Nostr signing extension to your web browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others)</li>
+            </ul>
+            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Join Nostr</a>
         </div>
     </div>
 
@@ -439,7 +435,8 @@
             seen.add(ev.pubkey);
             return {
                 ts: ev.created_at * 1000,
-                count: seen.size
+                count: seen.size,
+                id: ev.id
             };
         });
     }
@@ -509,8 +506,14 @@
             <!-- Line -->
             <polyline points="${pts}" fill="none" stroke="#32CD32" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 
-            <!-- Dots at each data point -->
-            ${points.map(p => `<circle cx="${xScale(p.ts).toFixed(1)}" cy="${yScale(p.count).toFixed(1)}" r="3" fill="#32CD32" opacity="0.7"/>`).join('')}
+            <!-- Dots — each is a mined block, click to view on njump.me -->
+            ${points.map(p => p.id ? `
+                <a href="https://njump.me/${p.id}" target="_blank" rel="noopener">
+                    <circle cx="${xScale(p.ts).toFixed(1)}" cy="${yScale(p.count).toFixed(1)}" r="5" fill="#32CD32" opacity="0.75" style="cursor:pointer">
+                        <title>Block mined ${new Date(p.ts).toLocaleString()} — click to view on njump.me</title>
+                    </circle>
+                </a>` : `<circle cx="${xScale(p.ts).toFixed(1)}" cy="${yScale(p.count).toFixed(1)}" r="3" fill="#32CD32" opacity="0.5"/>`
+            ).join('')}
 
             <!-- Last point highlight -->
             <circle cx="${lx}" cy="${ly}" r="5" fill="#32CD32"/>
@@ -652,12 +655,20 @@
         renderRichlist(balances, myPubkeyHex, totalSupply);
     }
 
-    // ── Menu ──────────────────────────────────────────────────────────────────
-    function toggleMenu(show) {
-        document.getElementById('menuModal').style.display = show ? 'flex' : 'none';
+    // ── Menu / modals ─────────────────────────────────────────────────────────
+    function toggleMenuModal(show) {
+        const modal = document.getElementById('menuModal');
+        modal.style.display = show ? 'flex' : 'none';
+        modal.setAttribute('aria-hidden', String(!show));
+    }
+    function toggleJoinNostrModal(show) {
+        const modal = document.getElementById('joinNostrModal');
+        modal.style.display = show ? 'flex' : 'none';
+        modal.setAttribute('aria-hidden', String(!show));
     }
     window.addEventListener('click', e => {
-        if (e.target === document.getElementById('menuModal')) toggleMenu(false);
+        if (e.target === document.getElementById('menuModal')) toggleMenuModal(false);
+        if (e.target === document.getElementById('joinNostrModal')) toggleJoinNostrModal(false);
     });
 
     // ── Boot ──────────────────────────────────────────────────────────────────
