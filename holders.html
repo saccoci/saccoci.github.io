@@ -194,7 +194,8 @@
             word-break: break-all;
         }
 
-        .pubkey-cell .npub-short { color: var(--text-color); }
+        .pubkey-cell .npub-short { color: var(--text-color); text-decoration: none; }
+        .pubkey-cell .npub-short:hover { color: var(--accent-orange); text-decoration: underline; }
         .pubkey-cell .you-badge {
             display: inline-block;
             margin-left: 6px;
@@ -431,14 +432,20 @@
         if (miningEvents.length === 0) return [];
 
         const seen = new Set();
-        return miningEvents.map(ev => {
+        const points = [];
+        for (const ev of miningEvents) {
+            const before = seen.size;
             seen.add(ev.pubkey);
-            return {
-                ts: ev.created_at * 1000,
-                count: seen.size,
-                id: ev.id
-            };
-        });
+            // Only add a point when a genuinely new holder appears
+            if (seen.size > before) {
+                points.push({
+                    ts:    ev.created_at * 1000,
+                    count: seen.size,
+                    id:    ev.id
+                });
+            }
+        }
+        return points;
     }
 
     // ── SVG Line chart ────────────────────────────────────────────────────────
@@ -506,13 +513,13 @@
             <!-- Line -->
             <polyline points="${pts}" fill="none" stroke="#32CD32" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 
-            <!-- Dots — each is a mined block, click to view on njump.me -->
+            <!-- Dots — one per new unique holder (their first mined block), clickable to njump.me -->
             ${points.map(p => p.id ? `
                 <a href="https://njump.me/${p.id}" target="_blank" rel="noopener">
-                    <circle cx="${xScale(p.ts).toFixed(1)}" cy="${yScale(p.count).toFixed(1)}" r="5" fill="#32CD32" opacity="0.75" style="cursor:pointer">
-                        <title>Block mined ${new Date(p.ts).toLocaleString()} — click to view on njump.me</title>
+                    <circle cx="${xScale(p.ts).toFixed(1)}" cy="${yScale(p.count).toFixed(1)}" r="5" fill="#32CD32" opacity="0.85" style="cursor:pointer">
+                        <title>New holder #${p.count} — first block mined ${new Date(p.ts).toLocaleString()} — click to view on njump.me</title>
                     </circle>
-                </a>` : `<circle cx="${xScale(p.ts).toFixed(1)}" cy="${yScale(p.count).toFixed(1)}" r="3" fill="#32CD32" opacity="0.5"/>`
+                </a>` : `<circle cx="${xScale(p.ts).toFixed(1)}" cy="${yScale(p.count).toFixed(1)}" r="5" fill="#32CD32" opacity="0.85"/>`
             ).join('')}
 
             <!-- Last point highlight -->
@@ -557,7 +564,7 @@
             <tr class="${isYou ? 'you-row' : ''}">
                 <td class="rank-cell ${cls}">${label}</td>
                 <td class="pubkey-cell">
-                    <span class="npub-short">${shortNpub(npub)}</span>
+                    <a href="https://njump.me/${npub}" target="_blank" rel="noopener" class="npub-short">${shortNpub(npub)}</a>
                     ${isYou ? '<span class="you-badge">YOU</span>' : ''}
                 </td>
                 <td class="balance-cell">${balance.toLocaleString()} NSTC</td>

@@ -101,7 +101,7 @@
         <div id="status"></div>
 
         <div id="indexerStatus" style="font-size:11px;color:#888;margin-bottom:20px;text-align:center;display:none;">
-            Checking indexers...
+            <span id="indexerStatusText">Checking indexers...</span>
         </div>
 
         <div id="notConnected">
@@ -403,6 +403,7 @@
             document.getElementById('connected').style.display = 'block';
             document.getElementById('refreshBtn').style.display = 'block';
             document.getElementById('indexerStatus').style.display = 'block';
+            startIndexerCheckAnim();
 
             await fetchBalance();
             await fetchHistory();
@@ -791,9 +792,26 @@
             updateIndexerStatusDisplay();
         }
 
+        let indexerCheckAnimInterval = null;
+        function startIndexerCheckAnim() {
+            const el = document.getElementById('indexerStatusText');
+            if (!el) return;
+            const base = '⏳ Checking indexers, connecting wallet';
+            let i = 0;
+            if (indexerCheckAnimInterval) clearInterval(indexerCheckAnimInterval);
+            indexerCheckAnimInterval = setInterval(() => {
+                el.textContent = base + '.'.repeat(i % 4);
+                i++;
+            }, 400);
+        }
+        function stopIndexerCheckAnim() {
+            if (indexerCheckAnimInterval) { clearInterval(indexerCheckAnimInterval); indexerCheckAnimInterval = null; }
+        }
+
         function updateIndexerStatusDisplay() {
-            const statusDiv = document.getElementById('indexerStatus');
-            if (!statusDiv) return;
+            stopIndexerCheckAnim();
+            const statusText = document.getElementById('indexerStatusText');
+            if (!statusText) return;
 
             const statuses = Object.entries(state.indexerStatus).map(([url, status]) => {
                 const icon = status === 'online' ? '✓' : '✗';
@@ -803,9 +821,9 @@
             });
 
             if (statuses.length > 0) {
-                statusDiv.innerHTML = `Indexers: ${statuses.join(' • ')}`;
+                statusText.innerHTML = `Indexers: ${statuses.join(' • ')}`;
             } else {
-                statusDiv.innerHTML = 'No indexers configured';
+                statusText.textContent = 'No indexers configured';
             }
         }
 
