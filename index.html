@@ -17,6 +17,27 @@
             --border-color: #444;
         }
 
+        .header-top { display: flex; justify-content: space-between; align-items: center; max-width: 800px; width: 100%; margin: 0 auto 20px; padding-bottom: 20px; border-bottom: 2px solid #3a3a3a; }
+        .hamburger-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 20px; line-height: 1; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .hamburger-btn:hover { background: #333; border-color: var(--accent-green); }
+        .join-nostr-btn { background: var(--accent-orange); color: #1a1a1a; border: 1px solid var(--accent-orange); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; text-decoration: none; display: inline-block; transition: all 0.2s; }
+        .join-nostr-btn:hover { background: var(--accent-orange-hover); border-color: var(--accent-orange-hover); transform: translateY(-2px); }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; padding: 20px; z-index: 50; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 26px; max-width: 380px; width: 100%; position: relative; }
+        .modal h3 { margin-bottom: 6px; color: var(--text-color); }
+        .modal p { color: #c0c0c0; font-size: 14px; line-height: 1.4; }
+        .modal a { color: var(--accent-orange); text-decoration: none; }
+        .modal a:hover { text-decoration: underline; }
+        .modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none; color: #999; font-size: 20px; cursor: pointer; }
+        .modal-close:hover { color: #fff; }
+        .menu-modal .modal-link { display: block; padding: 12px 16px; color: var(--text-color); text-decoration: none; border-radius: 8px; margin-bottom: 8px; transition: all 0.2s; border: 1px solid transparent; }
+        .menu-modal .modal-link:hover { background: #333; border-color: var(--accent-green); color: var(--accent-green); }
+        .modal .button { width: 100%; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: 600; border: 1px solid transparent; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s; }
+        .modal .button-secondary { background: var(--card-bg); color: var(--accent-orange); border: 1px solid var(--accent-orange); }
+        .modal .button-secondary:hover { background: var(--accent-orange); color: #1a1a1a; }
+
         * {
             margin: 0;
             padding: 0;
@@ -319,6 +340,50 @@
 
 <body>
 
+    <div class="header-top">
+        <button class="hamburger-btn" onclick="toggleMenuModal(true)" aria-label="Menu">☰</button>
+        <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
+    </div>
+
+    <div id="menuModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal menu-modal">
+            <button class="modal-close" onclick="toggleMenuModal(false)" aria-label="Close">×</button>
+            <h3>Menu</h3>
+            <a href="https://saccoci.github.io/index.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
+            <a href="https://saccoci.github.io/start.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
+            <a href="https://saccoci.github.io/explorer.html"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
+            <a href="https://saccoci.github.io/stats.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
+            <a href="https://saccoci.github.io/wallet.html"     target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
+            <a href="https://nostrcoin.boards.net"              target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md"       target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
+            <a href="https://github.com/saccoci"                target="_blank" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+            <button class="button button-secondary" style="margin-top:8px;" onclick="toggleMenuModal(false)">Close</button>
+        </div>
+    </div>
+
+    <div id="joinNostrModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal">
+            <button class="modal-close" onclick="toggleJoinNostrModal(false)" aria-label="Close">×</button>
+            <h3>What is Nostr?</h3>
+            <p style="margin-top:12px;">
+                <strong>Nostr</strong> (Notes and Other Stuff Transmitted by Relays) is a decentralized social protocol that enables global, decentralized, and censorship-resistant social networking.
+            </p>
+            <p style="margin-top:12px;">
+                <strong>Why do I need Nostr for Nostrcoin?</strong> Nostrcoin is built on top of Nostr's event system. Since Nostrcoin uses Nostr events for its blockchain (mining events and transfer events), you need a Nostr account to use the wallet and interact with the network.
+            </p>
+            <p style="margin-top:12px;">
+                To get started with Nostrcoin, you'll need to:
+            </p>
+            <ul style="margin-top:8px;margin-left:20px;line-height:1.8;">
+                <li>Create a Nostr account</li>
+                <li>Install a Nostr signing extension to your web browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others)</li>
+            </ul>
+            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Join Nostr</a>
+            <button class="button button-secondary" style="margin-top:16px;" onclick="toggleJoinNostrModal(false)">Close</button>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <h1>⚡ Nostrcoin</h1>
@@ -336,11 +401,11 @@
         </section>
 
         <section class="faucet-section">
-            <a href="https://nostrcoin.boards.net/thread/6/nostrcoin-faucet" target="_blank" class="faucet-btn">
-                💧 Nostrcoin Faucet
+            <a href="start.html" class="faucet-btn">
+                🚀 Learn or Receive NSTC
             </a>
             <div class="faucet-description">
-                Receive 5 free Nostrcoin (NSTC)
+                New here? Learn or get your first free NSTC
             </div>
         </section>
 
@@ -373,6 +438,14 @@ This is a call for anyone who wishes to be in on a project from the start and a 
         </div>
 
         <nav class="links-grid">
+            <a href="start.html" class="link-card">
+                <div class="link-header">
+                    <span class="link-title">Get Started</span>
+                    <span class="link-icon">🚀</span>
+                </div>
+                <div class="link-desc">New here? Get your first NSTC in minutes</div>
+            </a>
+
             <a href="https://nostrcoin.netlify.app" class="link-card">
                 <div class="link-header">
                     <span class="link-title">Landing Page</span>
@@ -389,6 +462,14 @@ This is a call for anyone who wishes to be in on a project from the start and a 
                 <div class="link-desc">Frequently Asked Questions about Nostrcoin</div>
             </a>
 
+            <a href="wallet.html" class="link-card">
+                <div class="link-header">
+                    <span class="link-title">Wallet</span>
+                    <span class="link-icon">💳</span>
+                </div>
+                <div class="link-desc">Manage your NSTC securely</div>
+            </a>
+
             <a href="explorer.html" class="link-card">
                 <div class="link-header">
                     <span class="link-title">Block Explorer</span>
@@ -397,20 +478,12 @@ This is a call for anyone who wishes to be in on a project from the start and a 
                 <div class="link-desc">View blocks and transactions</div>
             </a>
 
-            <a href="wallet.html" class="link-card">
+            <a href="stats.html" class="link-card">
                 <div class="link-header">
-                    <span class="link-title">Wallet</span>
-                    <span class="link-icon">💳</span>
+                    <span class="link-title">Stats</span>
+                    <span class="link-icon">📊</span>
                 </div>
-                <div class="link-desc">View and manage your NSTC securely</div>
-            </a>
-
-            <a href="holders.html" class="link-card">
-                <div class="link-header">
-                    <span class="link-title">Holders</span>
-                    <span class="link-icon">🏆</span>
-                </div>
-                <div class="link-desc">Richlist and unique holders</div>
+                <div class="link-desc">Richlist, holders over time, and network stats</div>
             </a>
 
             <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank" class="link-card">
@@ -442,7 +515,7 @@ This is a call for anyone who wishes to be in on a project from the start and a 
                     <span class="link-title">Community Forum</span>
                     <span class="link-icon">💬</span>
                 </div>
-                <div class="link-desc">Discussion, NSCT faucet, or get support with things like mining</div>
+                <div class="link-desc">Discussion, NSTC faucet, or get support with things like mining</div>
             </a>
         </nav>
 
@@ -458,6 +531,23 @@ This is a call for anyone who wishes to be in on a project from the start and a 
             <div class="corn-icon">🌽</div>
         </footer>
     </div>
+
+    <script>
+        function toggleMenuModal(show) {
+            const m = document.getElementById('menuModal');
+            m.classList.toggle('active', show);
+            m.setAttribute('aria-hidden', String(!show));
+        }
+        function toggleJoinNostrModal(show) {
+            const m = document.getElementById('joinNostrModal');
+            m.classList.toggle('active', show);
+            m.setAttribute('aria-hidden', String(!show));
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('menuModal')) toggleMenuModal(false);
+            if (e.target === document.getElementById('joinNostrModal')) toggleJoinNostrModal(false);
+        });
+    </script>
 
     <script>
         const modal = document.getElementById('helpModal');

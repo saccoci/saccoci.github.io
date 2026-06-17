@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<!-- Nostrcoin Get Started v0.1.0 -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Nostrcoin · Get Started</title>
+    <style>
+        :root {
+            --bg:#1a1a1a; --card:#2a2a2a; --text:#f5f5f5; --muted:#cdcdcd;
+            --green:#32CD32; --orange:#f28500; --orange2:#ff9500; --border:#444;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding:20px; min-height:100vh; display:flex; flex-direction:column; align-items:center; }
+        .container { max-width:640px; width:100%; margin-top:20px; }
+
+        /* Header */
+        .header-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:20px; border-bottom:2px solid #3a3a3a; }
+        .hamburger-btn { background:var(--card); border:1px solid var(--border); color:var(--text); padding:10px 14px; border-radius:8px; cursor:pointer; font-size:20px; line-height:1; transition:all 0.2s; }
+        .hamburger-btn:hover { background:#333; border-color:var(--green); }
+        .join-nostr-btn { background:var(--orange); color:#1a1a1a; border:1px solid var(--orange); padding:12px 24px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px; text-decoration:none; display:inline-block; transition:all 0.2s; }
+        .join-nostr-btn:hover { background:var(--orange2); border-color:var(--orange2); transform:translateY(-2px); }
+
+        /* Modals */
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); justify-content:center; align-items:center; z-index:1000; padding:20px; }
+        .modal { background:var(--card); border:1px solid var(--border); border-radius:16px; max-width:420px; width:100%; padding:30px; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+        .modal-close { position:absolute; top:14px; right:18px; font-size:1.8rem; color:var(--muted); cursor:pointer; background:none; border:none; }
+        .modal-close:hover { color:#fff; }
+        .menu-modal .modal-link { display:block; padding:12px 16px; color:var(--text); text-decoration:none; border-radius:8px; margin-bottom:8px; transition:all 0.2s; border:1px solid transparent; }
+        .menu-modal .modal-link:hover { background:#333; border-color:var(--green); color:var(--green); }
+        .modal h3 { color:var(--orange); font-size:1.2rem; margin-bottom:12px; }
+        .modal p { color:var(--muted); font-size:0.95rem; margin-bottom:10px; }
+        .modal ul { color:var(--muted); font-size:0.95rem; margin-left:20px; line-height:1.8; }
+
+        /* Logo */
+        .logo { text-align:center; margin-bottom:32px; }
+        .logo h1 { font-size:clamp(1.6rem,4vw,2.4rem); font-weight:700; color:var(--green); }
+        .logo p { color:var(--muted); font-size:1rem; margin-top:6px; }
+
+        /* Wizard steps */
+        .step { display:none; }
+        .step.active { display:block; }
+
+        .step-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:32px; margin-bottom:16px; }
+        .step-badge { display:inline-block; background:var(--orange); color:#1a1a1a; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:16px; }
+        .step-title { font-size:1.4rem; font-weight:700; margin-bottom:12px; color:var(--text); }
+        .step-body { color:var(--muted); font-size:0.97rem; margin-bottom:24px; line-height:1.7; }
+        .step-body strong { color:var(--text); }
+        .step-body a { color:var(--orange); text-decoration:none; }
+        .step-body a:hover { text-decoration:underline; }
+
+        /* Buttons */
+        .btn-row { display:flex; gap:12px; flex-wrap:wrap; }
+        .btn { padding:14px 24px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; border:none; transition:all 0.2s; text-decoration:none; display:inline-block; text-align:center; }
+        .btn-primary { background:var(--green); color:#1a1a1a; }
+        .btn-primary:hover { background:#28b428; transform:translateY(-2px); }
+        .btn-secondary { background:transparent; color:var(--text); border:1px solid var(--border); }
+        .btn-secondary:hover { border-color:var(--green); color:var(--green); background:#222; }
+        .btn-orange { background:var(--orange); color:#1a1a1a; }
+        .btn-orange:hover { background:var(--orange2); transform:translateY(-2px); }
+        .btn-outline-orange { background:transparent; color:var(--orange); border:1px solid var(--orange); }
+        .btn-outline-orange:hover { background:rgba(242,133,0,0.1); }
+
+        /* Choice cards */
+        .choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+        @media(max-width:480px){ .choice-grid { grid-template-columns:1fr; } }
+        .choice-card { background:#222; border:2px solid var(--border); border-radius:14px; padding:24px 20px; cursor:pointer; transition:all 0.2s; text-align:center; }
+        .choice-card:hover { border-color:var(--orange); background:#2a2a2a; }
+        .choice-card.selected { border-color:var(--green); background:rgba(50,205,50,0.07); }
+        .choice-icon { font-size:2.4rem; margin-bottom:10px; }
+        .choice-title { font-size:1rem; font-weight:700; margin-bottom:6px; }
+        .choice-desc { font-size:0.82rem; color:#888; line-height:1.5; }
+
+        /* Mining steps list */
+        .how-list { list-style:none; counter-reset:steps; margin-bottom:24px; }
+        .how-list li { counter-increment:steps; padding:12px 0 12px 48px; position:relative; border-bottom:1px solid #333; color:var(--muted); font-size:0.95rem; }
+        .how-list li:last-child { border-bottom:none; }
+        .how-list li::before { content:counter(steps); position:absolute; left:0; top:50%; transform:translateY(-50%); width:30px; height:30px; border-radius:50%; background:var(--orange); color:#1a1a1a; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; }
+        .how-list li strong { color:var(--text); }
+        .how-list li a { color:var(--orange); text-decoration:none; }
+        .how-list li a:hover { text-decoration:underline; }
+
+        /* Faucet info box */
+        .info-box { background:#222; border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:20px; }
+        .info-box-title { color:var(--orange); font-weight:700; font-size:0.95rem; margin-bottom:8px; }
+        .info-box p { color:var(--muted); font-size:0.9rem; line-height:1.6; }
+        .info-box a:not(.btn) { color:var(--orange); text-decoration:none; }
+        .info-box a:not(.btn):hover { text-decoration:underline; }
+        .info-box a.btn-orange { color:#1a1a1a; }
+        .info-box a.btn-outline-orange { color:var(--orange); }
+        .npub-box { font-family:monospace; background:#1a1a1a; border:1px solid #444; border-radius:8px; padding:10px 14px; font-size:0.82rem; color:var(--green); word-break:break-all; margin-top:8px; cursor:pointer; position:relative; }
+        .npub-box:hover::after { content:'Click to copy'; position:absolute; top:-24px; left:50%; transform:translateX(-50%); background:#333; color:#fff; font-size:10px; padding:3px 8px; border-radius:4px; font-family:sans-serif; white-space:nowrap; }
+        .copied-flash { color:var(--green); font-size:11px; margin-top:4px; display:none; }
+
+        /* Footer */
+        footer { margin-top:auto; text-align:center; color:var(--muted); font-size:0.85rem; padding:40px 0 20px; }
+        a.text-link { color:var(--orange); text-decoration:none; }
+        a.text-link:hover { text-decoration:underline; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header-top">
+        <button class="hamburger-btn" onclick="toggleMenuModal(true)" aria-label="Menu">☰</button>
+        <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
+    </div>
+
+    <!-- Nav menu -->
+    <div id="menuModal" class="modal-overlay menu-modal" aria-hidden="true">
+        <div class="modal">
+            <button class="modal-close" onclick="toggleMenuModal(false)">×</button>
+            <a href="https://saccoci.github.io/index.html"    target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
+            <a href="https://saccoci.github.io/start.html"    target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
+            <a href="https://saccoci.github.io/explorer.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
+            <a href="https://saccoci.github.io/stats.html"    target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
+            <a href="https://saccoci.github.io/wallet.html"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
+            <a href="https://nostrcoin.boards.net"            target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md"     target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
+            <a href="https://github.com/saccoci"              target="_blank" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+        </div>
+    </div>
+
+    <!-- Join Nostr modal -->
+    <div id="joinNostrModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal">
+            <button class="modal-close" onclick="toggleJoinNostrModal(false)">×</button>
+            <h3>What is Nostr?</h3>
+            <p><strong>Nostr</strong> is a decentralized, censorship-resistant social protocol. Nostrcoin uses Nostr events as its ledger — you need a Nostr account to participate.</p>
+            <ul style="margin-bottom:16px;">
+                <li>Create a Nostr account</li>
+                <li>Install a signing extension (AKA Profiles, Alby, nos2x, Gooti, etc.)</li>
+            </ul>
+            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="text-align:center;display:block;">Get Started on Nostr</a>
+        </div>
+    </div>
+
+    <div id="joinWizardModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal">
+            <button class="modal-close" onclick="toggleJoinWizardModal(false)">×</button>
+            <h3>Before you go...</h3>
+            <p>You're about to leave this site and go through the <strong>nstart.me</strong> Nostr account creation wizard in a new tab.</p>
+            <p style="margin-top:12px; color:#f28500; font-weight:600;">⚠️ Save your private key (your <strong>nsec</strong>) somewhere safe.</p>
+            <p>It's the only way to access your account — if you lose it, it cannot be recovered. Don't share it with anyone.</p>
+            <p style="margin-top:12px;">Once you've created your account and saved your nsec, come back to this tab to get your first NSTC.</p>
+            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="text-align:center;display:block;margin-top:12px;" onclick="onJoinWizardLaunch()">Continue to nstart.me →</a>
+        </div>
+    </div>
+
+    <div class="logo">
+        <h1>⚡ Nostrcoin · Get Started</h1>
+        <p>Let's get you some NSTC. It only takes a minute.</p>
+    </div>
+
+    <!-- ── Step 1: Are you on Nostr? ── -->
+    <div id="step1" class="step active">
+        <div class="step-card">
+            <div class="step-badge">Step 1 of 3</div>
+            <div class="step-title">Are you on Nostr?</div>
+            <div class="step-body">
+                Nostrcoin runs entirely on <strong>Nostr</strong> — a decentralized protocol. Every transaction, every mined block, is a Nostr event. To participate you need a Nostr account and a signing extension installed in your browser.
+                <br><br>
+                If you're not sure, check your browser extensions for <strong>AKA Profiles, Alby, nos2x, Gooti, Flamingo,</strong> or similar.
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="goStep(2)">Yes, I'm on Nostr ✓</button>
+                <button class="btn btn-orange" onclick="confirmJoinNostr()">No — help me join</button>
+                <button class="btn btn-secondary" onclick="goStep('learn')">Just want to learn 📖</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Step Learn: Just here to learn ── -->
+    <div id="steplearn" class="step">
+        <div class="step-card">
+            <div class="step-badge">Learn</div>
+            <div class="step-title">📖 What is Nostrcoin?</div>
+            <div class="step-body">
+                Nostrcoin (NSTC) is an experimental, educational cryptocurrency built entirely on the <strong>Nostr</strong> protocol. Instead of a traditional blockchain, every mined block and every transfer is a public Nostr event — anyone can independently validate the full history.
+                <br><br>
+                It uses <strong>proof-of-work mining</strong>: every 10-minute epoch, the first valid event with the right hash difficulty wins a block reward of 50 NSTC. Rewards halve every 210,000 blocks, similar to Bitcoin, with a max supply of 21,000,000 NSTC.
+                <br><br>
+                This project has <strong>zero monetary value</strong> and is meant purely to explore what's possible when you build a currency-like system on top of a decentralized social protocol.
+            </div>
+            <div class="btn-row">
+                <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank" class="btn btn-secondary">README →</a>
+                <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" target="_blank" class="btn btn-secondary">Whitepaper →</a>
+                <a href="https://saccoci.github.io/stats.html" target="_blank" class="btn btn-secondary">View Network Stats →</a>
+            </div>
+            <div class="btn-row" style="margin-top:12px;">
+                <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+                <button class="btn btn-primary" onclick="goStep(2)">Actually, let's get some NSTC →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Step 2: Receive or Mine? ── -->
+    <div id="step2" class="step">
+        <div class="step-card">
+            <div class="step-badge">Step 2 of 3</div>
+            <div class="step-title">How do you want to get NSTC?</div>
+            <div class="step-body">Choose your path. You can always do both later.</div>
+            <div class="choice-grid">
+                <div class="choice-card" id="choiceReceive" onclick="selectChoice('receive')">
+                    <div class="choice-icon">🎁</div>
+                    <div class="choice-title">Receive NSTC</div>
+                    <div class="choice-desc">Get a free gift of NSTC from the faucet or from Saccoci directly.</div>
+                </div>
+                <div class="choice-card" id="choiceMine" onclick="selectChoice('mine')">
+                    <div class="choice-icon">⛏️</div>
+                    <div class="choice-title">Mine NSTC</div>
+                    <div class="choice-desc">Use the wallet to mine proof-of-work blocks and earn 50 NSTC per epoch won.</div>
+                </div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+                <button class="btn btn-primary" id="step2next" onclick="goStep3()" disabled style="opacity:0.4;cursor:not-allowed;">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Step 3a: Receive ── -->
+    <div id="step3receive" class="step">
+        <div class="step-card">
+            <div class="step-badge">Step 3 of 3</div>
+            <div class="step-title">🎁 Get your first NSTC</div>
+            <div class="step-body">Two ways to receive NSTC for free:</div>
+
+            <div class="info-box" style="margin-top:16px;">
+                <div class="info-box-title">Option A — Faucet (forum)</div>
+                <p>Post your npub in the faucet thread on the forum and someone will send you some NSTC.</p>
+                <div style="margin-top:12px;">
+                    <a href="https://nostrcoin.boards.net/thread/6/nostrcoin-faucet" target="_blank" class="btn btn-orange" style="font-size:13px;padding:10px 18px;">Open Faucet Thread →</a>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">Option B — Ask Saccoci directly on Nostr</div>
+                <p>Send a Nostr DM or mention to Saccoci and ask for a small NSTC gift. Include your npub.</p>
+                <div class="npub-box" id="saccociNpub" onclick="copyNpub()">npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw</div>
+                <div class="copied-flash" id="copiedFlash">✓ Copied to clipboard</div>
+                <div style="margin-top:12px;">
+                    <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" target="_blank" class="btn btn-outline-orange" style="font-size:13px;padding:10px 18px;">View on njump.me →</a>
+                </div>
+            </div>
+
+            <div class="step-body" style="margin-top:8px;">
+                Once you've received NSTC, open the <strong><a href="https://saccoci.github.io/wallet.html" target="_blank">Wallet</a></strong> and connect your Nostr extension to check your balance.
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
+                <a href="https://saccoci.github.io/wallet.html" target="_blank" class="btn btn-primary">Open Wallet →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Step 3b: Mine ── -->
+    <div id="step3mine" class="step">
+        <div class="step-card">
+            <div class="step-badge">Step 3 of 3</div>
+            <div class="step-title">⛏️ Start Mining NSTC</div>
+            <div class="step-body">Mining is done right in your browser. Here's how:</div>
+            <ol class="how-list">
+                <li><strong>Open the Wallet</strong> at <a href="https://saccoci.github.io/wallet.html" target="_blank">saccoci.github.io/wallet</a></li>
+                <li><strong>Connect your Nostr extension</strong> — tap "Connect Extension" and approve the request</li>
+                <li><strong>Scroll down to the Mining section</strong> — you'll see a Start Mining button</li>
+                <li><strong>Optionally set a message</strong> — this gets embedded in your mined block (like a coinbase message in Bitcoin)</li>
+                <li><strong>Tap Start Mining</strong> — your browser will start hashing. Each 10-minute epoch, only one miner wins the block reward of <strong>50 NSTC</strong></li>
+                <li><strong>When a block is found</strong> — it's broadcast to Nostr relays automatically. Your balance updates at the next epoch (~10 min)</li>
+            </ol>
+            <div class="info-box">
+                <div class="info-box-title">💡 Tips</div>
+                <p>Keep the wallet tab open and active while mining — browsers throttle background tabs. The miner stops automatically at epoch boundaries and restarts fresh each epoch. Check the <a href="https://saccoci.github.io/explorer.html" target="_blank">Explorer</a> to see if your block was validated.</p>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
+                <a href="https://saccoci.github.io/wallet.html" target="_blank" class="btn btn-primary">Open Wallet & Mine →</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Created by Saccoci Nachiamelli</p>
+        <p>Find me on Nostr: <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" target="_blank" class="text-link">npub1sac...jnpw</a></p>
+        <p>On X: <a href="https://x.com/@saccocin" target="_blank" class="text-link">@saccocin</a> · Email: saccoci@proton.me</p>
+    </footer>
+</div>
+
+<script>
+    let choice = null;
+
+    function goStep(n) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + n)?.classList.add('active');
+        window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    function confirmJoinNostr() {
+        toggleJoinWizardModal(true);
+    }
+
+    function onJoinWizardLaunch() {
+        toggleJoinWizardModal(false);
+        // After they return from nstart.me, advance to step 2
+        setTimeout(() => goStep(2), 800);
+    }
+
+    function selectChoice(c) {
+        choice = c;
+        document.querySelectorAll('.choice-card').forEach(el => el.classList.remove('selected'));
+        document.getElementById('choice' + (c==='receive'?'Receive':'Mine')).classList.add('selected');
+        const btn = document.getElementById('step2next');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+    }
+
+    function goStep3() {
+        if (!choice) return;
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step3' + choice).classList.add('active');
+        window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    function copyNpub() {
+        const text = document.getElementById('saccociNpub').textContent.trim();
+        navigator.clipboard.writeText(text).then(() => {
+            const flash = document.getElementById('copiedFlash');
+            flash.style.display = 'block';
+            setTimeout(() => { flash.style.display = 'none'; }, 2000);
+        });
+    }
+
+    function toggleMenuModal(show){const m=document.getElementById('menuModal');m.style.display=show?'flex':'none';m.setAttribute('aria-hidden',String(!show));}
+    function toggleJoinNostrModal(show){const m=document.getElementById('joinNostrModal');m.style.display=show?'flex':'none';m.setAttribute('aria-hidden',String(!show));}
+    function toggleJoinWizardModal(show){const m=document.getElementById('joinWizardModal');m.style.display=show?'flex':'none';m.setAttribute('aria-hidden',String(!show));}
+    window.addEventListener('click',e=>{
+        if(e.target===document.getElementById('menuModal'))toggleMenuModal(false);
+        if(e.target===document.getElementById('joinNostrModal'))toggleJoinNostrModal(false);
+        if(e.target===document.getElementById('joinWizardModal'))toggleJoinWizardModal(false);
+    });
+</script>
+</body>
+</html>
