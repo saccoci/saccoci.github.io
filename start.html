@@ -140,9 +140,9 @@
         <div class="modal">
             <button class="modal-close" onclick="toggleJoinWizardModal(false)">×</button>
             <h3>Before you go...</h3>
-            <p>You're about to leave this site and go through the <strong>nstart.me</strong> Nostr account creation wizard in a new tab.</p>
+            <p>You're about to leave this site and go through the <strong>nstart.me</strong> Nostr account creation wizard in a new tab. There are many ways to create a Nostr account, nstart.me is a good one.</p>
             <p style="margin-top:12px; color:#f28500; font-weight:600;">⚠️ Save your private key (your <strong>nsec</strong>) somewhere safe.</p>
-            <p>It's the only way to access your account — if you lose it, it cannot be recovered. Don't share it with anyone.</p>
+            <p>Your "nsec" is your account - both your username and password combined. <strong>Save your nsec safely and keep it secret.</strong> It's the only way to access your account — if you lose it, it cannot be recovered and your account is lost forever.</p>
             <p style="margin-top:12px;">Once you've created your account and saved your nsec, come back to this tab to get your first NSTC.</p>
             <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="text-align:center;display:block;margin-top:12px;" onclick="onJoinWizardLaunch()">Continue to nstart.me →</a>
         </div>
@@ -159,14 +159,12 @@
             <div class="step-badge">Step 1 of 3</div>
             <div class="step-title">Are you on Nostr?</div>
             <div class="step-body">
-                Nostrcoin runs entirely on <strong>Nostr</strong> — a decentralized protocol. Every transaction, every mined block, is a Nostr event. To participate you need a Nostr account and a signing extension installed in your browser.
-                <br><br>
-                If you're not sure, check your browser extensions for <strong>AKA Profiles, Alby, nos2x, Gooti, Flamingo,</strong> or similar.
+                Nostrcoin runs entirely on <strong>Nostr</strong> — a decentralized protocol. Every transaction, every mined block, is a Nostr event. So, <strong>you need a Nostr account</strong>. Joining Nostr takes only seconds and zero personal information is collected. Your account will both "get you on Nostr" and serve as your Nostrcoin wallet address.
             </div>
             <div class="btn-row">
                 <button class="btn btn-primary" onclick="goStep(2)">Yes, I'm on Nostr ✓</button>
                 <button class="btn btn-orange" onclick="confirmJoinNostr()">No — help me join</button>
-                <button class="btn btn-secondary" onclick="goStep('learn')">Just want to learn 📖</button>
+                <button class="btn btn-secondary" onclick="goStep('learn')">I just want to learn 📖</button>
             </div>
         </div>
     </div>
@@ -186,11 +184,12 @@
             <div class="btn-row">
                 <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank" class="btn btn-secondary">README →</a>
                 <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" target="_blank" class="btn btn-secondary">Whitepaper →</a>
+                <a href="https://nostrcoin.boards.net/board/1/general-discussion" target="_blank" class="btn btn-secondary">Forum →</a>
                 <a href="https://saccoci.github.io/stats.html" target="_blank" class="btn btn-secondary">View Network Stats →</a>
             </div>
             <div class="btn-row" style="margin-top:12px;">
                 <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
-                <button class="btn btn-primary" onclick="goStep(2)">Actually, let's get some NSTC →</button>
+                <button class="btn btn-primary" onclick="goStep(2)">Actually, let's just get some NSTC →</button>
             </div>
         </div>
     </div>
@@ -229,15 +228,15 @@
 
             <div class="info-box" style="margin-top:16px;">
                 <div class="info-box-title">Option A — Faucet (forum)</div>
-                <p>Post your npub in the faucet thread on the forum and someone will send you some NSTC.</p>
+                <p><strong>Post your npub</strong> in the faucet thread on the forum and Saccoci will send you some NSTC. You can post anonymously. Just say something like, "I'd like some Nostrcoin," or "Give me some NSTC, please," or "nok me!" Be sure to include your npub... (your Nostrcoin address).</p>
                 <div style="margin-top:12px;">
                     <a href="https://nostrcoin.boards.net/thread/6/nostrcoin-faucet" target="_blank" class="btn btn-orange" style="font-size:13px;padding:10px 18px;">Open Faucet Thread →</a>
                 </div>
             </div>
 
             <div class="info-box">
-                <div class="info-box-title">Option B — Ask Saccoci directly on Nostr</div>
-                <p>Send a Nostr DM or mention to Saccoci and ask for a small NSTC gift. Include your npub.</p>
+                <div class="info-box-title">Option B — Reach out to Saccoci directly</div>
+                <p>Create a note or mention (on Nostr or X) and ping Saccoci. Or, send a DM or email to Saccoci. Contact info is on the bottom of this page. Be sure to include your npub.</p>
                 <div class="npub-box" id="saccociNpub" onclick="copyNpub()">npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw</div>
                 <div class="copied-flash" id="copiedFlash">✓ Copied to clipboard</div>
                 <div style="margin-top:12px;">
@@ -246,7 +245,7 @@
             </div>
 
             <div class="step-body" style="margin-top:8px;">
-                Once you've received NSTC, open the <strong><a href="https://saccoci.github.io/wallet.html" target="_blank">Wallet</a></strong> and connect your Nostr extension to check your balance.
+                Once you've received NSTC, open the <strong><a href="https://saccoci.github.io/wallet.html" target="_blank">Wallet</a></strong> and check your balance. Logging in with a Nostr extension is the best practice, but you can also log in using your nsec.
             </div>
             <div class="btn-row">
                 <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
@@ -260,14 +259,15 @@
         <div class="step-card">
             <div class="step-badge">Step 3 of 3</div>
             <div class="step-title">⛏️ Start Mining NSTC</div>
-            <div class="step-body">Mining is done right in your browser. Here's how:</div>
+            <div class="step-body">Mining can be done in your wallet, right in your browser. Here's how:</div>
             <ol class="how-list">
                 <li><strong>Open the Wallet</strong> at <a href="https://saccoci.github.io/wallet.html" target="_blank">saccoci.github.io/wallet</a></li>
-                <li><strong>Connect your Nostr extension</strong> — tap "Connect Extension" and approve the request</li>
-                <li><strong>Scroll down to the Mining section</strong> — you'll see a Start Mining button</li>
+                <li><strong>Login to Nostr</strong> — tap "Connect Extension" and approve the request (or, alternately, enter your nsec to login)</li>
+                <li><strong>Scroll down and choose the Mining tab</strong> — you'll see a Start Mining button</li>
                 <li><strong>Optionally set a message</strong> — this gets embedded in your mined block (like a coinbase message in Bitcoin)</li>
                 <li><strong>Tap Start Mining</strong> — your browser will start hashing. Each 10-minute epoch, only one miner wins the block reward of <strong>50 NSTC</strong></li>
                 <li><strong>When a block is found</strong> — it's broadcast to Nostr relays automatically. Your balance updates at the next epoch (~10 min)</li>
+                <li><strong>Next level mining</strong> — Congratulations on mining your first block! To <i>really</i> mine, you want an "always on" miner. See the README file or visit the forum for details.</li>
             </ol>
             <div class="info-box">
                 <div class="info-box-title">💡 Tips</div>
