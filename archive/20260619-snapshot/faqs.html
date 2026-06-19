@@ -3,11 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍊</text></svg>">
-    <title>🍊 Nostrcoin · FAQs</title>
+    <title>Nostrcoin (NSTC) - FAQs</title>
     <style>
         :root {
             --bg-color: #1a1a1a;
@@ -26,7 +22,7 @@
         }
 
         body {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
@@ -54,21 +50,6 @@
             margin-bottom: 10px;
             color: var(--accent-green);
         }
-
-        .header-top { display:flex; justify-content:space-between; align-items:center; max-width:800px; width:100%; margin:0 auto 20px; padding-bottom:20px; border-bottom:2px solid #3a3a3a; }
-        .hamburger-btn { background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-color); padding:10px 14px; border-radius:8px; cursor:pointer; font-size:20px; line-height:1; transition:all 0.2s; }
-        .hamburger-btn:hover { background:#333; border-color:var(--accent-green); }
-        .join-nostr-btn { background:var(--accent-orange); color:#1a1a1a; border:1px solid var(--accent-orange); padding:12px 24px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px; text-decoration:none; display:inline-block; transition:all 0.2s; }
-        .join-nostr-btn:hover { background:#ff9500; border-color:#ff9500; transform:translateY(-2px); }
-        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); display:none; justify-content:center; align-items:center; padding:20px; z-index:1000; }
-        .modal { background:var(--card-bg); border:1px solid var(--border-color); border-radius:16px; padding:30px; max-width:420px; width:100%; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
-        .modal-close { position:absolute; top:14px; right:18px; font-size:1.8rem; color:var(--text-muted); cursor:pointer; background:none; border:none; }
-        .modal-close:hover { color:#fff; }
-        .modal h3 { color:var(--accent-orange); font-size:1.2rem; margin-bottom:12px; }
-        .modal p { color:var(--text-muted); font-size:0.95rem; margin-bottom:10px; }
-        .modal ul { color:var(--text-muted); font-size:0.95rem; margin-left:20px; line-height:1.8; margin-bottom:16px; }
-        .menu-modal .modal-link { display:block; padding:12px 16px; color:var(--text-color); text-decoration:none; border-radius:8px; margin-bottom:8px; transition:all 0.2s; border:1px solid transparent; }
-        .menu-modal .modal-link:hover { background:#333; border-color:var(--accent-green); color:var(--accent-green); }
 
         .nav-back {
             display: inline-block;
@@ -135,53 +116,16 @@
 </head>
 <body>
 
-    <div class="header-top">
-        <button class="hamburger-btn" onclick="toggleMenuModal(true)" aria-label="Menu">☰</button>
-        <button class="join-nostr-btn" onclick="toggleJoinNostrModal(true)">Join Nostr</button>
-    </div>
-
-    <!-- Nav menu -->
-    <div id="menuModal" class="modal-overlay" aria-hidden="true">
-        <div class="modal menu-modal">
-            <button class="modal-close" onclick="toggleMenuModal(false)">×</button>
-            <a href="https://saccoci.github.io/index.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
-            <a href="https://saccoci.github.io/start.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
-            <a href="https://saccoci.github.io/explorer.html"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
-            <a href="https://saccoci.github.io/stats.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
-            <a href="https://saccoci.github.io/wallet.html"     target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
-            <a href="https://nostrcoin.boards.net"              target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md"       target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
-            <a href="https://github.com/saccoci"                target="_blank" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
-        </div>
-    </div>
-
-    <!-- Join Nostr modal -->
-    <div id="joinNostrModal" class="modal-overlay" aria-hidden="true">
-        <div class="modal">
-            <button class="modal-close" onclick="toggleJoinNostrModal(false)">×</button>
-            <h3>What is Nostr?</h3>
-            <p><strong>Nostr</strong> (Notes and Other Stuff Transmitted by Relays) is a decentralized social protocol that enables global, censorship-resistant networking.</p>
-            <p><strong>Why do I need Nostr for Nostrcoin?</strong> Nostrcoin uses Nostr events as its ledger. You need a Nostr account to mine or transfer NSTC.</p>
-            <p>To get started you'll need to:</p>
-            <ul>
-                <li>Create a Nostr account</li>
-                <li>Install a signing extension (AKA Profiles, Alby, nos2x, Gooti, etc.)</li>
-            </ul>
-            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="text-align:center;display:block;">Get Started on Nostr</a>
-        </div>
-    </div>
-
     <div class="container">
         <header>
-            <a href="index.html" class="nav-back">← Back to Home</a>
-            <h1>🍊 Frequently Asked Questions</h1>
+            <a href="https://nostrcoin.netlify.app" class="nav-back">← Back to Launchpad</a>
+            <h1>⚡ Frequently Asked Questions</h1>
             <p style="color: var(--text-muted)">Everything you need to know about Nostrcoin (NSTC)</p>
         </header>
 
         <section class="faq-section">
             <h2 class="section-title">General Questions</h2>
-
+            
             <div class="faq-item">
                 <div class="faq-question">What is Nostrcoin?</div>
                 <div class="faq-answer">Nostrcoin is a fully decentralized, experimental cryptocurrency built natively on the Nostr protocol. Instead of using a traditional blockchain, it uses Nostr events as its ledger, allowing anyone to validate the entire transaction history independently.</div>
@@ -274,23 +218,6 @@
             <p>Find me on Nostr: <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" target="_blank" class="text-link">npub1sac...jnpw</a></p>
         </footer>
     </div>
-
-    <script>
-        function toggleMenuModal(show) {
-            const m = document.getElementById('menuModal');
-            m.style.display = show ? 'flex' : 'none';
-            m.setAttribute('aria-hidden', String(!show));
-        }
-        function toggleJoinNostrModal(show) {
-            const m = document.getElementById('joinNostrModal');
-            m.style.display = show ? 'flex' : 'none';
-            m.setAttribute('aria-hidden', String(!show));
-        }
-        window.addEventListener('click', e => {
-            if (e.target === document.getElementById('menuModal')) toggleMenuModal(false);
-            if (e.target === document.getElementById('joinNostrModal')) toggleJoinNostrModal(false);
-        });
-    </script>
 
 </body>
 </html>
