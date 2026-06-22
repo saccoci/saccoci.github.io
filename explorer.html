@@ -639,6 +639,20 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => { refreshData(); setInterval(refreshData, 30000); });
+
+        // ── Theme toggle (persists across all pages via localStorage) ─────────
+        function applyTheme(light) {
+            document.documentElement.classList.toggle('light', light);
+            const btn = document.getElementById('themeBtn');
+            if (btn) btn.textContent = light ? '🌙' : '☀️';
+        }
+        function toggleTheme() {
+            const isLight = document.documentElement.classList.contains('light');
+            localStorage.setItem('nstc-theme', isLight ? 'dark' : 'light');
+            applyTheme(!isLight);
+        }
+        // Apply saved preference immediately on every page load
+        applyTheme(localStorage.getItem('nstc-theme') === 'light');
     </script>
 </body>
 </html>
