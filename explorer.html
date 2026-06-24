@@ -117,15 +117,17 @@
         <div class="modal menu-modal">
             <button class="modal-close" onclick="toggleMenuModal(false)" aria-label="Close">×</button>
             <h3>Menu</h3>
-            <a href="https://saccoci.github.io/index.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
-            <a href="https://saccoci.github.io/start.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
-            <a href="https://saccoci.github.io/explorer.html"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
-            <a href="https://saccoci.github.io/stats.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
-            <a href="https://saccoci.github.io/wallet.html"     target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
-            <a href="https://nostrcoin.boards.net"              target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md"       target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
-            <a href="https://github.com/saccoci"                target="_blank" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+                        <a href="https://saccoci.github.io/index.html" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
+            <a href="https://saccoci.github.io/start.html" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
+            <a href="https://saccoci.github.io/wallet.html" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
+            <a href="https://saccoci.github.io/explorer.html" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
+            <a href="https://saccoci.github.io/stats.html" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
+            <a href="https://saccoci.github.io/faqs.html" class="modal-link" onclick="toggleMenuModal(false)">FAQs</a>
+            <a href="https://nostrcoin.boards.net" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" class="modal-link" onclick="toggleMenuModal(false)">README</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
+            <a href="https://github.com/saccoci" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+
             <button class="button button-secondary" style="margin-top:8px;" onclick="toggleMenuModal(false)">Close</button>
         </div>
     </div>
@@ -147,7 +149,7 @@
                 <li>Create a Nostr account</li>
                 <li>Install a Nostr signing extension to your web browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others)</li>
             </ul>
-            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Join Nostr</a>
+            <a href="https://nstart.me" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Join Nostr</a>
             <button class="button button-secondary" style="margin-top:16px;" onclick="toggleJoinNostrModal(false)">Close</button>
         </div>
     </div>
@@ -335,10 +337,10 @@
                         <span style="font-size:12px;color:#888;">Mined at epoch ${epoch}</span>
                     </div>
                     <div class="event-details">
-                        Miner: <span class="pubkey"><a href="https://njump.me/${npub}" target="_blank">${npubShort}</a></span><br>
+                        Miner: <span class="pubkey"><a href="https://njump.me/${npub}">${npubShort}</a></span><br>
                         Time: ${date} • Reward: <span class="amount">50 NSTC</span>
                     </div>
-                    <div class="event-hash">Proof: <a href="https://njump.me/${toNevent(block.id)}" target="_blank">${block.id}</a></div>
+                    <div class="event-hash">Proof: <a href="https://njump.me/${toNevent(block.id)}">${block.id}</a></div>
                 </div>`;
         }
 
@@ -366,11 +368,11 @@
                         <span style="font-size:12px;color:#888;">${date}</span>
                     </div>
                     <div class="event-details">
-                        From: <span class="pubkey"><a href="https://njump.me/${fromNpubFull}" target="_blank">${fromNpubStr}</a></span>
-                        To: <span class="pubkey">${toNpubFull ? `<a href="https://njump.me/${toNpubFull}" target="_blank">${toNpubStr}</a>` : toNpubStr}</span><br>
+                        From: <span class="pubkey"><a href="https://njump.me/${fromNpubFull}">${fromNpubStr}</a></span>
+                        To: <span class="pubkey">${toNpubFull ? `<a href="https://njump.me/${toNpubFull}">${toNpubStr}</a>` : toNpubStr}</span><br>
                         Amount: <span class="amount">${amount} NSTC</span>
                     </div>
-                    <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}" target="_blank">${tx.id}</a></div>
+                    <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}">${tx.id}</a></div>
                 </div>`;
             }).join('');
         }
@@ -456,7 +458,7 @@
             let html = `
                 <div style="margin-top:20px;">
                     <div style="background:#333;border:1px solid #444;border-radius:8px;padding:20px;margin-bottom:20px;">
-                        <h3 style="color:#f28500;margin-bottom:15px;">Account: <span class="pubkey"><a href="https://njump.me/${npubInput}" target="_blank">${npubDisplay}</a></span></h3>
+                        <h3 style="color:#f28500;margin-bottom:15px;">Account: <span class="pubkey"><a href="https://njump.me/${npubInput}">${npubDisplay}</a></span></h3>
                         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;">
                             <div>
                                 <div style="font-size:12px;color:#888;margin-bottom:5px;">Balance</div>
@@ -540,10 +542,10 @@
                                 <span style="font-size:12px;color:#888;">${date}</span>
                             </div>
                             <div class="event-details">
-                                To: <span class="pubkey">${toNpubFull ? `<a href="https://njump.me/${toNpubFull}" target="_blank">${toNpubStr}</a>` : toNpubStr}</span><br>
+                                To: <span class="pubkey">${toNpubFull ? `<a href="https://njump.me/${toNpubFull}">${toNpubStr}</a>` : toNpubStr}</span><br>
                                 Amount: <span class="amount">${amount} NSTC</span>
                             </div>
-                            <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}" target="_blank">${tx.id}</a></div>
+                            <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}">${tx.id}</a></div>
                         </div>`;
                     }).join('')}
                     ${remainingSent.length > 0 ? `
@@ -562,10 +564,10 @@
                                         <span style="font-size:12px;color:#888;">${date}</span>
                                     </div>
                                     <div class="event-details">
-                                        To: <span class="pubkey">${toNpubFull ? `<a href="https://njump.me/${toNpubFull}" target="_blank">${toNpubStr}</a>` : toNpubStr}</span><br>
+                                        To: <span class="pubkey">${toNpubFull ? `<a href="https://njump.me/${toNpubFull}">${toNpubStr}</a>` : toNpubStr}</span><br>
                                         Amount: <span class="amount">${amount} NSTC</span>
                                     </div>
-                                    <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}" target="_blank">${tx.id}</a></div>
+                                    <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}">${tx.id}</a></div>
                                 </div>`;
                             }).join('')}
                         </div>
@@ -598,10 +600,10 @@
                                 <span style="font-size:12px;color:#888;">${date}</span>
                             </div>
                             <div class="event-details">
-                                From: <span class="pubkey"><a href="https://njump.me/${fromNpubFull}" target="_blank">${fromNpubStr}</a></span><br>
+                                From: <span class="pubkey"><a href="https://njump.me/${fromNpubFull}">${fromNpubStr}</a></span><br>
                                 Amount: <span class="amount">${amount} NSTC</span>
                             </div>
-                            <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}" target="_blank">${tx.id}</a></div>
+                            <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}">${tx.id}</a></div>
                         </div>`;
                     }).join('')}
                     ${remainingReceived.length > 0 ? `
@@ -619,10 +621,10 @@
                                         <span style="font-size:12px;color:#888;">${date}</span>
                                     </div>
                                     <div class="event-details">
-                                        From: <span class="pubkey"><a href="https://njump.me/${fromNpubFull}" target="_blank">${fromNpubStr}</a></span><br>
+                                        From: <span class="pubkey"><a href="https://njump.me/${fromNpubFull}">${fromNpubStr}</a></span><br>
                                         Amount: <span class="amount">${amount} NSTC</span>
                                     </div>
-                                    <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}" target="_blank">${tx.id}</a></div>
+                                    <div class="event-hash">TX Hash: <a href="https://njump.me/${toNevent(tx.id)}">${tx.id}</a></div>
                                 </div>`;
                             }).join('')}
                         </div>

@@ -23,17 +23,21 @@
         }
 
         :root.light {
-            --bg-color: #f5f5f0;
-            --card-bg: #ffffff;
-            --text-color: #1a1a1a;
-            --text-muted: #555555;
-            --accent-green: #1e8a1e;
-            --accent-orange: #d97000;
-            --accent-orange-hover: #f28500;
-            --border-color: #ccc;
+            --bg: #f5f5f0;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #555555;
+            --green: #1e8a1e;
+            --orange: #d97000;
+            --orange2: #f28500;
+            --border: #ccc;
         }
-
-        body { background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+        :root.light .stat-card, :root.light .card { background: #ffffff !important; border-color: #ccc !important; color: #1a1a1a !important; }
+        :root.light .richlist-table tbody tr:hover { background: #f0f0eb !important; }
+        :root.light .richlist-table tbody tr { border-color: #ddd !important; }
+        :root.light .stat-label, :root.light .chart-note, :root.light .chart-empty { color: #666 !important; }
+        :root.light .rank-cell { color: #999 !important; }
+        :root.light #indexerStatus { color: #666 !important; }
 
         .theme-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 18px; line-height: 1; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         .theme-btn:hover { border-color: var(--accent-orange); }
@@ -131,15 +135,17 @@
     <div id="menuModal" class="modal-overlay menu-modal" aria-hidden="true">
         <div class="modal">
             <button class="modal-close" onclick="toggleMenuModal(false)">×</button>
-            <a href="https://saccoci.github.io/index.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
-            <a href="https://saccoci.github.io/start.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
-            <a href="https://saccoci.github.io/explorer.html"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
-            <a href="https://saccoci.github.io/stats.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
-            <a href="https://saccoci.github.io/wallet.html"     target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
-            <a href="https://nostrcoin.boards.net"              target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md"       target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
-            <a href="https://github.com/saccoci"                target="_blank" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+                        <a href="https://saccoci.github.io/index.html" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
+            <a href="https://saccoci.github.io/start.html" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
+            <a href="https://saccoci.github.io/wallet.html" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
+            <a href="https://saccoci.github.io/explorer.html" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
+            <a href="https://saccoci.github.io/stats.html" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
+            <a href="https://saccoci.github.io/faqs.html" class="modal-link" onclick="toggleMenuModal(false)">FAQs</a>
+            <a href="https://nostrcoin.boards.net" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" class="modal-link" onclick="toggleMenuModal(false)">README</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
+            <a href="https://github.com/saccoci" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+
         </div>
     </div>
 
@@ -155,7 +161,7 @@
                 <li>Create a Nostr account</li>
                 <li>Install a signing extension (AKA Profiles, Alby, nos2x, Gooti, etc.)</li>
             </ul>
-            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Get Started on Nostr</a>
+            <a href="https://nstart.me" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Get Started on Nostr</a>
         </div>
     </div>
 
@@ -190,8 +196,8 @@
 
     <footer>
         <p>Created by Saccoci Nachiamelli</p>
-        <p>Find me on Nostr: <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" target="_blank" class="text-link">npub1sac...jnpw</a></p>
-        <p>On X: <a href="https://x.com/@saccocin" target="_blank" class="text-link">@saccocin</a> · Email: saccoci@proton.me</p>
+        <p>Find me on Nostr: <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" class="text-link">npub1sac...jnpw</a></p>
+        <p>On X: <a href="https://x.com/@saccocin" class="text-link">@saccocin</a> · Email: saccoci@proton.me</p>
     </footer>
 
 </div>
@@ -315,7 +321,7 @@
                 : `Holder #${p.count} via mining — ${shortNpub(npub)} — ${new Date(p.ts).toLocaleDateString()}`;
             const color = p.via==='transfer' ? '#f28500' : '#32CD32';
             return p.id
-                ? `<a href="https://njump.me/${p.id}" target="_blank" rel="noopener"><circle cx="${cx}" cy="${cy}" r="5" fill="${color}" opacity="0.9" style="cursor:pointer"><title>${label}</title></circle></a>`
+                ? `<a href="https://njump.me/${p.id}" rel="noopener"><circle cx="${cx}" cy="${cy}" r="5" fill="${color}" opacity="0.9" style="cursor:pointer"><title>${label}</title></circle></a>`
                 : `<circle cx="${cx}" cy="${cy}" r="5" fill="${color}" opacity="0.9"><title>${label}</title></circle>`;
         }).join('');
 
@@ -359,7 +365,7 @@
                 const you  = myPubkey && pk===myPubkey;
                 return `<tr class="${you?'you-row':''}">
                     <td class="rank-cell ${c}">${l}</td>
-                    <td class="pubkey-cell"><a href="https://njump.me/${npub}" target="_blank" rel="noopener">${shortNpub(npub)}</a>${you?'<span class="you-badge">YOU</span>':''}</td>
+                    <td class="pubkey-cell"><a href="https://njump.me/${npub}" rel="noopener">${shortNpub(npub)}</a>${you?'<span class="you-badge">YOU</span>':''}</td>
                     <td class="balance-cell">${bal.toLocaleString()} NSTC</td>
                     <td class="pct-cell">${pct}%<span class="pct-bar-wrap"><span class="pct-bar" style="width:${Math.min(100,parseFloat(pct))}%"></span></span></td>
                 </tr>`;

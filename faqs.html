@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Nostrcoin Stats v0.1.0 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,150 +7,122 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Nostrcoin · FAQs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nostrcoin · Stats</title>
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --card-bg: #2a2a2a;
-            --text-color: #f5f5f5;
-            --text-muted: #cdcdcd;
-            --accent-green: #32CD32;
-            --accent-orange: #f28500;
-            --border-color: #444;
+            --bg: #1a1a1a;
+            --card: #2a2a2a;
+            --text: #f5f5f5;
+            --muted: #cdcdcd;
+            --green: #32CD32;
+            --orange: #f28500;
+            --orange2: #ff9500;
+            --border: #444;
+            --red: #ff6b6b;
         }
 
         :root.light {
-            --bg-color: #f5f5f0;
-            --card-bg: #ffffff;
-            --text-color: #1a1a1a;
-            --text-muted: #555555;
-            --accent-green: #1e8a1e;
-            --accent-orange: #d97000;
-            --accent-orange-hover: #f28500;
-            --border-color: #ccc;
+            --bg: #f5f5f0;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #555555;
+            --green: #1e8a1e;
+            --orange: #d97000;
+            --orange2: #f28500;
+            --border: #ccc;
         }
-
-        body { background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+        :root.light .stat-card, :root.light .card { background: #ffffff !important; border-color: #ccc !important; color: #1a1a1a !important; }
+        :root.light .richlist-table tbody tr:hover { background: #f0f0eb !important; }
+        :root.light .richlist-table tbody tr { border-color: #ddd !important; }
+        :root.light .stat-label, :root.light .chart-note, :root.light .chart-empty { color: #666 !important; }
+        :root.light .rank-cell { color: #999 !important; }
+        :root.light #indexerStatus { color: #666 !important; }
 
         .theme-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 18px; line-height: 1; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         .theme-btn:hover { border-color: var(--accent-orange); }
         .header-right { display: flex; align-items: center; gap: 10px; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Outfit',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding:20px; min-height:100vh; display:flex; flex-direction:column; align-items:center; }
+        .container { max-width:800px; width:100%; margin-top:20px; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Header */
+        .header-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:20px; border-bottom: 2px solid var(--border-color); }
+        .hamburger-btn { background:var(--card); border:1px solid var(--border); color:var(--text); padding:10px 14px; border-radius:8px; cursor:pointer; font-size:20px; line-height:1; transition:all 0.2s; display:flex; align-items:center; }
+        .hamburger-btn:hover { background:#333; border-color:var(--green); }
+        .join-nostr-btn { background:var(--orange); color:#1a1a1a; border:1px solid var(--orange); padding:12px 24px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px; text-decoration:none; display:inline-block; transition:all 0.2s; }
+        .join-nostr-btn:hover { background:var(--orange2); border-color:var(--orange2); transform:translateY(-2px); }
 
-        body {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        .logo { text-align:center; margin-bottom:8px; }
+        .logo h1 { font-size:clamp(1.6rem,4vw,2.4rem); font-weight:700; color:var(--green); }
 
-        .container {
-            max-width: 800px;
-            width: 100%;
-            margin-top: 40px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--accent-green);
-        }
-
-        .header-top { display:flex; justify-content:space-between; align-items:center; max-width:800px; width:100%; margin:0 auto 20px; padding-bottom:20px; border-bottom: 2px solid var(--border-color); }
-        .hamburger-btn { background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-color); padding:10px 14px; border-radius:8px; cursor:pointer; font-size:20px; line-height:1; transition:all 0.2s; }
-        .hamburger-btn:hover { background:#333; border-color:var(--accent-green); }
-        .join-nostr-btn { background:var(--accent-orange); color:#1a1a1a; border:1px solid var(--accent-orange); padding:12px 24px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px; text-decoration:none; display:inline-block; transition:all 0.2s; }
-        .join-nostr-btn:hover { background:#ff9500; border-color:#ff9500; transform:translateY(-2px); }
-        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); display:none; justify-content:center; align-items:center; padding:20px; z-index:1000; }
-        .modal { background:var(--card-bg); border:1px solid var(--border-color); border-radius:16px; padding:30px; max-width:420px; width:100%; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
-        .modal-close { position:absolute; top:14px; right:18px; font-size:1.8rem; color:var(--text-muted); cursor:pointer; background:none; border:none; }
+        /* Modals */
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); justify-content:center; align-items:center; z-index:1000; padding:20px; }
+        .modal { background:var(--card); border:1px solid var(--border); border-radius:16px; max-width:420px; width:100%; padding:30px; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+        .modal-close { position:absolute; top:14px; right:18px; font-size:1.8rem; color:var(--muted); cursor:pointer; background:none; border:none; }
         .modal-close:hover { color:#fff; }
-        .modal h3 { color:var(--accent-orange); font-size:1.2rem; margin-bottom:12px; }
-        .modal p { color:var(--text-muted); font-size:0.95rem; margin-bottom:10px; }
-        .modal ul { color:var(--text-muted); font-size:0.95rem; margin-left:20px; line-height:1.8; margin-bottom:16px; }
-        .menu-modal .modal-link { display:block; padding:12px 16px; color:var(--text-color); text-decoration:none; border-radius:8px; margin-bottom:8px; transition:all 0.2s; border:1px solid transparent; }
-        .menu-modal .modal-link:hover { background:#333; border-color:var(--accent-green); color:var(--accent-green); }
+        .menu-modal .modal-link { display:block; padding:12px 16px; color:var(--text); text-decoration:none; border-radius:8px; margin-bottom:8px; transition:all 0.2s; border:1px solid transparent; }
+        .menu-modal .modal-link:hover { background:#333; border-color:var(--green); color:var(--green); }
+        .modal h3 { color:var(--orange); font-size:1.2rem; margin-bottom:12px; }
+        .modal p { color:var(--muted); font-size:0.95rem; margin-bottom:10px; }
+        .modal ul { color:var(--muted); font-size:0.95rem; margin-left:20px; line-height:1.8; }
 
-        .nav-back {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: var(--accent-orange);
-            text-decoration: none;
-            font-weight: 600;
-        }
+        /* Indexer status */
+        #indexerStatus { font-size:11px; color:#888; margin-bottom:16px; text-align:center; min-height:16px; }
 
-        .nav-back:hover {
-            text-decoration: underline;
-        }
+        /* Stat grid */
+        .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:24px; }
+        .stat-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; }
+        .stat-label { font-size:10px; color:#888; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:4px; }
+        .stat-value { font-size:1.5rem; font-weight:700; color:var(--green); }
+        .stat-sub { font-size:10px; color:#666; margin-top:2px; }
 
-        .faq-section {
-            margin-bottom: 30px;
-        }
+        /* Cards */
+        .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; }
+        .section-title { font-size:1rem; font-weight:700; color:var(--orange); margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border); }
 
-        .section-title {
-            color: var(--accent-orange);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-        }
+        /* Chart */
+        #holdersChart { width:100%; display:block; }
+        .chart-note { font-size:11px; color:#666; margin-top:8px; text-align:center; }
+        .chart-empty { height:180px; display:flex; align-items:center; justify-content:center; color:#666; font-size:0.9rem; }
 
-        .faq-item {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
+        /* Richlist */
+        .richlist-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+        .richlist-table thead th { text-align:left; padding:8px 10px; color:#888; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid var(--border); }
+        .richlist-table thead th:last-child { text-align:right; }
+        .richlist-table tbody tr { border-bottom:1px solid #333; transition:background 0.15s; }
+        .richlist-table tbody tr:last-child { border-bottom:none; }
+        .richlist-table tbody tr:hover { background:#333; }
+        .richlist-table td { padding:10px; vertical-align:middle; }
+        .rank-cell { width:36px; font-weight:700; color:#666; font-size:0.85rem; }
+        .rank-cell.top1 { color:#FFD700; font-size:1.1rem; }
+        .rank-cell.top2 { color:#C0C0C0; font-size:1.1rem; }
+        .rank-cell.top3 { color:#CD7F32; font-size:1.1rem; }
+        .pubkey-cell { font-family:monospace; font-size:0.82rem; }
+        .pubkey-cell a { color:var(--text); text-decoration:none; }
+        .pubkey-cell a:hover { color:var(--orange); text-decoration:underline; }
+        .you-badge { display:inline-block; margin-left:6px; background:var(--orange); color:#1a1a1a; font-size:10px; font-weight:700; padding:1px 6px; border-radius:4px; font-family:sans-serif; vertical-align:middle; }
+        .balance-cell { text-align:right; font-weight:600; color:var(--green); white-space:nowrap; }
+        .pct-cell { text-align:right; color:#888; font-size:0.82rem; white-space:nowrap; }
+        .pct-bar-wrap { width:50px; height:4px; background:#3a3a3a; border-radius:2px; display:inline-block; vertical-align:middle; margin-left:6px; }
+        .pct-bar { height:4px; border-radius:2px; background:var(--green); }
+        tr.you-row { background:rgba(242,133,0,0.07); }
+        tr.you-row:hover { background:rgba(242,133,0,0.13); }
 
-        .faq-question {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 8px;
-        }
+        /* Loading / error */
+        .loading { text-align:center; color:#888; padding:32px 0; }
+        .error-msg { color:var(--red); text-align:center; padding:16px 0; font-size:0.9rem; }
 
-        .faq-answer {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
+        /* Footer */
+        footer { margin-top:auto; text-align:center; color:var(--muted); font-size:0.85rem; padding:40px 0 20px; }
+        a.text-link { color:var(--orange); text-decoration:none; }
+        a.text-link:hover { text-decoration:underline; }
 
-        footer {
-            margin-top: auto;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            padding-top: 40px;
-            padding-bottom: 20px;
-        }
-
-        a.text-link {
-            color: var(--accent-orange);
-            text-decoration: none;
-        }
-
-        a.text-link:hover {
-            text-decoration: underline;
-        }
+        @media(max-width:600px) { .pct-bar-wrap { display:none; } .stat-grid { grid-template-columns:repeat(2,1fr); } }
     </style>
 </head>
 <body>
+<div class="container">
 
     <div class="header-top">
         <button class="hamburger-btn" onclick="toggleMenuModal(true)" aria-label="Menu">☰</button>
@@ -159,18 +132,20 @@
     </div>
 
     <!-- Nav menu -->
-    <div id="menuModal" class="modal-overlay" aria-hidden="true">
-        <div class="modal menu-modal">
+    <div id="menuModal" class="modal-overlay menu-modal" aria-hidden="true">
+        <div class="modal">
             <button class="modal-close" onclick="toggleMenuModal(false)">×</button>
-            <a href="https://saccoci.github.io/index.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
-            <a href="https://saccoci.github.io/start.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
-            <a href="https://saccoci.github.io/explorer.html"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
-            <a href="https://saccoci.github.io/stats.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
-            <a href="https://saccoci.github.io/wallet.html"     target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
-            <a href="https://nostrcoin.boards.net"              target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md"       target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
-            <a href="https://github.com/saccoci"                target="_blank" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+                        <a href="https://saccoci.github.io/index.html" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
+            <a href="https://saccoci.github.io/start.html" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
+            <a href="https://saccoci.github.io/wallet.html" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
+            <a href="https://saccoci.github.io/explorer.html" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
+            <a href="https://saccoci.github.io/stats.html" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
+            <a href="https://saccoci.github.io/faqs.html" class="modal-link" onclick="toggleMenuModal(false)">FAQs</a>
+            <a href="https://nostrcoin.boards.net" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" class="modal-link" onclick="toggleMenuModal(false)">README</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
+            <a href="https://github.com/saccoci" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+
         </div>
     </div>
 
@@ -179,135 +154,325 @@
         <div class="modal">
             <button class="modal-close" onclick="toggleJoinNostrModal(false)">×</button>
             <h3>What is Nostr?</h3>
-            <p><strong>Nostr</strong> (Notes and Other Stuff Transmitted by Relays) is a decentralized social protocol that enables global, censorship-resistant networking.</p>
-            <p><strong>Why do I need Nostr for Nostrcoin?</strong> Nostrcoin uses Nostr events as its ledger. You need a Nostr account to mine or transfer NSTC.</p>
+            <p><strong>Nostr</strong> (Notes and Other Stuff Transmitted by Relays) is a decentralized, censorship-resistant social protocol.</p>
+            <p><strong>Why do I need it for Nostrcoin?</strong> Nostrcoin uses Nostr events as its ledger. You need a Nostr account to mine or transfer NSTC.</p>
             <p>To get started you'll need to:</p>
             <ul>
                 <li>Create a Nostr account</li>
                 <li>Install a signing extension (AKA Profiles, Alby, nos2x, Gooti, etc.)</li>
             </ul>
-            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="text-align:center;display:block;">Get Started on Nostr</a>
+            <a href="https://nstart.me" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Get Started on Nostr</a>
         </div>
     </div>
 
-    <div class="container">
-        <header>
-            <a href="index.html" class="nav-back">← Back to Home</a>
-            <h1 style="display:flex;align-items:center;justify-content:center;gap:12px;"><img src="images/orange-256.png" width="48" height="48" style="image-rendering:auto;display:inline-block;"> Frequently Asked Questions</h1>
-            <p style="color: var(--text-muted)">Everything you need to know about Nostrcoin (NSTC)</p>
-        </header>
+    <div class="logo"><h1 style="display:flex;align-items:center;justify-content:center;gap:12px;"><img src="images/orange-256.png" width="48" height="48" style="image-rendering:auto;display:inline-block;"> Nostrcoin · Stats</h1></div>
 
-        <section class="faq-section">
-            <h2 class="section-title">General Questions</h2>
+    <div id="indexerStatus">⏳ Checking indexers...</div>
 
-            <div class="faq-item">
-                <div class="faq-question">What is Nostrcoin?</div>
-                <div class="faq-answer">Nostrcoin is a fully decentralized, experimental cryptocurrency built natively on the Nostr protocol. Instead of using a traditional blockchain, it uses Nostr events as its ledger, allowing anyone to validate the entire transaction history independently.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">Does Nostrcoin have any monetary value?</div>
-                <div class="faq-answer">No. Nostrcoin has zero monetary value and is intended strictly for fun and educational purposes. It is a demonstration of how decentralized systems can be built on existing protocols.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">How is it different from a traditional blockchain?</div>
-                <div class="faq-answer">Traditional blockchains require specialized infrastructure and often require users to download massive datasets. Nostrcoin leverages existing Nostr relays for data distribution, meaning it doesn't need its own separate network of nodes to spread messages.</div>
-            </div>
-        </section>
-
-        <section class="faq-section">
-            <h2 class="section-title">Mining and Rewards</h2>
-
-            <div class="faq-item">
-                <div class="faq-question">How does mining work?</div>
-                <div class="faq-answer">Mining is a Proof-of-Work (PoW) process where your computer attempts to solve a mathematical puzzle. You must create a Nostr event with an ID (a SHA-256 hash) that starts with four leading zeros.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">What is an "epoch"?</div>
-                <div class="faq-answer">An epoch is a 10-minute time window. In each epoch, only the first valid mining event found wins the block reward. If multiple valid events are found, the one with the earliest timestamp wins.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">What are the block rewards?</div>
-                <div class="faq-answer">The initial reward is 50 NSTC per block. Following the Bitcoin model, this reward halves every 210,000 blocks (approximately every four years).</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">Can I spam the network with mining attempts?</div>
-                <div class="faq-answer">No. To prevent spam, the protocol enforces a limit of one mining attempt per user per epoch.</div>
-            </div>
-        </section>
-
-        <section class="faq-section">
-            <h2 class="section-title">Economics and Supply</h2>
-
-            <div class="faq-item">
-                <div class="faq-question">What is the maximum supply of NSTC?</div>
-                <div class="faq-answer">The total supply is capped at 21,000,000 NSTC.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">What is a "nok"?</div>
-                <div class="faq-answer">A nok is the smallest unit of Nostrcoin, similar to a "satoshi" in Bitcoin. 1 NSTC equals 100,000,000 noks.</div>
-            </div>
-        </section>
-
-        <section class="faq-section">
-            <h2 class="section-title">Privacy and Security</h2>
-
-            <div class="faq-item">
-                <div class="faq-question">Is my activity private?</div>
-                <div class="faq-answer">No. All activity is permanently public. Because Nostr is an open protocol, every block you mine and every transaction you send is recorded on public relays and linked to your Nostr public key (npub). Anyone can calculate your exact balance and view your full transaction history at any time.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">Is Nostrcoin secure?</div>
-                <div class="faq-answer">As an experimental project, users should expect chaos. The documentation warns that the system will likely experience bugs, crashes, data corruption, forks, and potential exploits.</div>
-            </div>
-        </section>
-
-        <section class="faq-section">
-            <h2 class="section-title">Technical Participation</h2>
-
-            <div class="faq-item">
-                <div class="faq-question">What is an "Indexer"?</div>
-                <div class="faq-answer">An indexer is a node that listens to Nostr relays, validates events according to the protocol rules, and maintains a database of user balances. They provide the APIs that wallets and explorers use to display data.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">How can I help the network?</div>
-                <div class="faq-answer">The most valuable way to contribute is by running an always-on indexer node on a VPS to help keep the network resilient and decentralized. The more geographically distributed nodes there are, the harder the network is to censor or attack.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">Where can I find the tools to use Nostrcoin?</div>
-                <div class="faq-answer">The project provides a web-based wallet and explorer hosted at <a href="https://saccoci.github.io" target="_blank" class="text-link">https://saccoci.github.io</a>. For more technical users, the source code for the indexer, miner, and validator is available on GitHub.</div>
-            </div>
-        </section>
-
-        <footer>
-            <p>Created by Saccoci Nachiamelli</p>
-            <p>Find me on Nostr: <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" target="_blank" class="text-link">npub1sac...jnpw</a></p>
-        </footer>
+    <!-- Summary stat grid -->
+    <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Total Supply</div><div class="stat-value" id="statSupply">—</div><div class="stat-sub">NSTC minted</div></div>
+        <div class="stat-card"><div class="stat-label">Max Supply</div><div class="stat-value">21M</div><div class="stat-sub" id="statPctMined">—% mined</div></div>
+        <div class="stat-card"><div class="stat-label">Unique Holders</div><div class="stat-value" id="statHolders">—</div><div class="stat-sub">with balance > 0</div></div>
+        <div class="stat-card"><div class="stat-label">Blocks Mined</div><div class="stat-value" id="statBlocks">—</div><div class="stat-sub">epochs won</div></div>
+        <div class="stat-card"><div class="stat-label">Transfers</div><div class="stat-value" id="statTransfers">—</div><div class="stat-sub">NSTC sent</div></div>
+        <div class="stat-card"><div class="stat-label">Current Epoch</div><div class="stat-value" id="statEpoch">—</div><div class="stat-sub">since genesis</div></div>
+        <div class="stat-card"><div class="stat-label">Blocks / Epoch</div><div class="stat-value" id="statBlockRate">—</div><div class="stat-sub">fill rate</div></div>
+        <div class="stat-card"><div class="stat-label">Largest Tx</div><div class="stat-value" id="statLargestTx">—</div><div class="stat-sub">NSTC single transfer</div></div>
     </div>
 
-    <script>
-        function toggleMenuModal(show) {
-            const m = document.getElementById('menuModal');
-            m.style.display = show ? 'flex' : 'none';
-            m.setAttribute('aria-hidden', String(!show));
+    <!-- Unique holders over time -->
+    <div class="card">
+        <div class="section-title">Unique Holders Over Time</div>
+        <div id="chartArea"><div class="loading">Loading chart…</div></div>
+        <p class="chart-note">Each dot = a new holder's first appearance (via mining or receiving). Click a dot to view that event on njump.me.</p>
+    </div>
+
+    <!-- Richlist -->
+    <div class="card">
+        <div class="section-title">Richlist</div>
+        <div id="richlistArea"><div class="loading">Loading balances…</div></div>
+    </div>
+
+    <footer>
+        <p>Created by Saccoci Nachiamelli</p>
+        <p>Find me on Nostr: <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" class="text-link">npub1sac...jnpw</a></p>
+        <p>On X: <a href="https://x.com/@saccocin" class="text-link">@saccocin</a> · Email: saccoci@proton.me</p>
+    </footer>
+
+</div>
+<script>
+    const INDEXERS = ['http://localhost:3000', 'https://vm-182.lnvps.cloud'];
+    const KIND_MINING   = 30333;
+    const KIND_TRANSFER = 30334;
+    const MINING_REWARD = 50;
+    const MAX_SUPPLY    = 21000000;
+    const EPOCH_ORIGIN_MS = 1764968400000;
+
+    // ── Bech32 ────────────────────────────────────────────────────────────────
+    const B32 = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+    function b32Polymod(v) {
+        const G=[0x3b6a57b2,0x26508e6d,0x1ea119fa,0x3d4233dd,0x2a1462b3]; let c=1;
+        for(const p of v){const b=c>>25;c=((c&0x1ffffff)<<5)^p;for(let i=0;i<5;i++)if((b>>i)&1)c^=G[i];}
+        return c;
+    }
+    function b32Checksum(hrp,data){
+        const v=hrp.split('').map(c=>c.charCodeAt(0)>>5).concat([0]).concat(hrp.split('').map(c=>c.charCodeAt(0)&31)).concat(data);
+        const p=b32Polymod(v.concat([0,0,0,0,0,0]))^1;
+        return Array.from({length:6},(_,i)=>(p>>(5*(5-i)))&31);
+    }
+    function b32Encode(hrp,data){return hrp+'1'+data.concat(b32Checksum(hrp,data)).map(d=>B32[d]).join('');}
+    function convBits(data,from,to,pad=true){
+        let acc=0,bits=0;const r=[],mv=(1<<to)-1;
+        for(const v of data){acc=(acc<<from)|v;bits+=from;while(bits>=to){bits-=to;r.push((acc>>bits)&mv);}}
+        if(pad&&bits>0)r.push((acc<<(to-bits))&mv);return r;
+    }
+    function hexToNpub(hex){return b32Encode('npub',convBits(hex.match(/.{2}/g).map(b=>parseInt(b,16)),8,5));}
+    function shortNpub(n){return n.slice(0,10)+'...'+n.slice(-6);}
+
+    // ── Balance computation ───────────────────────────────────────────────────
+    function computeBalances(events) {
+        const bal = {};
+        const sorted = [...events].sort((a,b)=>a.created_at-b.created_at);
+        for (const ev of sorted) {
+            if (ev.kind === KIND_MINING) {
+                bal[ev.pubkey] = (bal[ev.pubkey]||0) + MINING_REWARD;
+            }
+            if (ev.kind === KIND_TRANSFER) {
+                const rTag = ev.tags?.find(t=>t[0]==='p');
+                const aTag = ev.tags?.find(t=>t[0]==='amount');
+                if (!rTag||!aTag) continue;
+                const amt = parseInt(aTag[1],10);
+                if (isNaN(amt)||amt<=0) continue;
+                if ((bal[ev.pubkey]||0) < amt) continue;
+                bal[ev.pubkey] -= amt;
+                bal[rTag[1]] = (bal[rTag[1]]||0) + amt;
+            }
         }
-        function toggleJoinNostrModal(show) {
-            const m = document.getElementById('joinNostrModal');
-            m.style.display = show ? 'flex' : 'none';
-            m.setAttribute('aria-hidden', String(!show));
+        return bal;
+    }
+
+    // ── Holders over time — includes first-receive via transfer ───────────────
+    function computeHoldersOverTime(events) {
+        const sorted = [...events].sort((a,b)=>a.created_at-b.created_at);
+        const seen   = new Set();
+        const bal    = {};
+        const points = [];
+
+        for (const ev of sorted) {
+            if (ev.kind === KIND_MINING) {
+                bal[ev.pubkey] = (bal[ev.pubkey]||0) + MINING_REWARD;
+                if (!seen.has(ev.pubkey)) {
+                    seen.add(ev.pubkey);
+                    points.push({ ts: ev.created_at*1000, count: seen.size, id: ev.id, pubkey: ev.pubkey, via: 'mine' });
+                }
+            }
+            if (ev.kind === KIND_TRANSFER) {
+                const rTag = ev.tags?.find(t=>t[0]==='p');
+                const aTag = ev.tags?.find(t=>t[0]==='amount');
+                if (!rTag||!aTag) continue;
+                const recipient = rTag[1];
+                const amt = parseInt(aTag[1],10);
+                if (isNaN(amt)||amt<=0) continue;
+                if ((bal[ev.pubkey]||0) < amt) continue;
+                bal[ev.pubkey] -= amt;
+                bal[recipient] = (bal[recipient]||0) + amt;
+                // New holder via transfer
+                if (!seen.has(recipient)) {
+                    seen.add(recipient);
+                    points.push({ ts: ev.created_at*1000, count: seen.size, id: ev.id, pubkey: recipient, via: 'transfer' });
+                }
+            }
         }
-        window.addEventListener('click', e => {
-            if (e.target === document.getElementById('menuModal')) toggleMenuModal(false);
-            if (e.target === document.getElementById('joinNostrModal')) toggleJoinNostrModal(false);
+        return points;
+    }
+
+    // ── SVG Chart ─────────────────────────────────────────────────────────────
+    function renderChart(points, container) {
+        if (points.length < 2) {
+            container.innerHTML = '<div class="chart-empty">Not enough data yet.</div>';
+            return;
+        }
+        const W=740, H=190, P={top:16,right:20,bottom:36,left:36};
+        const gW=W-P.left-P.right, gH=H-P.top-P.bottom;
+        const minT=points[0].ts, maxT=points[points.length-1].ts;
+        const maxC=points[points.length-1].count;
+        const xS = t => P.left+((t-minT)/(maxT-minT||1))*gW;
+        const yS = c => P.top+gH-(c/(maxC||1))*gH;
+
+        const xTicks = Math.min(5, points.length);
+        const xTicksArr = Array.from({length:xTicks},(_,i)=>{
+            const t=minT+(i/(xTicks-1||1))*(maxT-minT);
+            return {x:xS(t), label:new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric'})};
         });
+        const yTicksArr = [...new Set([0,Math.round(maxC/2),maxC])];
+        const pts = points.map(p=>`${xS(p.ts).toFixed(1)},${yS(p.count).toFixed(1)}`).join(' ');
+        const area = `M${xS(points[0].ts).toFixed(1)},${yS(0).toFixed(1)} `
+            + points.map(p=>`L${xS(p.ts).toFixed(1)},${yS(p.count).toFixed(1)}`).join(' ')
+            + ` L${xS(points[points.length-1].ts).toFixed(1)},${yS(0).toFixed(1)} Z`;
+
+        const last = points[points.length-1];
+
+        const dots = points.map(p => {
+            const cx = xS(p.ts).toFixed(1), cy = yS(p.count).toFixed(1);
+            const npub = hexToNpub(p.pubkey);
+            const label = p.via==='transfer'
+                ? `Holder #${p.count} via transfer — ${shortNpub(npub)} — ${new Date(p.ts).toLocaleDateString()}`
+                : `Holder #${p.count} via mining — ${shortNpub(npub)} — ${new Date(p.ts).toLocaleDateString()}`;
+            const color = p.via==='transfer' ? '#f28500' : '#32CD32';
+            return p.id
+                ? `<a href="https://njump.me/${p.id}" rel="noopener"><circle cx="${cx}" cy="${cy}" r="5" fill="${color}" opacity="0.9" style="cursor:pointer"><title>${label}</title></circle></a>`
+                : `<circle cx="${cx}" cy="${cy}" r="5" fill="${color}" opacity="0.9"><title>${label}</title></circle>`;
+        }).join('');
+
+        container.innerHTML = `
+        <svg id="holdersChart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#32CD32" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="#32CD32" stop-opacity="0.02"/>
+                </linearGradient>
+            </defs>
+            ${yTicksArr.map(c=>`
+                <line x1="${P.left}" y1="${yS(c).toFixed(1)}" x2="${W-P.right}" y2="${yS(c).toFixed(1)}" stroke="#333" stroke-width="1"/>
+                <text x="${P.left-6}" y="${(yS(c)+4).toFixed(1)}" fill="#666" font-size="11" text-anchor="end">${c}</text>
+            `).join('')}
+            <path d="${area}" fill="url(#ag)"/>
+            <polyline points="${pts}" fill="none" stroke="#32CD32" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+            ${dots}
+            <circle cx="${xS(last.ts).toFixed(1)}" cy="${yS(last.count).toFixed(1)}" r="6" fill="#32CD32"/>
+            <text x="${xS(last.ts).toFixed(1)}" y="${(yS(last.count)-10).toFixed(1)}" fill="#32CD32" font-size="12" font-weight="700" text-anchor="middle">${last.count}</text>
+            ${xTicksArr.map(t=>`<text x="${t.x.toFixed(1)}" y="${H-6}" fill="#666" font-size="11" text-anchor="middle">${t.label}</text>`).join('')}
+            <line x1="${P.left}" y1="${P.top}" x2="${P.left}" y2="${H-P.bottom}" stroke="#444" stroke-width="1"/>
+            <line x1="${P.left}" y1="${H-P.bottom}" x2="${W-P.right}" y2="${H-P.bottom}" stroke="#444" stroke-width="1"/>
+        </svg>
+        <div style="font-size:11px;color:#666;margin-top:6px;">
+            <span style="color:#32CD32">●</span> First mine &nbsp;
+            <span style="color:#f28500">●</span> First receive via transfer
+        </div>`;
+    }
+
+    // ── Richlist ──────────────────────────────────────────────────────────────
+    function renderRichlist(balances, myPubkey, totalSupply) {
+        try {
+            const sorted = Object.entries(balances).filter(([,b])=>b>0).sort(([,a],[,b])=>b-a);
+            if (!sorted.length) { document.getElementById('richlistArea').innerHTML='<div class="error-msg">No holders found.</div>'; return; }
+            const medal = i => i===0?{l:'🥇',c:'top1'}:i===1?{l:'🥈',c:'top2'}:i===2?{l:'🥉',c:'top3'}:{l:`#${i+1}`,c:''};
+            const rows = sorted.map(([pk,bal],i)=>{
+                const {l,c} = medal(i);
+                const npub = hexToNpub(pk);
+                const pct  = totalSupply>0?((bal/totalSupply)*100).toFixed(1):'0.0';
+                const you  = myPubkey && pk===myPubkey;
+                return `<tr class="${you?'you-row':''}">
+                    <td class="rank-cell ${c}">${l}</td>
+                    <td class="pubkey-cell"><a href="https://njump.me/${npub}" rel="noopener">${shortNpub(npub)}</a>${you?'<span class="you-badge">YOU</span>':''}</td>
+                    <td class="balance-cell">${bal.toLocaleString()} NSTC</td>
+                    <td class="pct-cell">${pct}%<span class="pct-bar-wrap"><span class="pct-bar" style="width:${Math.min(100,parseFloat(pct))}%"></span></span></td>
+                </tr>`;
+            }).join('');
+            document.getElementById('richlistArea').innerHTML = `
+            <table class="richlist-table">
+                <thead><tr><th>Rank</th><th>Address</th><th style="text-align:right">Balance</th><th style="text-align:right">Share</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+        } catch (err) {
+            console.error('renderRichlist failed:', err);
+            document.getElementById('richlistArea').innerHTML = '<div class="error-msg">Could not render richlist — check console for details.</div>';
+        }
+    }
+
+    // ── Animation ─────────────────────────────────────────────────────────────
+    let animInt=null, isFirstLoad=true;
+    function startAnim(refresh) {
+        const el=document.getElementById('indexerStatus'); if(!el)return;
+        const base=refresh?'⏳ Checking indexers, updating':'⏳ Checking indexers';
+        let i=0; if(animInt)clearInterval(animInt);
+        animInt=setInterval(()=>{el.textContent=base+'.'.repeat(i%4);i++;},400);
+    }
+    function stopAnim(html) {
+        if(animInt){clearInterval(animInt);animInt=null;}
+        const el=document.getElementById('indexerStatus'); if(el)el.innerHTML=html;
+    }
+
+    // ── Load ──────────────────────────────────────────────────────────────────
+    let myPubkey = null;
+
+    async function loadData() {
+        startAnim(!isFirstLoad);
+        let events=null, stats=null, label='';
+
+        for (const url of INDEXERS) {
+            try {
+                const [s,e] = await Promise.all([
+                    fetch(`${url}/stats`).then(r=>r.json()),
+                    fetch(`${url}/events`).then(r=>r.json())
+                ]);
+                stats=s; events=e.events||[];
+                const sh=url.replace(/https?:\/\//,'').split('/')[0];
+                label=`<span style="color:#32CD32">✓ ${sh}</span>`;
+                break;
+            } catch {
+                const sh=url.replace(/https?:\/\//,'').split('/')[0];
+                label+=`<span style="color:#ff6b6b">✗ ${sh}</span> `;
+            }
+        }
+        stopAnim(label||'<span style="color:#ff6b6b">All indexers offline</span>');
+        isFirstLoad=false;
+        if(!events){
+            ['chartArea','richlistArea'].forEach(id=>document.getElementById(id).innerHTML='<div class="error-msg">Could not reach any indexer.</div>');
+            return;
+        }
+
+        const miningEvs   = events.filter(e=>e.kind===KIND_MINING);
+        const transferEvs  = events.filter(e=>e.kind===KIND_TRANSFER);
+        const balances     = computeBalances(events);
+        const totalSupply  = Object.values(balances).reduce((a,b)=>a+b,0);
+        const uniqueHolders= Object.values(balances).filter(b=>b>0).length;
+        const currentEpoch = Math.floor((Date.now()-EPOCH_ORIGIN_MS)/600000);
+        const blockRate    = currentEpoch>0 ? (miningEvs.length/currentEpoch*100).toFixed(1) : '—';
+        const largestTx    = transferEvs.reduce((mx,ev)=>{
+            const a=parseInt(ev.tags?.find(t=>t[0]==='amount')?.[1]||'0',10);
+            return a>mx?a:mx;
+        },0);
+
+        document.getElementById('statSupply').textContent    = totalSupply.toLocaleString();
+        document.getElementById('statPctMined').textContent  = ((totalSupply/MAX_SUPPLY)*100).toFixed(4)+'% mined';
+        document.getElementById('statHolders').textContent   = uniqueHolders.toLocaleString();
+        document.getElementById('statBlocks').textContent    = miningEvs.length.toLocaleString();
+        document.getElementById('statTransfers').textContent = transferEvs.length.toLocaleString();
+        document.getElementById('statEpoch').textContent     = currentEpoch.toLocaleString();
+        document.getElementById('statBlockRate').textContent = blockRate+'%';
+        document.getElementById('statLargestTx').textContent = largestTx>0?largestTx.toLocaleString():'—';
+
+        const holderPoints = computeHoldersOverTime(events);
+        renderChart(holderPoints, document.getElementById('chartArea'));
+
+        // Render richlist immediately — don't let an unresponsive Nostr extension block this
+        renderRichlist(balances, myPubkey, totalSupply);
+
+        // Try to identify "you" in the background; re-render only if/when it resolves
+        if (window.nostr && !myPubkey) {
+            Promise.race([
+                window.nostr.getPublicKey(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+            ]).then(pk => {
+                if (pk) {
+                    myPubkey = pk;
+                    renderRichlist(balances, myPubkey, totalSupply);
+                }
+            }).catch(() => { /* extension unavailable or not approved — ignore */ });
+        }
+    }
+
+    // ── Modals ────────────────────────────────────────────────────────────────
+    function toggleMenuModal(show){const m=document.getElementById('menuModal');m.style.display=show?'flex':'none';m.setAttribute('aria-hidden',String(!show));}
+    function toggleJoinNostrModal(show){const m=document.getElementById('joinNostrModal');m.style.display=show?'flex':'none';m.setAttribute('aria-hidden',String(!show));}
+    window.addEventListener('click',e=>{
+        if(e.target===document.getElementById('menuModal'))toggleMenuModal(false);
+        if(e.target===document.getElementById('joinNostrModal'))toggleJoinNostrModal(false);
+    });
+
+    document.addEventListener('DOMContentLoaded',()=>{loadData();setInterval(loadData,60000);});
 
         // ── Theme toggle (persists across all pages via localStorage) ─────────
         function applyTheme(light) {
@@ -323,6 +488,5 @@
         // Apply saved preference immediately on every page load
         applyTheme(localStorage.getItem('nstc-theme') === 'light');
     </script>
-
 </body>
 </html>

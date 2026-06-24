@@ -16,23 +16,27 @@
         }
 
         :root.light {
-            --bg-color: #f5f5f0;
-            --card-bg: #ffffff;
-            --text-color: #1a1a1a;
-            --text-muted: #555555;
-            --accent-green: #1e8a1e;
-            --accent-orange: #d97000;
-            --accent-orange-hover: #f28500;
-            --border-color: #ccc;
+            --bg: #f5f5f0;
+            --card: #ffffff;
+            --text: #f5f5f0;
+            --muted: #555555;
+            --orange: #d97000;
+            --orange2: #f28500;
+            --border: #ccc;
         }
-
-        body { background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+        :root.light body { background: #f5f5f0 !important; color: #1a1a1a !important; }
+        :root.light .card, :root.light .step-card, :root.light .info-box, :root.light .modal { background: #ffffff !important; color: #1a1a1a !important; }
+        :root.light .choice-card { background: #f0f0eb !important; border-color: #ccc !important; }
+        :root.light .choice-card:hover { border-color: var(--orange) !important; }
+        :root.light .how-list li { color: #333 !important; }
+        :root.light .step-body, :root.light .tagline { color: #444 !important; }
+        :root.light .npub-box { background: #eee !important; color: #1a1a1a !important; }
 
         .theme-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 18px; line-height: 1; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         .theme-btn:hover { border-color: var(--accent-orange); }
         .header-right { display: flex; align-items: center; gap: 10px; }
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding:20px; min-height:100vh; display:flex; flex-direction:column; align-items:center; }
+        body { transition: background 0.3s, color 0.3s; font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding:20px; min-height:100vh; display:flex; flex-direction:column; align-items:center; }
         .container { max-width:640px; width:100%; margin-top:20px; }
 
         /* Header */
@@ -133,15 +137,17 @@
     <div id="menuModal" class="modal-overlay menu-modal" aria-hidden="true">
         <div class="modal">
             <button class="modal-close" onclick="toggleMenuModal(false)">×</button>
-            <a href="https://saccoci.github.io/index.html"    target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
-            <a href="https://saccoci.github.io/start.html"    target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
-            <a href="https://saccoci.github.io/explorer.html" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
-            <a href="https://saccoci.github.io/stats.html"    target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
-            <a href="https://saccoci.github.io/wallet.html"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
-            <a href="https://nostrcoin.boards.net"            target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md"     target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
-            <a href="https://github.com/saccoci"              target="_blank" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+                        <a href="https://saccoci.github.io/index.html" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
+            <a href="https://saccoci.github.io/start.html" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
+            <a href="https://saccoci.github.io/wallet.html" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
+            <a href="https://saccoci.github.io/explorer.html" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
+            <a href="https://saccoci.github.io/stats.html" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
+            <a href="https://saccoci.github.io/faqs.html" class="modal-link" onclick="toggleMenuModal(false)">FAQs</a>
+            <a href="https://nostrcoin.boards.net" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" class="modal-link" onclick="toggleMenuModal(false)">README</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
+            <a href="https://github.com/saccoci" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+
         </div>
     </div>
 
@@ -155,7 +161,7 @@
                 <li>Create a Nostr account</li>
                 <li>Install a signing extension (AKA Profiles, Alby, nos2x, Gooti, etc.)</li>
             </ul>
-            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="text-align:center;display:block;">Get Started on Nostr</a>
+            <a href="https://nstart.me" class="join-nostr-btn" style="text-align:center;display:block;">Get Started on Nostr</a>
         </div>
     </div>
 
@@ -167,7 +173,7 @@
             <p style="margin-top:12px; color:#f28500; font-weight:600;">⚠️ Save your private key (your <strong>nsec</strong>) somewhere safe.</p>
             <p>Your "nsec" is your account - both your username and password combined. <strong>Save your nsec safely and keep it secret.</strong> It's the only way to access your account — if you lose it, it cannot be recovered and your account is lost forever.</p>
             <p style="margin-top:12px;">Once you've created your account and saved your nsec, come back to this tab to get your first NSTC.</p>
-            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="text-align:center;display:block;margin-top:12px;" onclick="onJoinWizardLaunch()">Continue to nstart.me →</a>
+            <a href="https://nstart.me" class="join-nostr-btn" style="text-align:center;display:block;margin-top:12px;" onclick="onJoinWizardLaunch()">Continue to nstart.me →</a>
         </div>
     </div>
 
@@ -205,10 +211,10 @@
                 This project has <strong>zero monetary value</strong> and is meant purely to explore what's possible when you build a currency-like system on top of a decentralized social protocol.
             </div>
             <div class="btn-row">
-                <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank" class="btn btn-secondary">README →</a>
-                <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" target="_blank" class="btn btn-secondary">Whitepaper →</a>
-                <a href="https://nostrcoin.boards.net/board/1/general-discussion" target="_blank" class="btn btn-secondary">Forum →</a>
-                <a href="https://saccoci.github.io/stats.html" target="_blank" class="btn btn-secondary">View Network Stats →</a>
+                <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" class="btn btn-secondary">README →</a>
+                <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" class="btn btn-secondary">Whitepaper →</a>
+                <a href="https://nostrcoin.boards.net/board/1/general-discussion" class="btn btn-secondary">Forum →</a>
+                <a href="https://saccoci.github.io/stats.html" class="btn btn-secondary">View Network Stats →</a>
             </div>
             <div class="btn-row" style="margin-top:12px;">
                 <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
@@ -253,7 +259,7 @@
                 <div class="info-box-title">Option A — Faucet (forum)</div>
                 <p><strong>Post your npub</strong> in the faucet thread on the forum and Saccoci will send you some NSTC. You can post anonymously. Just say something like, "I'd like some Nostrcoin," or "Give me some NSTC, please," or "nok me!" Be sure to include your npub... (your Nostrcoin address).</p>
                 <div style="margin-top:12px;">
-                    <a href="https://nostrcoin.boards.net/thread/6/nostrcoin-faucet" target="_blank" class="btn btn-orange" style="font-size:13px;padding:10px 18px;">Open Faucet Thread →</a>
+                    <a href="https://nostrcoin.boards.net/thread/6/nostrcoin-faucet" class="btn btn-orange" style="font-size:13px;padding:10px 18px;">Open Faucet Thread →</a>
                 </div>
             </div>
 
@@ -263,16 +269,16 @@
                 <div class="npub-box" id="saccociNpub" onclick="copyNpub()">npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw</div>
                 <div class="copied-flash" id="copiedFlash">✓ Copied to clipboard</div>
                 <div style="margin-top:12px;">
-                    <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" target="_blank" class="btn btn-outline-orange" style="font-size:13px;padding:10px 18px;">View on njump.me →</a>
+                    <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" class="btn btn-outline-orange" style="font-size:13px;padding:10px 18px;">View on njump.me →</a>
                 </div>
             </div>
 
             <div class="step-body" style="margin-top:8px;">
-                Once you've received NSTC, open the <strong><a href="https://saccoci.github.io/wallet.html" target="_blank">Wallet</a></strong> and check your balance. Logging in with a Nostr extension is the best practice, but you can also log in using your nsec.
+                Once you've received NSTC, open the <strong><a href="https://saccoci.github.io/wallet.html">Wallet</a></strong> and check your balance. Logging in with a Nostr extension is the best practice, but you can also log in using your nsec.
             </div>
             <div class="btn-row">
                 <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
-                <a href="https://saccoci.github.io/wallet.html" target="_blank" class="btn btn-primary">Open Wallet →</a>
+                <a href="https://saccoci.github.io/wallet.html" class="btn btn-primary">Open Wallet →</a>
             </div>
         </div>
     </div>
@@ -284,7 +290,7 @@
             <div class="step-title">⛏️ Start Mining NSTC</div>
             <div class="step-body">Mining can be done in your wallet, right in your browser. Here's how:</div>
             <ol class="how-list">
-                <li><strong>Open the Wallet</strong> at <a href="https://saccoci.github.io/wallet.html" target="_blank">saccoci.github.io/wallet</a></li>
+                <li><strong>Open the Wallet</strong> at <a href="https://saccoci.github.io/wallet.html">saccoci.github.io/wallet</a></li>
                 <li><strong>Login to Nostr</strong> — tap "Connect Extension" and approve the request (or, alternately, enter your nsec to login)</li>
                 <li><strong>Scroll down and choose the Mining tab</strong> — you'll see a Start Mining button</li>
                 <li><strong>Optionally set a message</strong> — this gets embedded in your mined block (like a coinbase message in Bitcoin)</li>
@@ -294,19 +300,19 @@
             </ol>
             <div class="info-box">
                 <div class="info-box-title">💡 Tips</div>
-                <p>Keep the wallet tab open and active while mining — browsers throttle background tabs. The miner stops automatically at epoch boundaries and restarts fresh each epoch. Check the <a href="https://saccoci.github.io/explorer.html" target="_blank">Explorer</a> to see if your block was validated.</p>
+                <p>Keep the wallet tab open and active while mining — browsers throttle background tabs. The miner stops automatically at epoch boundaries and restarts fresh each epoch. Check the <a href="https://saccoci.github.io/explorer.html">Explorer</a> to see if your block was validated.</p>
             </div>
             <div class="btn-row">
                 <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
-                <a href="https://saccoci.github.io/wallet.html" target="_blank" class="btn btn-primary">Open Wallet & Mine →</a>
+                <a href="https://saccoci.github.io/wallet.html" class="btn btn-primary">Open Wallet & Mine →</a>
             </div>
         </div>
     </div>
 
     <footer>
         <p>Created by Saccoci Nachiamelli</p>
-        <p>Find me on Nostr: <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" target="_blank" class="text-link">npub1sac...jnpw</a></p>
-        <p>On X: <a href="https://x.com/@saccocin" target="_blank" class="text-link">@saccocin</a> · Email: saccoci@proton.me</p>
+        <p>Find me on Nostr: <a href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" class="text-link">npub1sac...jnpw</a></p>
+        <p>On X: <a href="https://x.com/@saccocin" class="text-link">@saccocin</a> · Email: saccoci@proton.me</p>
     </footer>
 </div>
 

@@ -233,15 +233,17 @@
         <div class="modal menu-modal">
             <button class="modal-close" onclick="toggleMenuModal(false)" aria-label="Close">×</button>
             <h3>Menu</h3>
-            <a href="https://saccoci.github.io/index.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
-            <a href="https://saccoci.github.io/start.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
-            <a href="https://saccoci.github.io/explorer.html"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
-            <a href="https://saccoci.github.io/stats.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
-            <a href="https://saccoci.github.io/wallet.html"     target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
-            <a href="https://nostrcoin.boards.net"              target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md"       target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
-            <a href="https://github.com/saccoci"                target="_blank" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+                        <a href="https://saccoci.github.io/index.html" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
+            <a href="https://saccoci.github.io/start.html" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
+            <a href="https://saccoci.github.io/wallet.html" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
+            <a href="https://saccoci.github.io/explorer.html" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
+            <a href="https://saccoci.github.io/stats.html" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
+            <a href="https://saccoci.github.io/faqs.html" class="modal-link" onclick="toggleMenuModal(false)">FAQs</a>
+            <a href="https://nostrcoin.boards.net" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" class="modal-link" onclick="toggleMenuModal(false)">README</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
+            <a href="https://github.com/saccoci" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+
             <button class="button button-secondary" style="margin-top:8px;" onclick="toggleMenuModal(false)">Close</button>
         </div>
     </div>
@@ -263,7 +265,7 @@
                 <li>Create a Nostr account</li>
                 <li>Install a Nostr signing extension to your web browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others)</li>
             </ul>
-            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Join Nostr</a>
+            <a href="https://nstart.me" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Join Nostr</a>
             <button class="button button-secondary" style="margin-top:16px;" onclick="toggleJoinNostrModal(false)">Close</button>
         </div>
     </div>
@@ -282,7 +284,7 @@
             <p style="margin-top:12px;">
                 To get started, you'll need two things: (1) a Nostr account. (2) A Nostr signing extension for your browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others).
             </p>
-            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:12px;text-align:center;display:block;">Join Nostr</a>
+            <a href="https://nstart.me" class="join-nostr-btn" style="margin-top:12px;text-align:center;display:block;">Join Nostr</a>
             <p style="margin-top:12px;font-size:12px;color:#ff6b6b;">
                 <strong>Disclaimer:</strong> This is for education and fun only. Expect bugs, potential loss of coins, and no monetary value. Do not invest real money.
             </p>
@@ -681,7 +683,7 @@
                 if (eventId) {
                     try {
                         const nevent = bech32Encode("nevent", convertBits([0, 32, ...hexToBytes(eventId)], 8, 5));
-                        neventStr = `<div class="tx-hash">Proof: <a href="https://njump.me/${nevent}" target="_blank" style="color:#32CD32;text-decoration:none;font-weight:bold;">${eventId}</a></div>`;
+                        neventStr = `<div class="tx-hash">Proof: <a href="https://njump.me/${nevent}" style="color:#32CD32;text-decoration:none;font-weight:bold;">${eventId}</a></div>`;
                     } catch(e) {
                         neventStr = `<div class="tx-hash">Proof: ${eventId}</div>`;
                     }
@@ -694,8 +696,8 @@
                             <span class="tx-amount">${sign}${tx.amount.toFixed(8)} NSTC</span>
                         </div>
                         <div class="tx-hash" style="margin-bottom:4px;">${date}</div>
-                        ${tx.recipient && recipientNpub ? `<div class="tx-hash">To: <a href="https://njump.me/${recipientNpub}" target="_blank" style="color:#f28500;text-decoration:none;">${recipientStr}</a></div>` : (tx.recipient ? `<div class="tx-hash">To: ${recipientStr}</div>` : '')}
-                        ${tx.sender && senderNpub ? `<div class="tx-hash">From: <a href="https://njump.me/${senderNpub}" target="_blank" style="color:#f28500;text-decoration:none;">${senderStr}</a></div>` : (tx.sender ? `<div class="tx-hash">From: ${senderStr}</div>` : '')}
+                        ${tx.recipient && recipientNpub ? `<div class="tx-hash">To: <a href="https://njump.me/${recipientNpub}" style="color:#f28500;text-decoration:none;">${recipientStr}</a></div>` : (tx.recipient ? `<div class="tx-hash">To: ${recipientStr}</div>` : '')}
+                        ${tx.sender && senderNpub ? `<div class="tx-hash">From: <a href="https://njump.me/${senderNpub}" style="color:#f28500;text-decoration:none;">${senderStr}</a></div>` : (tx.sender ? `<div class="tx-hash">From: ${senderStr}</div>` : '')}
                         ${neventStr}
                     </div>
                 `;
