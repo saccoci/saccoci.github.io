@@ -13,6 +13,9 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         :root { --bg:#1a1a1a; --card:#2a2a2a; --text:#f5f5f5; --muted:#cdcdcd; --green:#32CD32; --orange:#f28500; --orange2:#ff9500; --border:#444; }
+        :root.light .card, :root.light .section, :root.light .modal, :root.light .stat-box { background:#ffffff !important; }
+        :root.light .form-input { background:#f0f0eb !important; color:#1a1a1a !important; }
+        :root.light .status { background:#f0f0eb !important; }
         :root.light { --bg:#f5f5f0; --card:#ffffff; --text:#1a1a1a; --muted:#555; --green:#1e8a1e; --orange:#d97000; --orange2:#f28500; --border:#ccc; }
         body{font-family:'Outfit',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px;transition:background 0.3s,color 0.3s}
         .theme-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;cursor:pointer;font-size:18px;line-height:1;transition:all 0.2s}
@@ -24,22 +27,22 @@
         .header-top-left{display:flex;align-items:center;gap:12px}
         .hamburger-btn{background:#2a2a2a;border:1px solid #444;color:#f5f5f5;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:20px;line-height:1;transition:all .2s;display:flex;align-items:center;justify-content:center}
         .hamburger-btn:hover{background:var(--card);border-color:var(--green)}
-        .menu-modal .modal-link{display:block;padding:12px 16px;color:#f5f5f5;text-decoration:none;border-radius:8px;margin-bottom:8px;transition:all .2s;border:1px solid transparent}
+        .menu-modal .modal-link{display:block;padding:12px 16px;color:var(--text);text-decoration:none;border-radius:8px;margin-bottom:8px;transition:all .2s;border:1px solid transparent}
         .menu-modal .modal-link:hover{background:var(--card);border-color:var(--green);color:var(--green)}
         .menu-modal .modal-link.about-link{color:#f28500}
         .menu-modal .modal-link.about-link:hover{color:#ff9500;border-color:#f28500}
         .logo{font-size:42px;font-weight:700;color:#32CD32;margin-bottom:8px}
         .subtitle{color:#bbb;font-size:16px}
-        .card{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
-        .section{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:24px;margin-bottom:30px}
-        .section-title{font-size:20px;font-weight:600;color:#f28500;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #444}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:30px}
+        .section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:30px}
+        .section-title{font-size:20px;font-weight:600;color:var(--orange);margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border)}
         .balance-amount{font-size:42px;font-weight:700;color:#32CD32;margin:12px 0}
         .npub-display{font-size:11px;color:#888;font-family:monospace;word-break:break-all;margin-top:8px}
         .button{width:100%;padding:13px;border-radius:8px;font-size:14px;font-weight:600;border:1px solid transparent;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-bottom:12px}
         .button-primary{background:#32CD32;color:#1a1a1a;border-color:#32CD32}
         .button-primary:hover{background:#28b428;border-color:#28b428;transform:translateY(-2px)}
         #connectExtensionBtn.button-primary:hover{background:#f28500;border-color:#f28500}
-        .button-secondary{background:#2a2a2a;color:#f28500;border:1px solid #f28500}
+        .button-secondary{background:var(--card);color:var(--orange);border:1px solid var(--orange)}
         .button-secondary:hover{background:#f28500;color:#1a1a1a}
         .refresh-btn{background:#32CD32;color:#1a1a1a;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;margin-bottom:20px}
         .refresh-btn:hover{background:#28b428;transform:translateY(-2px)}
@@ -53,9 +56,9 @@
         .tab-content.active{display:block}
         .form-group{margin-bottom:20px}
         .form-label{font-size:12px;font-weight:600;color:#e0e0e0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-        .form-input{width:100%;padding:12px;border-radius:8px;border:1px solid #444;background:#1a1a1a;color:#f5f5f5;font-family:monospace;font-size:14px}
+        .form-input{width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:monospace;font-size:14px}
         .form-input:focus{outline:none;border-color:#32CD32;box-shadow:0 0 0 2px rgba(50,205,50,.3)}
-        .status{padding:12px;border-radius:8px;border:1px solid #444;background:#2a2a2a;font-size:14px;margin-bottom:20px}
+        .status{padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--card);font-size:14px;margin-bottom:20px}
         .status.success{color:#32CD32;border-color:#32CD32}
         .status.error{color:#ff6b6b;border-color:#ff6b6b}
         .status.info{color:#66c2ff;border-color:#66c2ff}
@@ -69,14 +72,14 @@
         .tx-amount{font-weight:700;color:#32CD32;font-size:16px}
         .tx-hash{color:#999;font-family:monospace;font-size:12px;line-height:1.6}
         .mining-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-        .stat-box{background:#333;border:1px solid #444;border-radius:8px;padding:16px;text-align:center}
+        .stat-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
         .stat-label{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
         .stat-value{font-size:24px;font-weight:700;color:#f28500}
-        .progress-bar{width:100%;height:10px;border-radius:5px;background:#1a1a1a;border:1px solid #444;overflow:hidden;margin-bottom:16px}
+        .progress-bar{width:100%;height:10px;border-radius:5px;background:var(--bg);border:1px solid var(--border);overflow:hidden;margin-bottom:16px}
         .progress-fill{height:100%;background:#f28500;transition:width .1s}
-        .qr-container{background:#1a1a1a;border-radius:8px;border:1px solid #444;padding:24px;text-align:center}
+        .qr-container{background:var(--bg);border-radius:8px;border:1px solid var(--border);padding:24px;text-align:center}
         #qrcode{margin:0 auto}
-        .version-footer{text-align:center;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-top:30px;padding-top:20px;border-top:1px solid #3a3a3a}
+        .version-footer{text-align:center;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:30px;padding-top:20px;border-top:1px solid var(--border)}
         .about-link{text-align:center;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-top:6px}
         .about-link button{background:none;border:none;color:inherit;cursor:pointer;opacity:.7;transition:opacity .2s}
         .about-link button:hover{opacity:1}
@@ -86,13 +89,54 @@
         .modal .join-nostr-btn{color:#1a1a1a!important}
         .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;padding:20px;z-index:50}
         .modal-overlay.active{display:flex}
-        .modal{background:#2a2a2a;border:1px solid #444;border-radius:16px;padding:26px;max-width:380px;width:100%;position:relative}
+        .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px;max-width:380px;width:100%;position:relative}
         .modal h3{margin-bottom:6px;color:#f5f5f5}
         .modal p{color:#c0c0c0;font-size:14px;line-height:1.4}
         .modal a{color:#f28500;text-decoration:none}
         .modal a:hover{text-decoration:underline}
         .modal-close{position:absolute;top:10px;right:14px;background:none;border:none;color:#999;font-size:20px;cursor:pointer}
         .modal-close:hover{color:#fff}
+
+        :root.light .hamburger-btn { background: #f0f0eb !important; border-color: #ccc !important; color: #1a1a1a !important; }
+        :root.light .menu-modal .modal-link { color: #1a1a1a !important; }
+        :root.light .logo { color: var(--green) !important; }
+        :root.light .section-title { color: var(--orange) !important; }
+        :root.light .label { color: #555 !important; }
+        :root.light .balance-amount { color: var(--green) !important; }
+        :root.light .modal h3 { color: var(--orange) !important; }
+        :root.light .modal p, :root.light .modal label { color: #333 !important; }
+        :root.light .stat-label { color: #666 !important; }
+        :root.light .stat-value { color: var(--green) !important; }
+        :root.light .version-footer { color: #999 !important; }
+        :root.light footer { color: #555 !important; }
+        :root.light #balanceSubtext { color: #555 !important; }
+        :root.light #indexerStatusText { color: #555 !important; }
+        :root.light .tx-item { color: #1a1a1a !important; }
+        :root.light .tx-label { color: #555 !important; }
+
+        /* Light mode — strong text contrast overrides */
+        :root.light body { color: #111111 !important; }
+        :root.light p, :root.light span, :root.light div, :root.light li,
+        :root.light td, :root.light th, :root.light label { color: #222222; }
+        :root.light h1, :root.light h2, :root.light h3,
+        :root.light h4, :root.light h5 { color: #111111; }
+        /* Muted/secondary text — still readable */
+        :root.light .subtitle, :root.light .tagline,
+        :root.light .stat-label, :root.light .npub-display,
+        :root.light .tx-hash, :root.light .about-link,
+        :root.light .faq-answer, :root.light .step-body,
+        :root.light .label, :root.light .choice-desc,
+        :root.light .link-desc, :root.light .chart-note { color: #444444 !important; }
+        /* Inline style overrides — catch hardcoded colors on elements */
+        :root.light [style*="color:#888"], :root.light [style*="color: #888"],
+        :root.light [style*="color:#999"], :root.light [style*="color: #999"],
+        :root.light [style*="color:#aaa"], :root.light [style*="color: #aaa"],
+        :root.light [style*="color:#bbb"], :root.light [style*="color: #bbb"] { color: #444444 !important; }
+        :root.light .form-input { background: #ffffff !important; color: #111111 !important; border-color: #aaa !important; }
+        :root.light .form-input::placeholder { color: #888 !important; }
+        :root.light .form-input:focus { border-color: var(--green) !important; }
+        :root.light .form-label { color: #222 !important; }
+        :root.light .nsec-warning { color: #555 !important; }
     </style>
 </head>
 <body>
@@ -138,7 +182,7 @@
         </div>
 
         <div id="connected" style="display:none;">
-            <div class="balance-card" style="background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:32px;margin-bottom:30px;text-align:center;">
+            <div class="balance-card" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:32px;margin-bottom:30px;text-align:center;">
                 <div style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Balance</div>
                 <div class="balance-amount" id="balanceAmount">0.00000000</div>
                 <div style="font-size:13px;color:#aaa;margin-bottom:12px;" id="balanceSubtext">Connected</div>

@@ -18,7 +18,7 @@
         :root.light {
             --bg: #f5f5f0;
             --card: #ffffff;
-            --text: #f5f5f0;
+            --text: #1a1a1a;
             --muted: #555555;
             --orange: #d97000;
             --orange2: #f28500;
@@ -121,6 +121,35 @@
         footer { margin-top:auto; text-align:center; color:var(--muted); font-size:0.85rem; padding:40px 0 20px; }
         a.text-link { color:var(--orange); text-decoration:none; }
         a.text-link:hover { text-decoration:underline; }
+
+        :root.light .hamburger-btn { background: #f0f0eb !important; border-color: #ccc !important; color: #1a1a1a !important; }
+        :root.light .menu-modal .modal-link { color: #1a1a1a !important; }
+        :root.light .step-title { color: #1a1a1a !important; }
+        :root.light .choice-title { color: #1a1a1a !important; }
+        :root.light .choice-desc { color: #555 !important; }
+        :root.light .label { color: #555 !important; }
+        :root.light .info-box-title { color: var(--orange) !important; }
+        :root.light .logo p { color: #555 !important; }
+        :root.light footer { color: #555 !important; }
+
+        /* Light mode — strong text contrast overrides */
+        :root.light body { color: #111111 !important; }
+        :root.light p, :root.light span, :root.light div, :root.light li,
+        :root.light td, :root.light th, :root.light label { color: #222222; }
+        :root.light h1, :root.light h2, :root.light h3,
+        :root.light h4, :root.light h5 { color: #111111; }
+        /* Muted/secondary text — still readable */
+        :root.light .subtitle, :root.light .tagline,
+        :root.light .stat-label, :root.light .npub-display,
+        :root.light .tx-hash, :root.light .about-link,
+        :root.light .faq-answer, :root.light .step-body,
+        :root.light .label, :root.light .choice-desc,
+        :root.light .link-desc, :root.light .chart-note { color: #444444 !important; }
+        /* Inline style overrides — catch hardcoded colors on elements */
+        :root.light [style*="color:#888"], :root.light [style*="color: #888"],
+        :root.light [style*="color:#999"], :root.light [style*="color: #999"],
+        :root.light [style*="color:#aaa"], :root.light [style*="color: #aaa"],
+        :root.light [style*="color:#bbb"], :root.light [style*="color: #bbb"] { color: #444444 !important; }
     </style>
 </head>
 <body>

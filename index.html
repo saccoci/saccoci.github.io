@@ -356,6 +356,37 @@
             .container { margin-top: 20px; }
             h1 { font-size: 2.5rem; }
         }
+
+        :root.light .modal-link { color: #1a1a1a !important; }
+        :root.light .modal h3 { color: #1a1a1a !important; }
+        :root.light .modal p, :root.light .modal ul { color: #333 !important; }
+        :root.light .hamburger-btn { background: #f0f0eb !important; border-color: #ccc !important; color: #1a1a1a !important; }
+        :root.light .description-card p { color: #333 !important; }
+        :root.light .link-desc { color: #555 !important; }
+        :root.light .link-card { background: #ffffff !important; border-color: #ccc !important; }
+        :root.light .link-card:hover { border-color: var(--accent-orange) !important; }
+        :root.light .link-title { color: #1a1a1a !important; }
+        :root.light footer { color: #555 !important; }
+        :root.light .section-title { color: #1a1a1a !important; }
+
+        /* Light mode — strong text contrast overrides */
+        :root.light body { color: #111111 !important; }
+        :root.light p, :root.light span, :root.light div, :root.light li,
+        :root.light td, :root.light th, :root.light label { color: #222222; }
+        :root.light h1, :root.light h2, :root.light h3,
+        :root.light h4, :root.light h5 { color: #111111; }
+        /* Muted/secondary text — still readable */
+        :root.light .subtitle, :root.light .tagline,
+        :root.light .stat-label, :root.light .npub-display,
+        :root.light .tx-hash, :root.light .about-link,
+        :root.light .faq-answer, :root.light .step-body,
+        :root.light .label, :root.light .choice-desc,
+        :root.light .link-desc, :root.light .chart-note { color: #444444 !important; }
+        /* Inline style overrides — catch hardcoded colors on elements */
+        :root.light [style*="color:#888"], :root.light [style*="color: #888"],
+        :root.light [style*="color:#999"], :root.light [style*="color: #999"],
+        :root.light [style*="color:#aaa"], :root.light [style*="color: #aaa"],
+        :root.light [style*="color:#bbb"], :root.light [style*="color: #bbb"] { color: #444444 !important; }
     </style>
 </head>
 
@@ -373,15 +404,16 @@
         <div class="modal menu-modal">
             <button class="modal-close" onclick="toggleMenuModal(false)" aria-label="Close">×</button>
             <h3>Menu</h3>
-            <a href="https://saccoci.github.io/index.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🏠 Home</a>
-            <a href="https://saccoci.github.io/start.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
-            <a href="https://saccoci.github.io/explorer.html"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
-            <a href="https://saccoci.github.io/stats.html"      target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
-            <a href="https://saccoci.github.io/wallet.html"     target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
-            <a href="https://nostrcoin.boards.net"              target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md"       target="_blank" class="modal-link" onclick="toggleMenuModal(false)">README</a>
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md"   target="_blank" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
-            <a href="https://github.com/saccoci"                target="_blank" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+                        <a href="https://saccoci.github.io/start.html" class="modal-link" onclick="toggleMenuModal(false)">🚀 Get Started</a>
+            <a href="https://saccoci.github.io/wallet.html" class="modal-link" onclick="toggleMenuModal(false)">Wallet</a>
+            <a href="https://saccoci.github.io/explorer.html" class="modal-link" onclick="toggleMenuModal(false)">Explorer</a>
+            <a href="https://saccoci.github.io/stats.html" class="modal-link" onclick="toggleMenuModal(false)">Stats</a>
+            <a href="https://saccoci.github.io/faqs.html" class="modal-link" onclick="toggleMenuModal(false)">FAQs</a>
+            <a href="https://nostrcoin.boards.net" class="modal-link" onclick="toggleMenuModal(false)">Forum</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" class="modal-link" onclick="toggleMenuModal(false)">README</a>
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" class="modal-link" onclick="toggleMenuModal(false)">Whitepaper</a>
+            <a href="https://github.com/saccoci" class="modal-link" onclick="toggleMenuModal(false)">GitHub</a>
+
             <button class="button button-secondary" style="margin-top:8px;" onclick="toggleMenuModal(false)">Close</button>
         </div>
     </div>
@@ -403,7 +435,7 @@
                 <li>Create a Nostr account</li>
                 <li>Install a Nostr signing extension to your web browser (like AKA Profiles, Gooti, nos2x, nos2x-fox, Alby, or others)</li>
             </ul>
-            <a href="https://nstart.me" target="_blank" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Join Nostr</a>
+            <a href="https://nstart.me" class="join-nostr-btn" style="margin-top:16px;text-align:center;display:block;">Join Nostr</a>
             <button class="button button-secondary" style="margin-top:16px;" onclick="toggleJoinNostrModal(false)">Close</button>
         </div>
     </div>
@@ -452,11 +484,11 @@ This is a call for anyone who wishes to be in on a project from the start and a 
                 <div class="modal-content">
                     <p>Nostrcoin relies on community participation to survive and thrive. Here is how you can directly contribute to strengthening our infrastructure:</p>
                     <ul>
-                        <li><strong><a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank">Run an Indexer Node</a>:</strong> The absolute most valuable way to support the network is by running an always-on indexer node on a VPS to <a href="https://nostrcoin.boards.net/thread/7/decentralization-challenge-especially-any-agents" target="_blank">help decentralize the network</a>. This preserves decentralization and fights censorship.</li>
+                        <li><strong><a href="https://github.com/saccoci/nostrcoin/blob/main/README.md">Run an Indexer Node</a>:</strong> The absolute most valuable way to support the network is by running an always-on indexer node on a VPS to <a href="https://nostrcoin.boards.net/thread/7/decentralization-challenge-especially-any-agents">help decentralize the network</a>. This preserves decentralization and fights censorship.</li>
                         <li><strong>Audit and Code:</strong> Review the miner, indexer, and web engine files on GitHub to help us catch chaotic bugs or optimizations.</li>
-                        <li><strong>Join the Conversation:</strong> Set up a node and report back on our <a href="https://nostrcoin.boards.net" target="_blank">Community Forum</a>. Let's get these systems running globally!</li>
+                        <li><strong>Join the Conversation:</strong> Set up a node and report back on our <a href="https://nostrcoin.boards.net">Community Forum</a>. Let's get these systems running globally!</li>
                     </ul>
-                    <p style="font-size: 0.9rem; font-style: italic; margin-top: 15px;">Check the project <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank">README</a> on GitHub for absolute step-by-step documentation on setting up your indexer.</p>
+                    <p style="font-size: 0.9rem; font-style: italic; margin-top: 15px;">Check the project <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md">README</a> on GitHub for absolute step-by-step documentation on setting up your indexer.</p>
                 </div>
             </div>
         </div>
@@ -503,7 +535,7 @@ This is a call for anyone who wishes to be in on a project from the start and a 
                 <div class="link-desc">View blocks and transactions</div>
             </a>
 
-            <a href="https://nostrcoin.boards.net" target="_blank" class="link-card">
+            <a href="https://nostrcoin.boards.net" class="link-card">
                 <div class="link-header">
                     <span class="link-title">Community Forum</span>
                     <span class="link-icon">💬</span>
@@ -519,7 +551,7 @@ This is a call for anyone who wishes to be in on a project from the start and a 
                 <div class="link-desc">Richlist, holders over time, and network stats</div>
             </a>
 
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" target="_blank" class="link-card">
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/README.md" class="link-card">
                 <div class="link-header">
                     <span class="link-title">README</span>
                     <span class="link-icon">📄</span>
@@ -527,7 +559,7 @@ This is a call for anyone who wishes to be in on a project from the start and a 
                 <div class="link-desc">Documentation and setup</div>
             </a>
 
-            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" target="_blank" class="link-card">
+            <a href="https://github.com/saccoci/nostrcoin/blob/main/WHITEPAPER.md" class="link-card">
                 <div class="link-header">
                     <span class="link-title">Whitepaper</span>
                     <span class="link-icon">📜</span>
@@ -535,7 +567,7 @@ This is a call for anyone who wishes to be in on a project from the start and a 
                 <div class="link-desc">Technical details and vision</div>
             </a>
 
-            <a href="https://github.com/saccoci/nostrcoin" target="_blank" class="link-card">
+            <a href="https://github.com/saccoci/nostrcoin" class="link-card">
                 <div class="link-header">
                     <span class="link-title">GitHub Repository</span>
                     <span class="link-icon">💻</span>
@@ -548,11 +580,9 @@ This is a call for anyone who wishes to be in on a project from the start and a 
         <footer>
             <p>Created by Saccoci Nachiamelli</p>
             <p>Find me on Nostr: <a
-                    href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw"
-                    target="_blank" class="text-link">npub1sac...jnpw</a></p>
+                    href="https://njump.me/npub1sac0698026aqf70t0th8sf8wu3zg0ypw58lyud7hqq68rpxv4j3q4yjnpw" class="text-link">npub1sac...jnpw</a></p>
             <p>On X: <a
-                    href="https://x.com/@saccocin"
-                    target="_blank" class="text-link">@saccocin</a></p>
+                    href="https://x.com/@saccocin" class="text-link">@saccocin</a></p>
             <p>Email: saccoci@proton.me</p>
             <div class="corn-icon">🌽</div>
         </footer>
@@ -616,7 +646,7 @@ This is a call for anyone who wishes to be in on a project from the start and a 
     </script>
     <script type="text/javascript" src="https://www.statcounter.com/counter/counter.js" async></script>
     <noscript>
-        <div class="statcounter"><a title="Web Analytics" href="https://statcounter.com/" target="_blank"><img
+        <div class="statcounter"><a title="Web Analytics" href="https://statcounter.com/"><img
                     class="statcounter" src="https://c.statcounter.com/13204969/0/5f94557c/1/" alt="Web Analytics"
                     referrerPolicy="no-referrer-when-downgrade"></a></div>
     </noscript>
